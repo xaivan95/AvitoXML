@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cities>
+    <city>
+        <name>Москва</name>
+        <population>12678079</population>
+        <region>Москва</region>
+    </city>
+    <city>
+        <name>Санкт-Петербург</name>
+        <population>5398064</population>
+        <region>Санкт-Петербург</region>
+    </city>
+    <city>
+        <name>Новосибирск</name>
+        <population>1625631</population>
+        <region>Новосибирская область</region>
+    </city>
+    <city>
+        <name>Екатеринбург</name>
+        <population>1493749</population>
+        <region>Свердловская область</region>
+    </city>
+    <city>
+        <name>Казань</name>
+        <population>1257391</population>
+        <region>Татарстан</region>
+    </city>
+    <city>
+        <name>Нижний Новгород</name>
+        <population>1244254</population>
+        <region>Нижегородская область</region>
+    </city>
+    <city>
+        <name>Челябинск</name>
+        <population>1192300</population>
+        <region>Челябинская область</region>
+    </city>
+    <city>
+        <name>Самара</name>
+        <population>1164685</population>
+        <region>Самарская область</region>
+    </city>
+    <city>
+        <name>Омск</name>
+        <population>1125695</population>
+        <region>Омская область</region>
+    </city>
+    <city>
+        <name>Ростов-на-Дону</name>
+        <population>1137704</population>
+        <region>Ростовская область</region>
+    </city>
+    <city>
+        <name>Уфа</name>
+        <population>1128783</population>
+        <region>Башкортостан</region>
+    </city>
+    <city>
+        <name>Красноярск</name>
+        <population>1093771</population>
+        <region>Красноярский край</region>
+    </city>
+    <city>
+        <name>Воронеж</name>
+        <population>1057681</population>
+        <region>Воронежская область</region>
+    </city>
+    <city>
+        <name>Пермь</name>
+        <population>1048005</population>
+        <region>Пермский край</region>
+    </city>
+    <city>
+        <name>Волгоград</name>
+        <population>1015582</population>
+        <region>Волгоградская область</region>
+    </city>
+    <city>
+        <name>Краснодар</name>
+        <population>932629</population>
+        <region>Краснодарский край</region>
+    </city>
+    <city>
+        <name>Саратов</name>
+        <population>901361</population>
+        <region>Саратовская область</region>
+    </city>
+    <city>
+        <name>Тюмень</name>
+        <population>847488</population>
+        <region>Тюменская область</region>
+    </city>
+    <city>
+        <name>Тольятти</name>
+        <population>699429</population>
+        <region>Самарская область</region>
+    </city>
+    <city>
+        <name>Ижевск</name>
+        <population>646277</population>
+        <region>Удмуртия</region>
+    </city>
+    <city>
+        <name>Барнаул</name>
+        <population>630877</population>
+        <region>Алтайский край</region>
+    </city>
+    <city>
+        <name>Ульяновск</name>
+        <population>624518</population>
+        <region>Ульяновская область</region>
+    </city>
+    <city>
+        <name>Иркутск</name>
+        <population>617264</population>
+        <region>Иркутская область</region>
+    </city>
+    <city>
+        <name>Хабаровск</name>
+        <population>616242</population>
+        <region>Хабаровский край</region>
+    </city>
+    <city>
+        <name>Ярославль</name>
+        <population>601403</population>
+        <region>Ярославская область</region>
+    </city>
+    <city>
+        <name>Владивосток</name>
+        <population>603519</population>
+        <region>Приморский край</region>
+    </city>
+    <city>
+        <name>Махачкала</name>
+        <population>603518</population>
+        <region>Дагестан</region>
+    </city>
+    <city>
+        <name>Томск</name>
+        <population>568508</population>
+        <region>Томская область</region>
+    </city>
+    <city>
+        <name>Оренбург</name>
+        <population>564443</population>
+        <region>Оренбургская область</region>
+    </city>
+    <city>
+        <name>Кемерово</name>
+        <population>557119</population>
+        <region>Кемеровская область</region>
+    </city>
+    <city>
+        <name>Новокузнецк</name>
+        <population>544583</population>
+        <region>Кемеровская область</region>
+    </city>
+    <city>
+        <name>Рязань</name>
+        <population>534762</population>
+        <region>Рязанская область</region>
+    </city>
+    <city>
+        <name>Астрахань</name>
+        <population>529793</population>
+        <region>Астраханская область</region>
+    </city>
+    <city>
+        <name>Набережные Челны</name>
+        <population>529797</population>
+        <region>Татарстан</region>
+    </city>
+    <city>
+        <name>Пенза</name>
+        <population>523726</population>
+        <region>Пензенская область</region>
+    </city>
+    <city>
+        <name>Липецк</name>
+        <population>508887</population>
+        <region>Липецкая область</region>
+    </city>
+    <city>
+        <name>Киров</name>
+        <population>501468</population>
+        <region>Кировская область</region>
+    </city>
+    <city>
+        <name>Чебоксары</name>
+        <population>489498</population>
+        <region>Чувашия</region>
+    </city>
+    <city>
+        <name>Тула</name>
+        <population>473622</population>
+        <region>Тульская область</region>
+    </city>
+    <city>
+        <name>Калининград</name>
+        <population>489735</population>
+        <region>Калининградская область</region>
+    </city>
+    <city>
+        <name>Балашиха</name>
+        <population>507307</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Курск</name>
+        <population>452976</population>
+        <region>Курская область</region>
+    </city>
+    <city>
+        <name>Севастополь</name>
+        <population>449138</population>
+        <region>Севастополь</region>
+    </city>
+    <city>
+        <name>Улан-Удэ</name>
+        <population>437565</population>
+        <region>Бурятия</region>
+    </city>
+    <city>
+        <name>Ставрополь</name>
+        <population>454488</population>
+        <region>Ставропольский край</region>
+    </city>
+    <city>
+        <name>Сочи</name>
+        <population>466078</population>
+        <region>Краснодарский край</region>
+    </city>
+    <city>
+        <name>Тверь</name>
+        <population>424969</population>
+        <region>Тверская область</region>
+    </city>
+    <city>
+        <name>Магнитогорск</name>
+        <population>413251</population>
+        <region>Челябинская область</region>
+    </city>
+    <city>
+        <name>Иваново</name>
+        <population>401505</population>
+        <region>Ивановская область</region>
+    </city>
+    <city>
+        <name>Брянск</name>
+        <population>402675</population>
+        <region>Брянская область</region>
+    </city>
+    <city>
+        <name>Белгород</name>
+        <population>391554</population>
+        <region>Белгородская область</region>
+    </city>
+    <city>
+        <name>Сургут</name>
+        <population>396443</population>
+        <region>Ханты-Мансийский АО</region>
+    </city>
+    <city>
+        <name>Владимир</name>
+        <population>357024</population>
+        <region>Владимирская область</region>
+    </city>
+    <city>
+        <name>Нижний Тагил</name>
+        <population>349008</population>
+        <region>Свердловская область</region>
+    </city>
+    <city>
+        <name>Архангельск</name>
+        <population>347051</population>
+        <region>Архангельская область</region>
+    </city>
+    <city>
+        <name>Чита</name>
+        <population>349005</population>
+        <region>Забайкальский край</region>
+    </city>
+    <city>
+        <name>Калуга</name>
+        <population>331842</population>
+        <region>Калужская область</region>
+    </city>
+    <city>
+        <name>Симферополь</name>
+        <population>332317</population>
+        <region>Крым</region>
+    </city>
+    <city>
+        <name>Волжский</name>
+        <population>321479</population>
+        <region>Волгоградская область</region>
+    </city>
+    <city>
+        <name>Смоленск</name>
+        <population>325495</population>
+        <region>Смоленская область</region>
+    </city>
+    <city>
+        <name>Саранск</name>
+        <population>318841</population>
+        <region>Мордовия</region>
+    </city>
+    <city>
+        <name>Курган</name>
+        <population>309285</population>
+        <region>Курганская область</region>
+    </city>
+    <city>
+        <name>Орёл</name>
+        <population>308838</population>
+        <region>Орловская область</region>
+    </city>
+    <city>
+        <name>Вологда</name>
+        <population>308172</population>
+        <region>Вологодская область</region>
+    </city>
+    <city>
+        <name>Владикавказ</name>
+        <population>301543</population>
+        <region>Северная Осетия</region>
+    </city>
+    <city>
+        <name>Якутск</name>
+        <population>330615</population>
+        <region>Якутия</region>
+    </city>
+    <city>
+        <name>Подольск</name>
+        <population>302831</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Грозный</name>
+        <population>297137</population>
+        <region>Чечня</region>
+    </city>
+    <city>
+        <name>Мурманск</name>
+        <population>287847</population>
+        <region>Мурманская область</region>
+    </city>
+    <city>
+        <name>Тамбов</name>
+        <population>289701</population>
+        <region>Тамбовская область</region>
+    </city>
+    <city>
+        <name>Петрозаводск</name>
+        <population>278551</population>
+        <region>Карелия</region>
+    </city>
+    <city>
+        <name>Кострома</name>
+        <population>277280</population>
+        <region>Костромская область</region>
+    </city>
+    <city>
+        <name>Нижневартовск</name>
+        <population>277668</population>
+        <region>Ханты-Мансийский АО</region>
+    </city>
+    <city>
+        <name>Новороссийск</name>
+        <population>275795</population>
+        <region>Краснодарский край</region>
+    </city>
+    <city>
+        <name>Йошкар-Ола</name>
+        <population>266675</population>
+        <region>Марий Эл</region>
+    </city>
+    <city>
+        <name>Химки</name>
+        <population>257128</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Таганрог</name>
+        <population>248664</population>
+        <region>Ростовская область</region>
+    </city>
+    <city>
+        <name>Комсомольск-на-Амуре</name>
+        <population>241072</population>
+        <region>Хабаровский край</region>
+    </city>
+    <city>
+        <name>Сыктывкар</name>
+        <population>245083</population>
+        <region>Коми</region>
+    </city>
+    <city>
+        <name>Нальчик</name>
+        <population>239300</population>
+        <region>Кабардино-Балкария</region>
+    </city>
+    <city>
+        <name>Шахты</name>
+        <population>226452</population>
+        <region>Ростовская область</region>
+    </city>
+    <city>
+        <name>Дзержинск</name>
+        <population>227326</population>
+        <region>Нижегородская область</region>
+    </city>
+    <city>
+        <name>Орск</name>
+        <population>225314</population>
+        <region>Оренбургская область</region>
+    </city>
+    <city>
+        <name>Братск</name>
+        <population>224071</population>
+        <region>Иркутская область</region>
+    </city>
+    <city>
+        <name>Энгельс</name>
+        <population>225428</population>
+        <region>Саратовская область</region>
+    </city>
+    <city>
+        <name>Ангарск</name>
+        <population>222855</population>
+        <region>Иркутская область</region>
+    </city>
+    <city>
+        <name>Королёв</name>
+        <population>225299</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Великий Новгород</name>
+        <population>225019</population>
+        <region>Новгородская область</region>
+    </city>
+    <city>
+        <name>Мытищи</name>
+        <population>235504</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Псков</name>
+        <population>209426</population>
+        <region>Псковская область</region>
+    </city>
+    <city>
+        <name>Бийск</name>
+        <population>200629</population>
+        <region>Алтайский край</region>
+    </city>
+    <city>
+        <name>Люберцы</name>
+        <population>208397</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Северодвинск</name>
+        <population>179742</population>
+        <region>Архангельская область</region>
+    </city>
+    <city>
+        <name>Армавир</name>
+        <population>187215</population>
+        <region>Краснодарский край</region>
+    </city>
+    <city>
+        <name>Подольск</name>
+        <population>187956</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Южно-Сахалинск</name>
+        <population>200636</population>
+        <region>Сахалинская область</region>
+    </city>
+    <city>
+        <name>Петропавловск-Камчатский</name>
+        <population>179367</population>
+        <region>Камчатский край</region>
+    </city>
+    <city>
+        <name>Норильск</name>
+        <population>179554</population>
+        <region>Красноярский край</region>
+    </city>
+    <city>
+        <name>Сызрань</name>
+        <population>165725</population>
+        <region>Самарская область</region>
+    </city>
+    <city>
+        <name>Волгодонск</name>
+        <population>168048</population>
+        <region>Ростовская область</region>
+    </city>
+    <city>
+        <name>Новочеркасск</name>
+        <population>168766</population>
+        <region>Ростовская область</region>
+    </city>
+    <city>
+        <name>Абакан</name>
+        <population>184769</population>
+        <region>Хакасия</region>
+    </city>
+    <city>
+        <name>Находка</name>
+        <population>147468</population>
+        <region>Приморский край</region>
+    </city>
+    <city>
+        <name>Уссурийск</name>
+        <population>172942</population>
+        <region>Приморский край</region>
+    </city>
+    <city>
+        <name>Березники</name>
+        <population>138069</population>
+        <region>Пермский край</region>
+    </city>
+    <city>
+        <name>Салават</name>
+        <population>148575</population>
+        <region>Башкортостан</region>
+    </city>
+    <city>
+        <name>Электросталь</name>
+        <population>152607</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Миасс</name>
+        <population>151856</population>
+        <region>Челябинская область</region>
+    </city>
+    <city>
+        <name>Альметьевск</name>
+        <population>155988</population>
+        <region>Татарстан</region>
+    </city>
+    <city>
+        <name>Рубцовск</name>
+        <population>139565</population>
+        <region>Алтайский край</region>
+    </city>
+    <city>
+        <name>Ковров</name>
+        <population>134074</population>
+        <region>Владимирская область</region>
+    </city>
+    <city>
+        <name>Коломна</name>
+        <population>138693</population>
+        <region>Московская область</region>
+    </city>
+    <city>
+        <name>Майкоп</name>
+        <population>143385</population>
+        <region>Адыгея</region>
+    </city>
+</cities>

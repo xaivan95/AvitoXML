@@ -11,7 +11,177 @@ from datetime import datetime
 from bot.database import db
 from bot.states import ProductStates
 import config
+import xml.etree.ElementTree as ET
+from typing import List
 
+def load_brands() -> List[str]:
+    """Загрузка брендов из XML файла"""
+    try:
+        tree = ET.parse('brands.xml')
+        root = tree.getroot()
+        brands = [brand.text for brand in root.findall('brand') if brand.text]
+        return brands
+    except Exception as e:
+        print(f"Error loading brands: {e}")
+        return ["Nike", "Adidas", "Reebok", "Puma", "No name", "Другой бренд"]
+
+
+# Категории, требующие размер
+SIZE_CATEGORIES = [
+    "Мужская обувь", "Женская обувь", "Мужская одежда", "Женская одежда",
+    "Брюки", "Джинсы", "Шорты", "Пиджаки и костюмы", "Рубашки", "Платья", "Юбки"
+]
+
+
+# Добавьте новые вспомогательные функции
+async def ask_brand(message: Message, user_name: str = ""):
+    """Запрос бренда товара"""
+    brands = load_brands()
+
+    builder = InlineKeyboardBuilder()
+
+    # Показываем первые 10 брендов + кнопку "Показать еще"
+    for brand in brands[:10]:
+        builder.button(text=brand, callback_data=f"brand_{brand}")
+
+    builder.button(text="📋 Показать все бренды", callback_data="brand_show_all")
+    builder.button(text="✏️ Ввести вручную", callback_data="brand_custom")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите бренд товара:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_size(message: Message, user_name: str = ""):
+    """Запрос размера товара"""
+    builder = InlineKeyboardBuilder()
+
+    # Размеры одежды
+    clothing_sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "46", "48", "50", "52", "54", "56", "58"]
+    # Размеры обуви
+    shoe_sizes = ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
+
+    for size in clothing_sizes + shoe_sizes:
+        builder.button(text=size, callback_data=f"size_{size}")
+
+    builder.button(text="✏️ Ввести другой размер", callback_data="size_custom")
+    builder.button(text="⏩ Пропустить", callback_data="size_skip")
+
+    builder.adjust(4)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите размер товара:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_condition(message: Message, user_name: str = ""):
+    """Запрос состояния товара"""
+    builder = InlineKeyboardBuilder()
+
+    conditions = [
+        ("🆕 Новое с биркой", "new_with_tag"),
+        ("⭐ Отличное", "excellent"),
+        ("👍 Хорошее", "good"),
+        ("✅ Удовлетворительное", "satisfactory")
+    ]
+
+    for condition_name, condition_code in conditions:
+        builder.button(text=condition_name, callback_data=f"condition_{condition_code}")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите состояние товара:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_sale_type(message: Message, user_name: str = ""):
+    """Запрос типа продажи"""
+    builder = InlineKeyboardBuilder()
+
+    sale_types = [
+        ("🛒 Товар приобретен на продажу", "resale"),
+        ("🏭 Товар от производителя", "manufacturer")
+    ]
+
+    for sale_name, sale_code in sale_types:
+        builder.button(text=sale_name, callback_data=f"saletype_{sale_code}")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите тип продажи:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_placement_type(message: Message, user_name: str = ""):
+    """Запрос типа размещения"""
+    builder = InlineKeyboardBuilder()
+
+    placement_types = [
+        ("🏙️ По городам", "cities"),
+        ("🚇 По станциям метро", "metro")
+    ]
+
+    for placement_name, placement_code in placement_types:
+        builder.button(text=placement_name, callback_data=f"placement_{placement_code}")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите вариант размещения объявлений:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_placement_method(message: Message, user_name: str = ""):
+    """Запрос метода размещения"""
+    builder = InlineKeyboardBuilder()
+
+    placement_methods = [
+        ("📍 Указать точные города", "exact_cities"),
+        ("📊 По количеству объявлений", "by_quantity"),
+        ("🏢 Несколько объявлений в городе", "multiple_in_city")
+    ]
+
+    for method_name, method_code in placement_methods:
+        builder.button(text=method_name, callback_data=f"method_{method_code}")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите вариант размещения:",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_cities(message: Message, user_name: str = ""):
+    """Запрос городов"""
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}введите названия городов через запятую:\n\n"
+        "Пример: Москва, Санкт-Петербург, Новосибирск"
+    )
+
+
+async def ask_quantity(message: Message, user_name: str = ""):
+    """Запрос количества объявлений"""
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}введите количество объявлений для размещения:"
+    )
 router = Router()
 
 # Словари для временного хранения альбомов
@@ -250,93 +420,133 @@ async def update_delivery_services_keyboard(message: Message, state: FSMContext,
 
 async def complete_product_creation(message: Message, state: FSMContext, user_name: str = ""):
     """Завершение создания товара и сохранение в базу"""
-    data = await state.get_data()
+    try:
+        data = await state.get_data()
 
-    # Проверяем обязательные поля
-    required_fields = ['title', 'description', 'category', 'contact_phone']
-    missing_fields = [field for field in required_fields if not data.get(field)]
+        # Проверяем обязательные поля
+        required_fields = ['title', 'description', 'category', 'contact_phone']
+        missing_fields = [field for field in required_fields if not data.get(field)]
 
-    if missing_fields:
-        await message.answer(f"Ошибка: не заполнены обязательные поля: {', '.join(missing_fields)}")
-        return
+        if missing_fields:
+            await message.answer(f"Ошибка: не заполнены обязательные поля: {', '.join(missing_fields)}")
+            return
 
-    # Объединяем ВСЕ изображения (основные + дополнительные)
-    main_images = data.get('main_images', [])
-    additional_images = data.get('additional_images', [])
-    all_images = main_images + additional_images
+        # Объединяем ВСЕ изображения (основные + дополнительные)
+        main_images = data.get('main_images', [])
+        additional_images = data.get('additional_images', [])
+        all_images = main_images + additional_images
 
-    # Перемешиваем если нужно
-    if data.get('shuffle_images', False) and all_images:
-        random.shuffle(all_images)
+        # Перемешиваем если нужно
+        if data.get('shuffle_images', False) and all_images:
+            random.shuffle(all_images)
 
-    # Сохраняем товар в базу
-    product_data = {
-        'product_id': data.get('product_id'),
-        'title': data.get('title'),
-        'description': data.get('description'),
-        'price': data.get('price'),
-        'price_type': data.get('price_type', 'none'),
-        'price_min': data.get('price_min'),
-        'price_max': data.get('price_max'),
-        'category': data.get('category'),
-        'category_name': data.get('category_name', ''),
-        'contact_phone': data.get('contact_phone'),
-        'display_phone': data.get('display_phone', ''),
-        'contact_method': data.get('contact_method', 'both'),
-        'main_images': main_images,
-        'additional_images': additional_images,
-        'all_images': all_images,
-        'total_images': len(all_images),
-        'shuffle_images': data.get('shuffle_images', False),
-        'avito_delivery': data.get('avito_delivery', False),
-        'delivery_services': data.get('delivery_services', [])
-    }
-
-    await db.add_product(message.from_user.id, product_data)
-
-    await state.clear()
-    await db.clear_user_state(message.from_user.id)
-
-    # Статистика
-    main_count = len(main_images)
-    additional_count = len(additional_images)
-    delivery_services = data.get('delivery_services', [])
-
-    delivery_text = "не подключена"
-    if data.get('avito_delivery', False) and delivery_services:
-        delivery_names = {
-            "disabled": "Выключена",
-            "pickup": "ПВЗ",
-            "courier": "Курьер",
-            "postamat": "Постамат",
-            "own_courier": "Свой курьер",
-            "sdek": "СДЭК",
-            "business_lines": "Деловые Линии",
-            "dpd": "DPD",
-            "pek": "ПЭК",
-            "russian_post": "Почта России",
-            "sdek_courier": "СДЭК курьер",
-            "self_pickup_online": "Самовывоз с онлайн-оплатой"
+        # Сохраняем товар в базу
+        product_data = {
+            'product_id': data.get('product_id'),
+            'title': data.get('title'),
+            'description': data.get('description'),
+            'price': data.get('price'),
+            'price_type': data.get('price_type', 'none'),
+            'price_min': data.get('price_min'),
+            'price_max': data.get('price_max'),
+            'category': data.get('category'),
+            'category_name': data.get('category_name', ''),
+            'contact_phone': data.get('contact_phone'),
+            'display_phone': data.get('display_phone', ''),
+            'contact_method': data.get('contact_method', 'both'),
+            'main_images': main_images,
+            'additional_images': additional_images,
+            'all_images': all_images,
+            'total_images': len(all_images),
+            'shuffle_images': data.get('shuffle_images', False),
+            'avito_delivery': data.get('avito_delivery', False),
+            'delivery_services': data.get('delivery_services', []),
+            'delivery_discount': data.get('delivery_discount', 'none'),
+            'multioffer': data.get('multioffer', False),
+            'brand': data.get('brand', 'Не указан'),
+            'size': data.get('size', ''),
+            'condition': data.get('condition', ''),
+            'sale_type': data.get('sale_type', ''),
+            'placement_type': data.get('placement_type', ''),
+            'placement_method': data.get('placement_method', ''),
+            'cities': data.get('cities', []),
+            'quantity': data.get('quantity', 1)
         }
-        selected_names = [delivery_names.get(code, code) for code in delivery_services if code != "disabled"]
-        delivery_text = ", ".join(selected_names) if selected_names else "не выбрано"
 
-    await message.answer(
-        f"{user_name}, ✅ товар успешно добавлен!\n\n"
-        f"📋 Статистика:\n"
-        f"• Заголовок: {data['title'][:50]}...\n"
-        f"• Категория: {data.get('category_name', 'Не указана')}\n"
-        f"• Основные фото: {main_count}\n"
-        f"• Дополнительные фото: {additional_count}\n"
-        f"• Всего фото: {len(all_images)}\n"
-        f"• Перемешивание: {'Да' if data.get('shuffle_images') else 'Нет'}\n"
-        f"• Доставка: {delivery_text}\n\n"
-        f"Используйте команды:\n"
-        f"/new_product - добавить новый товар\n"
-        f"/my_products - посмотреть все товары\n"
-        f"/generate_xml - создать XML файл"
-    )
+        await db.add_product(message.from_user.id, product_data)
 
+        await state.clear()
+        await db.clear_user_state(message.from_user.id)
+
+        # Статистика
+        main_count = len(main_images)
+        additional_count = len(additional_images)
+        delivery_services = data.get('delivery_services', [])
+        delivery_discount = data.get('delivery_discount', 'none')
+        multioffer = data.get('multioffer', False)
+
+        delivery_text = "не подключена"
+        if data.get('avito_delivery', False) and delivery_services:
+            delivery_names = {
+                "disabled": "Выключена",
+                "pickup": "ПВЗ",
+                "courier": "Курьер",
+                "postamat": "Постамат",
+                "own_courier": "Свой курьер",
+                "sdek": "СДЭК",
+                "business_lines": "Деловые Линии",
+                "dpd": "DPD",
+                "pek": "ПЭК",
+                "russian_post": "Почта России",
+                "sdek_courier": "СДЭК курьер",
+                "self_pickup_online": "Самовывоз с онлайн-оплатой"
+            }
+            selected_names = [delivery_names.get(code, code) for code in delivery_services if code != "disabled"]
+            delivery_text = ", ".join(selected_names) if selected_names else "не выбрано"
+
+        discount_names = {
+            "free": "🆓 Бесплатная доставка",
+            "discount": "💰 Скидка на доставку",
+            "none": "🚫 Нет скидки"
+        }
+
+        condition_names = {
+            "new_with_tag": "🆕 Новое с биркой",
+            "excellent": "⭐ Отличное",
+            "good": "👍 Хорошее",
+            "satisfactory": "✅ Удовлетворительное"
+        }
+
+        sale_type_names = {
+            "resale": "🛒 Товар приобретен на продажу",
+            "manufacturer": "🏭 Товар от производителя"
+        }
+
+        await message.answer(
+            f"{user_name}, ✅ товар успешно добавлен!\n\n"
+            f"📋 Статистика:\n"
+            f"• Заголовок: {data['title'][:50]}...\n"
+            f"• Категория: {data.get('category_name', 'Не указана')}\n"
+            f"• Бренд: {data.get('brand', 'Не указан')}\n"
+            f"• Размер: {data.get('size', 'Не указан')}\n"
+            f"• Состояние: {condition_names.get(data.get('condition', ''), 'Не указано')}\n"
+            f"• Тип продажи: {sale_type_names.get(data.get('sale_type', ''), 'Не указан')}\n"
+            f"• Основные фото: {main_count}\n"
+            f"• Дополнительные фото: {additional_count}\n"
+            f"• Всего фото: {len(all_images)}\n"
+            f"• Перемешивание: {'Да' if data.get('shuffle_images') else 'Нет'}\n"
+            f"• Доставка: {delivery_text}\n"
+            f"• Скидка на доставку: {discount_names.get(delivery_discount, 'Не указано')}\n"
+            f"• Мультиобъявление: {'Да' if multioffer else 'Нет'}\n\n"
+            f"Используйте команды:\n"
+            f"/new_product - добавить новый товар\n"
+            f"/my_products - посмотреть все товары\n"
+            f"/generate_xml - создать XML файл"
+        )
+
+    except Exception as e:
+        print(f"Error in complete_product_creation: {e}")
+        await message.answer("Произошла ошибка при сохранении товара. Попробуйте еще раз.")
 
 # ========== ОСНОВНЫЕ ОБРАБОТЧИКИ ==========
 
@@ -852,7 +1062,6 @@ async def process_shuffle_choice(callback: CallbackQuery, state: FSMContext):
 
     await ask_avito_delivery(callback.message, user_name)
 
-
 @router.callback_query(F.data.startswith("delivery_"))
 async def process_delivery_choice(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора Авито доставки"""
@@ -867,8 +1076,9 @@ async def process_delivery_choice(callback: CallbackQuery, state: FSMContext):
         await state.set_state(ProductStates.waiting_for_delivery_services)
         await ask_delivery_services(callback.message, state, user_name)
     else:
-        # Доставка не нужна - завершаем создание товара
-        await complete_product_creation(callback.message, state, user_name)
+        # Если доставка не нужна, переходим к вопросу о мультиобъявлении
+        await state.set_state(ProductStates.waiting_for_multioffer)
+        await ask_multioffer(callback.message, user_name)
 
 
 @router.callback_query(F.data.startswith("service_"))
@@ -877,8 +1087,10 @@ async def process_delivery_service(callback: CallbackQuery, state: FSMContext):
     service_code = callback.data[8:]  # Убираем "service_"
 
     if service_code == "done":
-        # Завершаем создание товара при нажатии на кнопку "Завершить выбор"
-        await complete_product_creation(callback.message, state, callback.from_user.first_name)
+        # Переходим к вопросу о скидке на доставку
+        await state.set_state(ProductStates.waiting_for_delivery_discount)
+        user_name = callback.from_user.first_name
+        await ask_delivery_discount(callback.message, user_name)
         return
 
     data = await state.get_data()
@@ -900,3 +1112,318 @@ async def process_delivery_service(callback: CallbackQuery, state: FSMContext):
 
     # Обновляем клавиатуру с текущим состоянием выборов
     await update_delivery_services_keyboard(callback.message, state, callback.from_user.first_name)
+
+
+# Добавьте эти функции после существующих вспомогательных функций
+
+async def ask_delivery_discount(message: Message, user_name: str = ""):
+    """Запрос о скидке на доставку"""
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="🆓 Бесплатная доставка", callback_data="discount_free")
+    builder.button(text="💰 Скидка на доставку", callback_data="discount_discount")
+    builder.button(text="🚫 Нет скидки", callback_data="discount_none")
+
+    builder.adjust(1)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}есть ли скидка на доставку?\n\n"
+        "Для товаров с ценой выше 500 рублей можно настроить:\n"
+        "• 🆓 Бесплатная доставка - доставка бесплатная для покупателя\n"
+        "• 💰 Скидка на доставку - у покупателя появятся скидка на доставку\n"
+        "• 🚫 Нет скидки - скидки на доставку нет",
+        reply_markup=builder.as_markup()
+    )
+
+
+async def ask_multioffer(message: Message, user_name: str = ""):
+    """Запрос о мультиобъявлении"""
+    builder = InlineKeyboardBuilder()
+
+    builder.button(text="✅ Да", callback_data="multioffer_yes")
+    builder.button(text="❌ Нет", callback_data="multioffer_no")
+
+    builder.adjust(2)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}является ли объявление мультиобъявлением?",
+        reply_markup=builder.as_markup()
+    )
+
+@router.callback_query(F.data.startswith("discount_"))
+async def process_delivery_discount(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора скидки на доставку"""
+    discount_type = callback.data[9:]  # Убираем "discount_"
+
+    discount_names = {
+        "free": "бесплатная доставка",
+        "discount": "скидка на доставку",
+        "none": "нет скидки"
+    }
+
+    await state.update_data(delivery_discount=discount_type)
+    await state.set_state(ProductStates.waiting_for_multioffer)
+
+    user_name = callback.from_user.first_name
+    discount_text = discount_names.get(discount_type, "не указано")
+
+    await callback.message.edit_text(
+        f"{user_name}, скидка на доставку: {discount_text}\n\n"
+        "Теперь уточним тип объявления."
+    )
+
+    await ask_multioffer(callback.message, user_name)
+
+@router.callback_query(F.data.startswith("multioffer_"))
+async def process_multioffer(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора мультиобъявления"""
+    multioffer_choice = callback.data[11:]  # Убираем "multioffer_"
+
+    multioffer = (multioffer_choice == "yes")
+    await state.update_data(multioffer=multioffer)
+
+    user_name = callback.from_user.first_name
+    multioffer_text = "мультиобъявлением" if multioffer else "обычным объявлением"
+
+    await callback.message.edit_text(
+        f"{user_name}, объявление является {multioffer_text}.\n\n"
+        "Теперь укажем дополнительные параметры."
+    )
+
+    # Переходим к выбору бренда
+    await state.set_state(ProductStates.waiting_for_brand)
+    await ask_brand(callback.message, user_name)
+
+
+# Обработчики для брендов
+@router.callback_query(F.data.startswith("brand_"))
+async def process_brand(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора бренда"""
+    brand_data = callback.data[6:]  # Убираем "brand_"
+
+    if brand_data == "show_all":
+        # Показать все бренды
+        brands = load_brands()
+        builder = InlineKeyboardBuilder()
+
+        for brand in brands:
+            builder.button(text=brand, callback_data=f"brand_{brand}")
+
+        builder.button(text="✏️ Ввести вручную", callback_data="brand_custom")
+        builder.adjust(1)
+
+        await callback.message.edit_text(
+            "Выберите бренд из списка:",
+            reply_markup=builder.as_markup()
+        )
+        return
+
+    if brand_data == "custom":
+        await callback.message.edit_text("Введите название бренда:")
+        await state.set_state(ProductStates.waiting_for_brand)
+        return
+
+    await state.update_data(brand=brand_data)
+
+    # Проверяем, нужен ли размер для этой категории
+    data = await state.get_data()
+    category_name = data.get('category_name', '')
+
+    needs_size = any(size_cat in category_name for size_cat in SIZE_CATEGORIES)
+
+    user_name = callback.from_user.first_name
+    await callback.message.edit_text(f"{user_name}, бренд: {brand_data}")
+
+    if needs_size:
+        await state.set_state(ProductStates.waiting_for_size)
+        await ask_size(callback.message, user_name)
+    else:
+        await state.set_state(ProductStates.waiting_for_condition)
+        await ask_condition(callback.message, user_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_brand))
+async def process_custom_brand(message: Message, state: FSMContext):
+    """Обработка ручного ввода бренда"""
+    brand = message.text.strip()
+    if not brand:
+        await message.answer("Бренд не может быть пустым. Введите название бренда:")
+        return
+
+    await state.update_data(brand=brand)
+
+    # Проверяем, нужен ли размер для этой категории
+    data = await state.get_data()
+    category_name = data.get('category_name', '')
+
+    needs_size = any(size_cat in category_name for size_cat in SIZE_CATEGORIES)
+
+    user_name = message.from_user.first_name
+    if needs_size:
+        await state.set_state(ProductStates.waiting_for_size)
+        await ask_size(message, user_name)
+    else:
+        await state.set_state(ProductStates.waiting_for_condition)
+        await ask_condition(message, user_name)
+
+
+# Обработчики для размера
+@router.callback_query(F.data.startswith("size_"))
+async def process_size(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора размера"""
+    size_data = callback.data[5:]  # Убираем "size_"
+
+    if size_data == "custom":
+        await callback.message.edit_text("Введите размер товара:")
+        await state.set_state(ProductStates.waiting_for_size)
+        return
+
+    if size_data == "skip":
+        await state.update_data(size="")
+    else:
+        await state.update_data(size=size_data)
+
+    user_name = callback.from_user.first_name
+    size_text = size_data if size_data != "skip" else "не указан"
+
+    await callback.message.edit_text(f"{user_name}, размер: {size_text}")
+    await state.set_state(ProductStates.waiting_for_condition)
+    await ask_condition(callback.message, user_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_size))
+async def process_custom_size(message: Message, state: FSMContext):
+    """Обработка ручного ввода размера"""
+    size = message.text.strip()
+    await state.update_data(size=size)
+
+    user_name = message.from_user.first_name
+    await message.answer(f"{user_name}, размер: {size}")
+    await state.set_state(ProductStates.waiting_for_condition)
+    await ask_condition(message, user_name)
+
+
+# Обработчики для состояния товара
+@router.callback_query(F.data.startswith("condition_"))
+async def process_condition(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора состояния товара"""
+    condition = callback.data[10:]  # Убираем "condition_"
+
+    condition_names = {
+        "new_with_tag": "новое с биркой",
+        "excellent": "отличное",
+        "good": "хорошее",
+        "satisfactory": "удовлетворительное"
+    }
+
+    await state.update_data(condition=condition)
+    await state.set_state(ProductStates.waiting_for_sale_type)
+
+    user_name = callback.from_user.first_name
+    condition_text = condition_names.get(condition, "не указано")
+
+    await callback.message.edit_text(f"{user_name}, состояние: {condition_text}")
+    await ask_sale_type(callback.message, user_name)
+
+
+# Обработчики для типа продажи
+@router.callback_query(F.data.startswith("saletype_"))
+async def process_sale_type(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора типа продажи"""
+    sale_type = callback.data[9:]  # Убираем "saletype_"
+
+    sale_type_names = {
+        "resale": "товар приобретен на продажу",
+        "manufacturer": "товар от производителя"
+    }
+
+    await state.update_data(sale_type=sale_type)
+    await state.set_state(ProductStates.waiting_for_placement_type)
+
+    user_name = callback.from_user.first_name
+    sale_text = sale_type_names.get(sale_type, "не указан")
+
+    await callback.message.edit_text(f"{user_name}, тип продажи: {sale_text}")
+    await ask_placement_type(callback.message, user_name)
+
+
+# Обработчики для типа размещения
+@router.callback_query(F.data.startswith("placement_"))
+async def process_placement_type(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора типа размещения"""
+    placement_type = callback.data[10:]  # Убираем "placement_"
+
+    await state.update_data(placement_type=placement_type)
+    await state.set_state(ProductStates.waiting_for_placement_method)
+
+    user_name = callback.from_user.first_name
+    placement_text = "по городам" if placement_type == "cities" else "по станциям метро"
+
+    await callback.message.edit_text(f"{user_name}, размещение: {placement_text}")
+    await ask_placement_method(callback.message, user_name)
+
+
+# Обработчики для метода размещения
+@router.callback_query(F.data.startswith("method_"))
+async def process_placement_method(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора метода размещения"""
+    method = callback.data[7:]  # Убираем "method_"
+
+    await state.update_data(placement_method=method)
+
+    user_name = callback.from_user.first_name
+
+    if method == "exact_cities":
+        await state.set_state(ProductStates.waiting_for_cities)
+        await ask_cities(callback.message, user_name)
+    elif method in ["by_quantity", "multiple_in_city"]:
+        await state.set_state(ProductStates.waiting_for_quantity)
+        await ask_quantity(callback.message, user_name)
+    else:
+        # Завершаем создание товара
+        await complete_product_creation(callback.message, state, user_name)
+
+
+# Обработчики для городов
+@router.message(StateFilter(ProductStates.waiting_for_cities))
+async def process_cities(message: Message, state: FSMContext):
+    """Обработка ввода городов"""
+    cities_text = message.text.strip()
+    if not cities_text:
+        await message.answer("Введите названия городов:")
+        return
+
+    cities = [city.strip() for city in cities_text.split(',')]
+    await state.update_data(cities=cities)
+
+    user_name = message.from_user.first_name
+    await message.answer(f"{user_name}, города: {', '.join(cities)}")
+
+    # Завершаем создание товара
+    await complete_product_creation(message, state, user_name)
+
+
+# Обработчики для количества
+@router.message(StateFilter(ProductStates.waiting_for_quantity))
+async def process_quantity(message: Message, state: FSMContext):
+    """Обработка ввода количества"""
+    try:
+        quantity = int(message.text.strip())
+        if quantity <= 0:
+            await message.answer("Количество должно быть положительным числом. Введите количество:")
+            return
+
+        await state.update_data(quantity=quantity)
+
+        user_name = message.from_user.first_name
+        await message.answer(f"{user_name}, количество объявлений: {quantity}")
+
+        # Завершаем создание товара
+        await complete_product_creation(message, state, user_name)
+
+    except ValueError:
+        await message.answer("Количество должно быть числом. Введите количество:")
+
+
