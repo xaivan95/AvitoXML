@@ -1,3 +1,5 @@
+from pydoc import html
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, StateFilter
@@ -7,23 +9,12 @@ import re
 import random
 import uuid
 from datetime import datetime
-
+from bot.calendar import ProductCalendar, CalendarCallback
 from bot.database import db
 from bot.states import ProductStates
 import config
 import xml.etree.ElementTree as ET
 from typing import List
-
-def load_brands() -> List[str]:
-    """Загрузка брендов из XML файла"""
-    try:
-        tree = ET.parse('brands.xml')
-        root = tree.getroot()
-        brands = [brand.text for brand in root.findall('brand') if brand.text]
-        return brands
-    except Exception as e:
-        print(f"Error loading brands: {e}")
-        return ["Nike", "Adidas", "Reebok", "Puma", "No name", "Другой бренд"]
 
 
 # Категории, требующие размер
@@ -418,6 +409,146 @@ async def update_delivery_services_keyboard(message: Message, state: FSMContext,
     )
 
 
+async def ask_start_date(message: Message, user_name: str = ""):
+    """Запрос даты старта продажи"""
+    greeting = f"{user_name}, " if user_name else ""
+    calendar = ProductCalendar()
+
+    await message.answer(
+        f"{greeting}выберите дату начала продажи:\n\n"
+        "📅 Вы можете выбрать конкретную дату или пропустить этот шаг "
+        "(в этом случае продажа начнется сразу после публикации).",
+        reply_markup=await calendar.start_calendar()
+    )
+
+
+def load_brands() -> List[str]:
+    """Загрузка брендов из XML файла с обработкой ошибок"""
+    try:
+        # Сначала пробуем стандартный парсинг
+        return load_brands_standard()
+    except Exception as e:
+        print(f"Standard parsing failed: {e}")
+        # Если не получается, используем fallback
+        return load_brands_fallback()
+
+
+def load_brands_standard() -> List[str]:
+    """Стандартный парсинг XML"""
+    try:
+        tree = ET.parse('brands.xml')
+        root = tree.getroot()
+
+        brands = []
+
+        # Пробуем разные структуры XML
+        if root.tag == 'Brendy_fashion':
+            for brand_elem in root.findall('brand'):
+                brand_name = brand_elem.get('name')
+                if brand_name:
+                    brands.append(brand_name)
+        else:
+            # Ищем любые элементы brand
+            for brand_elem in root.findall('.//brand'):
+                brand_name = brand_elem.get('name')
+                if brand_name:
+                    brands.append(brand_name)
+                elif brand_elem.text and brand_elem.text.strip():
+                    brands.append(brand_elem.text.strip())
+
+        return brands
+
+    except ET.ParseError:
+        # Если XML с ошибками, используем fallback
+        raise Exception("XML parse error")
+
+
+def load_brands_fallback() -> List[str]:
+    """Альтернативный способ загрузки брендов через регулярные выражения"""
+    try:
+        with open('brands.xml', 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        brands = []
+
+        # Способ 1: Ищем name="значение"
+        pattern1 = r'name="([^"]*)"'
+        matches1 = re.findall(pattern1, content)
+        brands.extend(matches1)
+
+        # Способ 2: Ищем <brand>текст</brand>
+        pattern2 = r'<brand[^>]*>([^<]+)</brand>'
+        matches2 = re.findall(pattern2, content)
+        brands.extend([match.strip() for match in matches2])
+
+        # Способ 3: Ищем любые теги brand с атрибутами
+        pattern3 = r'<brand\s+[^>]*name\s*=\s*["\']([^"\']*)["\']'
+        matches3 = re.findall(pattern3, content)
+        brands.extend(matches3)
+
+        # Убираем дубликаты и пустые строки
+        unique_brands = list(set([brand for brand in brands if brand.strip()]))
+
+        print(f"Fallback loaded {len(unique_brands)} brands")
+        return unique_brands
+
+    except Exception as e:
+        print(f"Fallback loading failed: {e}")
+        # Возвращаем дефолтный список брендов
+        return get_default_brands()
+
+
+def get_default_brands() -> List[str]:
+    """Возвращает список брендов по умолчанию"""
+    return [
+        "Nike", "Adidas", "Reebok", "Puma", "No name", "Другой бренд",
+        "Zara", "H&M", "Uniqlo", "Gucci", "Louis Vuitton"
+    ]
+
+
+def is_valid_brand(brand: str) -> bool:
+    """Проверка наличия бренда в базе (регистронезависимая)"""
+    brands = load_brands()
+
+    # Приводим к нижнему регистру для сравнения
+    brand_lower = brand.lower().strip()
+
+    for existing_brand in brands:
+        if existing_brand.lower().strip() == brand_lower:
+            return True
+
+    return False
+
+
+def search_brands(query: str) -> List[str]:
+    """Поиск брендов по частичному совпадению"""
+    brands = load_brands()
+    query_lower = query.lower().strip()
+
+    matches = []
+    for brand in brands:
+        if query_lower in brand.lower():
+            matches.append(brand)
+
+    return matches[:10]  # Ограничиваем количество результатов
+
+async def ask_brand_manual(message: Message, user_name: str = ""):
+    """Запрос бренда с ручным вводом и подсказками"""
+    greeting = f"{user_name}, " if user_name else ""
+
+    # Показываем несколько примеров брендов для справки
+    sample_brands = load_brands()[:5]  # Первые 5 брендов как пример
+
+    sample_text = "\n".join([f"• {brand}" for brand in sample_brands])
+
+    await message.answer(
+        f"{greeting}введите название бренда:\n\n"
+        f"📋 Примеры брендов из базы:\n{sample_text}\n\n"
+        "💡 Бренд будет проверен в базе данных. "
+        "Если бренда нет в базе, вы сможете ввести его еще раз.\n"
+        "🔍 Можно ввести часть названия для поиска."
+    )
+
 async def complete_product_creation(message: Message, state: FSMContext, user_name: str = ""):
     """Завершение создания товара и сохранение в базу"""
     try:
@@ -430,6 +561,13 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
         if missing_fields:
             await message.answer(f"Ошибка: не заполнены обязательные поля: {', '.join(missing_fields)}")
             return
+
+        # Формируем информацию о дате старта
+        start_date_info = "сразу после публикации"
+        if data.get('start_datetime'):
+            start_date_info = data['start_datetime'].strftime('%d.%m.%Y %H:%M')
+        elif data.get('start_date'):
+            start_date_info = data['start_date'].strftime('%d.%m.%Y') + " (время не указано)"
 
         # Объединяем ВСЕ изображения (основные + дополнительные)
         main_images = data.get('main_images', [])
@@ -470,7 +608,11 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
             'placement_type': data.get('placement_type', ''),
             'placement_method': data.get('placement_method', ''),
             'cities': data.get('cities', []),
-            'quantity': data.get('quantity', 1)
+            'quantity': data.get('quantity', 1),
+            # Добавляем дату и время старта
+            'start_date': data.get('start_date'),
+            'start_time': data.get('start_time'),
+            'start_datetime': data.get('start_datetime')
         }
 
         await db.add_product(message.from_user.id, product_data)
@@ -478,76 +620,53 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
         await state.clear()
         await db.clear_user_state(message.from_user.id)
 
-        # Статистика
-        main_count = len(main_images)
-        additional_count = len(additional_images)
-        delivery_services = data.get('delivery_services', [])
-        delivery_discount = data.get('delivery_discount', 'none')
-        multioffer = data.get('multioffer', False)
+        # Статистика (добавьте информацию о дате старта)
+        start_date_info = "сразу после публикации"
+        if data.get('start_date'):
+            start_date_info = data['start_date'].strftime('%d.%m.%Y')
 
-        delivery_text = "не подключена"
-        if data.get('avito_delivery', False) and delivery_services:
-            delivery_names = {
-                "disabled": "Выключена",
-                "pickup": "ПВЗ",
-                "courier": "Курьер",
-                "postamat": "Постамат",
-                "own_courier": "Свой курьер",
-                "sdek": "СДЭК",
-                "business_lines": "Деловые Линии",
-                "dpd": "DPD",
-                "pek": "ПЭК",
-                "russian_post": "Почта России",
-                "sdek_courier": "СДЭК курьер",
-                "self_pickup_online": "Самовывоз с онлайн-оплатой"
-            }
-            selected_names = [delivery_names.get(code, code) for code in delivery_services if code != "disabled"]
-            delivery_text = ", ".join(selected_names) if selected_names else "не выбрано"
-
-        discount_names = {
-            "free": "🆓 Бесплатная доставка",
-            "discount": "💰 Скидка на доставку",
-            "none": "🚫 Нет скидки"
-        }
-
-        condition_names = {
-            "new_with_tag": "🆕 Новое с биркой",
-            "excellent": "⭐ Отличное",
-            "good": "👍 Хорошее",
-            "satisfactory": "✅ Удовлетворительное"
-        }
-
-        sale_type_names = {
-            "resale": "🛒 Товар приобретен на продажу",
-            "manufacturer": "🏭 Товар от производителя"
-        }
+        # ... остальная статистика ...
 
         await message.answer(
             f"{user_name}, ✅ товар успешно добавлен!\n\n"
             f"📋 Статистика:\n"
             f"• Заголовок: {data['title'][:50]}...\n"
             f"• Категория: {data.get('category_name', 'Не указана')}\n"
+            f"• Дата старта: {start_date_info}\n"
             f"• Бренд: {data.get('brand', 'Не указан')}\n"
-            f"• Размер: {data.get('size', 'Не указан')}\n"
-            f"• Состояние: {condition_names.get(data.get('condition', ''), 'Не указано')}\n"
-            f"• Тип продажи: {sale_type_names.get(data.get('sale_type', ''), 'Не указан')}\n"
-            f"• Основные фото: {main_count}\n"
-            f"• Дополнительные фото: {additional_count}\n"
-            f"• Всего фото: {len(all_images)}\n"
-            f"• Перемешивание: {'Да' if data.get('shuffle_images') else 'Нет'}\n"
-            f"• Доставка: {delivery_text}\n"
-            f"• Скидка на доставку: {discount_names.get(delivery_discount, 'Не указано')}\n"
-            f"• Мультиобъявление: {'Да' if multioffer else 'Нет'}\n\n"
-            f"Используйте команды:\n"
-            f"/new_product - добавить новый товар\n"
-            f"/my_products - посмотреть все товары\n"
-            f"/generate_xml - создать XML файл"
+            # ... остальная статистика ...
         )
 
     except Exception as e:
         print(f"Error in complete_product_creation: {e}")
         await message.answer("Произошла ошибка при сохранении товара. Попробуйте еще раз.")
 
+
+async def ask_start_time(message: Message, user_name: str = ""):
+    """Запрос времени старта продажи"""
+    greeting = f"{user_name}, " if user_name else ""
+
+    builder = InlineKeyboardBuilder()
+
+    # Популярные времена
+    popular_times = [
+        "09:00", "10:00", "11:00", "12:00",
+        "13:00", "14:00", "15:00", "16:00",
+        "17:00", "18:00", "19:00", "20:00"
+    ]
+
+    for time in popular_times:
+        builder.button(text=time, callback_data=f"time_{time}")
+
+    builder.button(text="✏️ Ввести вручную", callback_data="time_custom")
+    builder.adjust(3)
+
+    await message.answer(
+        f"{greeting}выберите время начала продажи:\n\n"
+        "⏰ Укажите время в формате ЧЧ:ММ (например, 14:30)\n"
+        "Или выберите из популярных вариантов:",
+        reply_markup=builder.as_markup()
+    )
 # ========== ОСНОВНЫЕ ОБРАБОТЧИКИ ==========
 
 @router.message(Command("new_product"))
@@ -1192,9 +1311,9 @@ async def process_multioffer(callback: CallbackQuery, state: FSMContext):
         "Теперь укажем дополнительные параметры."
     )
 
-    # Переходим к выбору бренда
+    # Переходим к вводу бренда вручную
     await state.set_state(ProductStates.waiting_for_brand)
-    await ask_brand(callback.message, user_name)
+    await ask_brand_manual(callback.message, user_name)
 
 
 # Обработчики для брендов
@@ -1242,6 +1361,83 @@ async def process_brand(callback: CallbackQuery, state: FSMContext):
     else:
         await state.set_state(ProductStates.waiting_for_condition)
         await ask_condition(callback.message, user_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_brand))
+async def process_brand_input(message: Message, state: FSMContext):
+    """Обработка ручного ввода бренда с поиском"""
+    brand_input = message.text.strip()
+
+    if not brand_input:
+        await message.answer("Бренд не может быть пустым. Введите название бренда:")
+        return
+
+    # Сначала проверяем точное совпадение
+    if is_valid_brand(brand_input):
+        await state.update_data(brand=brand_input)
+        await process_brand_success(message, state, message.from_user.first_name)
+        return
+
+    # Если точного совпадения нет, ищем похожие
+    similar_brands = search_brands(brand_input)
+
+    if similar_brands:
+        # Показываем похожие бренды
+        builder = InlineKeyboardBuilder()
+
+        for similar_brand in similar_brands:
+            builder.button(text=similar_brand, callback_data=f"exact_brand_{similar_brand}")
+
+        builder.button(text="✏️ Ввести другой бренд", callback_data="brand_retry")
+        builder.adjust(1)
+
+        similar_list = "\n".join([f"• {brand}" for brand in similar_brands])
+
+        await message.answer(
+            f"❌ Бренд '{brand_input}' не найден, но есть похожие:\n\n"
+            f"{similar_list}\n\n"
+            "Выберите подходящий вариант или введите бренд заново:",
+            reply_markup=builder.as_markup()
+        )
+    else:
+        await message.answer(
+            f"❌ Бренд '{brand_input}' не найден в базе.\n\n"
+            "Пожалуйста, проверьте написание и введите бренд еще раз:"
+        )
+
+@router.callback_query(F.data == "brand_retry")
+async def process_brand_retry(callback: CallbackQuery, state: FSMContext):
+    """Повторный ввод бренда"""
+    await callback.message.edit_text("Введите название бренда:")
+    # Состояние остается ProductStates.waiting_for_brand
+
+
+async def process_brand_success(message: Message, state: FSMContext, user_name: str):
+    """Продолжение процесса после успешного выбора бренда"""
+    data = await state.get_data()
+    brand = data.get('brand', '')
+
+    # Проверяем, нужен ли размер для этой категории
+    category_name = data.get('category_name', '')
+    needs_size = any(size_cat in category_name for size_cat in SIZE_CATEGORIES)
+
+    await message.answer(f"✅ Бренд подтвержден: {brand}")
+
+    if needs_size:
+        await state.set_state(ProductStates.waiting_for_size)
+        await ask_size(message, user_name)
+    else:
+        await state.set_state(ProductStates.waiting_for_condition)
+        await ask_condition(message, user_name)
+
+@router.callback_query(F.data.startswith("exact_brand_"))
+async def process_exact_brand(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора точного бренда из похожих"""
+    brand = callback.data[12:]  # Убираем "exact_brand_"
+
+    await state.update_data(brand=brand)
+    await callback.message.edit_text(f"✅ Бренд выбран: {brand}")
+    await process_brand_success(callback.message, state, callback.from_user.first_name)
 
 
 @router.message(StateFilter(ProductStates.waiting_for_brand))
@@ -1386,26 +1582,6 @@ async def process_placement_method(callback: CallbackQuery, state: FSMContext):
         await complete_product_creation(callback.message, state, user_name)
 
 
-# Обработчики для городов
-@router.message(StateFilter(ProductStates.waiting_for_cities))
-async def process_cities(message: Message, state: FSMContext):
-    """Обработка ввода городов"""
-    cities_text = message.text.strip()
-    if not cities_text:
-        await message.answer("Введите названия городов:")
-        return
-
-    cities = [city.strip() for city in cities_text.split(',')]
-    await state.update_data(cities=cities)
-
-    user_name = message.from_user.first_name
-    await message.answer(f"{user_name}, города: {', '.join(cities)}")
-
-    # Завершаем создание товара
-    await complete_product_creation(message, state, user_name)
-
-
-# Обработчики для количества
 @router.message(StateFilter(ProductStates.waiting_for_quantity))
 async def process_quantity(message: Message, state: FSMContext):
     """Обработка ввода количества"""
@@ -1420,10 +1596,142 @@ async def process_quantity(message: Message, state: FSMContext):
         user_name = message.from_user.first_name
         await message.answer(f"{user_name}, количество объявлений: {quantity}")
 
-        # Завершаем создание товара
-        await complete_product_creation(message, state, user_name)
+        # Переходим к выбору даты старта вместо завершения
+        await state.set_state(ProductStates.waiting_for_start_date)
+        await ask_start_date(message, user_name)
 
     except ValueError:
         await message.answer("Количество должно быть числом. Введите количество:")
 
 
+@router.message(StateFilter(ProductStates.waiting_for_cities))
+async def process_cities(message: Message, state: FSMContext):
+    """Обработка ввода городов"""
+    cities_text = message.text.strip()
+    if not cities_text:
+        await message.answer("Введите названия городов:")
+        return
+
+    cities = [city.strip() for city in cities_text.split(',')]
+    await state.update_data(cities=cities)
+
+    user_name = message.from_user.first_name
+    await message.answer(f"{user_name}, города: {', '.join(cities)}")
+
+    # Переходим к выбору даты старта вместо завершения
+    await state.set_state(ProductStates.waiting_for_start_date)
+    await ask_start_date(message, user_name)
+
+    @router.callback_query(CalendarCallback.filter(), StateFilter(ProductStates.waiting_for_start_date))
+    async def process_calendar(
+            callback: CallbackQuery,
+            callback_data: CalendarCallback,
+            state: FSMContext
+    ):
+        """Обработка выбора даты из календаря"""
+        calendar = ProductCalendar()
+        selected, date = await calendar.process_selection(callback, callback_data)
+
+        if selected:
+            user_name = callback.from_user.first_name
+
+            if date is None:
+                # Пользователь выбрал "Пропустить" - завершаем без времени
+                await state.update_data(start_date=None, start_time=None)
+                await callback.message.answer(f"{user_name}, продажа начнется сразу после публикации.")
+                await complete_product_creation(callback.message, state, user_name)
+            else:
+                # Сохраняем дату и переходим к выбору времени
+                await state.update_data(start_date=date)
+                await state.set_state(ProductStates.waiting_for_start_time)
+                await callback.message.answer(
+                    f"{user_name}, дата начала продажи: {date.strftime('%d.%m.%Y')}"
+                )
+                await ask_start_time(callback.message, user_name)
+
+    @router.callback_query(F.data == "ignore")
+    async def ignore_callback(callback: CallbackQuery):
+        """Игнорирование callback данных"""
+        await callback.answer()
+
+
+@router.callback_query(F.data.startswith("time_"), StateFilter(ProductStates.waiting_for_start_time))
+async def process_time_selection(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора времени из кнопок"""
+    time_data = callback.data[5:]  # Убираем "time_"
+
+    if time_data == "custom":
+        await callback.message.edit_text("Введите время в формате ЧЧ:ММ (например, 14:30):")
+        return
+
+    # Проверяем формат времени
+    if not is_valid_time_format(time_data):
+        await callback.answer("❌ Неверный формат времени", show_alert=True)
+        return
+
+    await process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_start_time))
+async def process_time_input_message(message: Message, state: FSMContext):
+    """Обработка ручного ввода времени"""
+    time_input = message.text.strip()
+
+    if not is_valid_time_format(time_input):
+        await message.answer(
+            "❌ Неверный формат времени.\n\n"
+            "Пожалуйста, введите время в формате ЧЧ:ММ (например, 14:30):"
+        )
+        return
+
+    await process_time_input(message, time_input, state, message.from_user.first_name)
+
+
+async def process_time_input(message: Message, time_str: str, state: FSMContext, user_name: str):
+    """Обработка введенного времени"""
+    # Получаем дату из состояния
+    data = await state.get_data()
+    start_date = data.get('start_date')
+
+    if not start_date:
+        await message.answer("❌ Ошибка: дата не найдена. Начните заново.")
+        return
+
+    # Собираем полную дату и время
+    time_parts = time_str.split(':')
+    hour = int(time_parts[0])
+    minute = int(time_parts[1])
+
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+    await state.update_data(
+        start_time=time_str,
+        start_datetime=full_datetime
+    )
+
+    await message.answer(
+        f"✅ Время установлено: {time_str}\n"
+        f"📅 Полная дата начала: {full_datetime.strftime('%d.%m.%Y %H:%M')}"
+    )
+
+    # Завершаем создание товара
+    await complete_product_creation(message, state, user_name)
+
+
+def is_valid_time_format(time_str: str) -> bool:
+    """Проверка корректности формата времени"""
+    try:
+        if not time_str or ':' not in time_str:
+            return False
+
+        parts = time_str.split(':')
+        if len(parts) != 2:
+            return False
+
+        hour = int(parts[0])
+        minute = int(parts[1])
+
+        return 0 <= hour <= 23 and 0 <= minute <= 59
+
+    except (ValueError, IndexError):
+        return False

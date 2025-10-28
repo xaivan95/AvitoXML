@@ -25,3 +25,6 @@ class ProductStates(StatesGroup):
     waiting_for_placement_method = State()
     waiting_for_cities = State()
     waiting_for_quantity = State()
+    # Добавляем новое состояние для даты старта
+    waiting_for_start_date = State()
+    waiting_for_start_time = State()  # Добавляем новое состояние для времени

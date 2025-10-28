@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 from datetime import datetime
 from aiogram import Router
-from aiogram.types import Message
+from aiogram.types import Message, FSInputFile, BufferedInputFile  # Используем конкретные классы
 from aiogram.filters import Command
 import tempfile
 import os
@@ -146,6 +146,12 @@ def create_ad_element(product, city: str = "", ad_number: int = 1) -> ET.Element
         ET.SubElement(param, "Name").text = "Размер"
         ET.SubElement(param, "Value").text = size
 
+    # Дата старта (если указана)
+    start_date = getattr(product, 'start_date', None)
+    if start_date:
+        # Форматируем дату в формат YYYY-MM-DD
+        ET.SubElement(ad, "DateBegin").text = start_date.strftime('%Y-%m-%d')
+
     # Доставка
     if getattr(product, 'avito_delivery', False):
         delivery = ET.SubElement(ad, "Delivery")
@@ -268,7 +274,7 @@ async def generate_xml_command(message: Message):
         # Генерируем XML
         xml_content = generate_product_xml(products)
 
-        # Создаем временный файл
+        # Способ 1: Используем FSInputFile (рекомендуемый)
         with tempfile.NamedTemporaryFile(mode='w', suffix='.xml', delete=False, encoding='utf-8') as f:
             f.write(xml_content)
             temp_filename = f.name
@@ -287,26 +293,36 @@ async def generate_xml_command(message: Message):
             else:
                 total_ads += 1
 
-        # Отправляем файл пользователю
-        with open(temp_filename, 'rb') as f:
-            await message.answer_document(
-                document=f,
-                filename=f"avito_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml",
-                caption=(
-                    f"✅ XML файл для загрузки на Авито готов!\n\n"
-                    f"📊 Статистика:\n"
-                    f"• Товаров: {len(products)}\n"
-                    f"• Объявлений: {total_ads}\n"
-                    f"• Файл готов к загрузке в личном кабинете Авито\n\n"
-                    f"💡 Загрузите этот файл в разделе автозагрузки объявлений Авито."
-                )
-            )
+        # Создаем FSInputFile из файла
+        input_file = FSInputFile(
+            path=temp_filename,
+            filename=f"avito_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml"
+        )
 
-        # Удаляем временный файл
+        # Отправляем документ
+        await message.answer_document(
+            document=input_file,
+            caption=(
+                f"✅ XML файл для загрузки на Авито готов!\n\n"
+                f"📊 Статистика:\n"
+                f"• Товаров: {len(products)}\n"
+                f"• Объявлений: {total_ads}\n"
+                f"• Файл готов к загрузке в личном кабинете Авито\n\n"
+                f"💡 Загрузите этот файл в разделе автозагрузки объявлений Авито."
+            )
+        )
+
+        # Удаляем временный файл после отправки
         os.unlink(temp_filename)
 
     except Exception as e:
         print(f"Error generating XML: {e}")
+        # Пытаемся удалить временный файл в случае ошибки
+        try:
+            if 'temp_filename' in locals():
+                os.unlink(temp_filename)
+        except:
+            pass
         await message.answer("Произошла ошибка при генерации XML файла. Попробуйте еще раз.")
 
 
