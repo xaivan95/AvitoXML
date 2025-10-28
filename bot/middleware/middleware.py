@@ -26,22 +26,3 @@ class CallbackUserStateMiddleware(BaseMiddleware):
         user_state = await db.get_user_state(user_id)
         data['user_state'] = user_state
         return await handler(event, data)
-
-class AlbumMiddleware(BaseMiddleware):
-    """Middleware для обработки альбомов (нескольких фото в одном сообщении)"""
-    def __init__(self):
-        super().__init__()
-
-    async def __call__(
-        self,
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-        event: Message,
-        data: Dict[str, Any]
-    ) -> Any:
-        if not event.media_group_id:
-            return await handler(event, data)
-
-        # Если это медиагруппа, сохраняем информацию о ней
-        data['media_group_id'] = event.media_group_id
-        data['is_album'] = True
-        return await handler(event, data)

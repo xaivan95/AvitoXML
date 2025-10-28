@@ -1,7 +1,7 @@
 from pydoc import html
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, KeyboardButton, ReplyKeyboardMarkup
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -16,6 +16,7 @@ import config
 import xml.etree.ElementTree as ET
 from typing import List
 
+from нф import validate_city_nominatim
 
 # Категории, требующие размер
 SIZE_CATEGORIES = [
@@ -100,7 +101,8 @@ async def ask_sale_type(message: Message, user_name: str = ""):
 
     sale_types = [
         ("🛒 Товар приобретен на продажу", "resale"),
-        ("🏭 Товар от производителя", "manufacturer")
+        ("🏭 Товар от производителя", "manufacturer"),
+        ("👤 Продаю своё", "personal")  # Добавляем новый тип
     ]
 
     for sale_name, sale_code in sale_types:
@@ -266,16 +268,25 @@ async def show_contact_methods(message: Message, user_name: str = ""):
     )
 
 
-async def ask_additional_images(message: Message, user_name: str = ""):
+async def ask_additional_images(message: Message, state: FSMContext, user_name: str = ""):
     """Запрос дополнительных изображений"""
     greeting = f"{user_name}, " if user_name else ""
+
+    # Получаем текущее количество основных фото через state
+    data = await state.get_data()
+    main_count = len(data.get('main_images', []))
+
     await message.answer(
         f"{greeting}теперь отправьте ДОПОЛНИТЕЛЬНЫЕ фотографии объявления.\n\n"
-        "📸 Вы можете отправлять фото по одному или несколькими сообщениями.\n"
+        f"📸 У вас уже {main_count} основных фото\n"
+        "Вы можете отправлять:\n"
+        "• 📷 По одному фото\n"
+        "• 🖼️ Несколько фото одним сообщением (альбом)\n"
+        "• 📤 Несколько сообщениями\n\n"
+        "💡 Все фото будут сразу добавляться в счетчик\n\n"
         "После отправки всех дополнительных фото нажмите /finish_additional_images\n\n"
-        "Если дополнительных фото нет, просто нажмите /finish_additional_images"
+        "💡 Если дополнительных фото нет, просто нажмите /finish_additional_images"
     )
-
 
 async def ask_shuffle_images(message: Message, state: FSMContext, user_name: str = ""):
     """Запрос о перемешивании фото"""
@@ -620,26 +631,118 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
         await state.clear()
         await db.clear_user_state(message.from_user.id)
 
-        # Статистика (добавьте информацию о дате старта)
-        start_date_info = "сразу после публикации"
-        if data.get('start_date'):
-            start_date_info = data['start_date'].strftime('%d.%m.%Y')
+        # Статистика
+        main_count = len(main_images)
+        additional_count = len(additional_images)
+        delivery_services = data.get('delivery_services', [])
+        delivery_discount = data.get('delivery_discount', 'none')
+        multioffer = data.get('multioffer', False)
 
-        # ... остальная статистика ...
+        # Тексты для статистики
+        delivery_text = "не подключена"
+        if data.get('avito_delivery', False) and delivery_services:
+            delivery_names = {
+                "disabled": "Выключена",
+                "pickup": "ПВЗ",
+                "courier": "Курьер",
+                "postamat": "Постамат",
+                "own_courier": "Свой курьер",
+                "sdek": "СДЭК",
+                "business_lines": "Деловые Линии",
+                "dpd": "DPD",
+                "pek": "ПЭК",
+                "russian_post": "Почта России",
+                "sdek_courier": "СДЭК курьер",
+                "self_pickup_online": "Самовывоз с онлайн-оплатой"
+            }
+            selected_names = [delivery_names.get(code, code) for code in delivery_services if code != "disabled"]
+            delivery_text = ", ".join(selected_names) if selected_names else "не выбрано"
+
+        discount_names = {
+            "free": "🆓 Бесплатная доставка",
+            "discount": "💰 Скидка на доставку",
+            "none": "🚫 Нет скидки"
+        }
+
+        condition_names = {
+            "new_with_tag": "🆕 Новое с биркой",
+            "excellent": "⭐ Отличное",
+            "good": "👍 Хорошее",
+            "satisfactory": "✅ Удовлетворительное"
+        }
+
+        sale_type_names = {
+            "resale": "🛒 Товар приобретен на продажу",
+            "manufacturer": "🏭 Товар от производителя",
+            "personal": "👤 Продаю своё"
+        }
+
+        contact_method_names = {
+            "both": "📞 По телефону и в сообщении",
+            "phone": "📞 По телефону",
+            "message": "💬 В сообщении"
+        }
+
+        price_info = "Не указана"
+        if data.get('price_type') == 'fixed' and data.get('price'):
+            price_info = f"{data['price']} руб. (фиксированная)"
+        elif data.get('price_type') == 'range' and data.get('price_min') and data.get('price_max'):
+            price_info = f"{data['price_min']}-{data['price_max']} руб. (диапазон)"
+
+        placement_info = "Не указано"
+        placement_type = data.get('placement_type', '')
+        placement_method = data.get('placement_method', '')
+
+        if placement_type == 'cities':
+            if placement_method == 'exact_cities':
+                cities = data.get('cities', [])
+                placement_info = f"По городам: {', '.join(cities)}"
+            elif placement_method == 'by_quantity':
+                quantity = data.get('quantity', 1)
+                placement_info = f"По количеству: {quantity} объявлений"
+            elif placement_method == 'multiple_in_city':
+                cities = data.get('cities', [])
+                quantity = data.get('quantity', 1)
+                if cities:
+                    placement_info = f"Мультиразмещение в {cities[0]}: {quantity} объявлений"
+        elif placement_type == 'metro':
+            placement_info = "По станциям метро"
 
         await message.answer(
             f"{user_name}, ✅ товар успешно добавлен!\n\n"
             f"📋 Статистика:\n"
             f"• Заголовок: {data['title'][:50]}...\n"
+            f"• Описание: {len(data['description'])} символов\n"
             f"• Категория: {data.get('category_name', 'Не указана')}\n"
+            f"• Цена: {price_info}\n"
             f"• Дата старта: {start_date_info}\n"
             f"• Бренд: {data.get('brand', 'Не указан')}\n"
-            # ... остальная статистика ...
+            f"• Размер: {data.get('size', 'Не указан')}\n"
+            f"• Состояние: {condition_names.get(data.get('condition', ''), 'Не указано')}\n"
+            f"• Тип продажи: {sale_type_names.get(data.get('sale_type', ''), 'Не указан')}\n"
+            f"• Способ связи: {contact_method_names.get(data.get('contact_method', 'both'), 'Не указан')}\n"
+            f"• Телефон: {data.get('display_phone', 'Не указан')}\n"
+            f"• Размещение: {placement_info}\n"
+            f"• Основные фото: {main_count}\n"
+            f"• Дополнительные фото: {additional_count}\n"
+            f"• Всего фото: {len(all_images)}\n"
+            f"• Перемешивание фото: {'✅ Да' if data.get('shuffle_images') else '❌ Нет'}\n"
+            f"• Доставка: {delivery_text}\n"
+            f"• Скидка на доставку: {discount_names.get(delivery_discount, 'Не указано')}\n"
+            f"• Мультиобъявление: {'✅ Да' if multioffer else '❌ Нет'}\n\n"
+            f"📊 Итог: создан товар с {len(all_images)} фото для размещения в системе\n\n"
+            f"Используйте команды:\n"
+            f"/new_product - добавить новый товар\n"
+            f"/my_products - посмотреть все товары\n"
+            f"/generate_xml - создать XML файл для Avito"
         )
 
     except Exception as e:
         print(f"Error in complete_product_creation: {e}")
-        await message.answer("Произошла ошибка при сохранении товара. Попробуйте еще раз.")
+        await message.answer(
+            "❌ Произошла ошибка при сохранении товара. Попробуйте еще раз.\n"
+            "Если ошибка повторяется, используйте /new_product для начала заново."
+        )
 
 
 async def ask_start_time(message: Message, user_name: str = ""):
@@ -667,7 +770,93 @@ async def ask_start_time(message: Message, user_name: str = ""):
         "Или выберите из популярных вариантов:",
         reply_markup=builder.as_markup()
     )
+
+async def ask_phone_number(message: Message, user_name: str = ""):
+        """Запрос номера телефона с кнопкой поделиться"""
+        greeting = f"{user_name}, " if user_name else ""
+
+        # Создаем клавиатуру с кнопкой "Поделиться номером"
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[
+                [KeyboardButton(text="📞 Поделиться номером", request_contact=True)],
+                [KeyboardButton(text="✏️ Ввести вручную")]
+            ],
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+
+        await message.answer(
+            f"{greeting}укажите контактный номер телефона:\n\n"
+            "Вы можете:\n"
+            "• Нажать кнопку '📞 Поделиться номером' для автоматической отправки\n"
+            "• Или ввести номер вручную в одном из форматов:\n"
+            "  — +7 (495) 777-10-66\n"
+            "  — 8 905 207 04 90\n"
+            "  — 89052070490",
+            reply_markup=keyboard
+        )
+
 # ========== ОСНОВНЫЕ ОБРАБОТЧИКИ ==========
+
+
+@router.message(StateFilter(ProductStates.waiting_for_main_images), F.media_group_id)
+async def handle_main_images_album(message: Message, album: list[Message], state: FSMContext):
+    """Обработка альбома основных изображений"""
+    if not album:
+        return
+
+    photo_files = []
+
+    for msg in album:
+        if msg.photo:
+            # Берем самое большое фото
+            largest_photo = msg.photo[-1]
+            photo_files.append(largest_photo.file_id)
+
+    if photo_files:
+        # Сохраняем все фото из альбома
+        data = await state.get_data()
+        main_images = data.get('main_images', [])
+        main_images.extend(photo_files)
+
+        await state.update_data(main_images=main_images)
+
+        user_name = message.from_user.first_name
+        await message.answer(
+            f"{user_name}, ✅ добавлен альбом с {len(photo_files)} основными фото! Всего основных фото: {len(main_images)}\n\n"
+            "Продолжайте отправлять фото или нажмите /finish_main_images чтобы завершить."
+        )
+
+
+@router.message(StateFilter(ProductStates.waiting_for_additional_images), F.media_group_id)
+async def handle_additional_images_album(message: Message, album: list[Message], state: FSMContext):
+    """Обработка альбома дополнительных изображений"""
+    if not album:
+        return
+
+    photo_files = []
+
+    for msg in album:
+        if msg.photo:
+            # Берем самое большое фото
+            largest_photo = msg.photo[-1]
+            photo_files.append(largest_photo.file_id)
+
+    if photo_files:
+        # Сохраняем все фото из альбома
+        data = await state.get_data()
+        additional_images = data.get('additional_images', [])
+        additional_images.extend(photo_files)
+
+        await state.update_data(additional_images=additional_images)
+
+        user_name = message.from_user.first_name
+        total_count = len(additional_images)
+
+        await message.answer(
+            f"{user_name}, ✅ добавлен альбом с {len(photo_files)} дополнительными фото! Всего дополнительных фото: {total_count}\n\n"
+            "Продолжайте отправлять фото или нажмите /finish_additional_images чтобы завершить."
+        )
 
 @router.message(Command("new_product"))
 async def new_product_command(message: Message, state: FSMContext):
@@ -702,6 +891,13 @@ async def back_to_categories(callback: CallbackQuery, state: FSMContext):
 @router.callback_query(F.data.startswith("cat_"))
 async def process_main_category(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора основной категории"""
+    API_KEY = "11596b4e-f890-4a88-b439-e9da09bb9c03"
+    validation_result = await validate_city_nominatim("мазсква")
+    print(validation_result)
+    validation_result2 = await validate_city_nominatim("Воронеж")
+    print(validation_result2)
+    validation_result3 = await validate_city_nominatim("Ямное Воронежская область")
+    print(validation_result3)
     category_id = callback.data[4:]  # Убираем "cat_"
     category_data = config.AVITO_CATEGORIES.get(category_id)
 
@@ -831,19 +1027,15 @@ async def process_price_skip(callback: CallbackQuery, state: FSMContext):
 
     user_name = callback.from_user.first_name
     await callback.message.edit_text(
-        f"{user_name}, цена не будет указана в объявлении.\n\n"
-        "Теперь укажите контактный номер телефона в одном из допустимых форматов.\n"
-        "Корректные примеры:\n"
-        "— +7 (495) 777-10-66\n"
-        "— (81374) 4-55-75\n"
-        "— 8 905 207 04 90\n"
-        "— +7 905 2070490\n"
-        "— 88123855085"
+        f"{user_name}, цена не будет указана в объявлении."
     )
 
+    # Переходим к новому запросу телефона с кнопкой
+    await ask_phone_number(callback.message, user_name)
 
 @router.message(StateFilter(ProductStates.waiting_for_price))
 async def process_fixed_price(message: Message, state: FSMContext):
+    """Обработка фиксированной цены"""
     """Обработка фиксированной цены"""
     try:
         price = int(message.text.strip())
@@ -855,16 +1047,11 @@ async def process_fixed_price(message: Message, state: FSMContext):
         await state.set_state(ProductStates.waiting_for_phone)
 
         user_name = message.from_user.first_name
-        await message.answer(
-            f"{user_name}, цена установлена: {price} руб.\n\n"
-            "Теперь укажите контактный номер телефона в одном из допустимых форматов.\n"
-            "Корректные примеры:\n"
-            "— +7 (495) 777-10-66\n"
-            "— (81374) 4-55-75\n"
-            "— 8 905 207 04 90\n"
-            "— +7 905 2070490\n"
-            "— 88123855085"
-        )
+        await message.answer(f"✅ Цена установлена: {price} руб.")
+
+        # Переходим к новому запросу телефона с кнопкой
+        await ask_phone_number(message, user_name)
+
     except ValueError:
         await message.answer("Цена должна быть числом. Введите цену еще раз:")
 
@@ -896,59 +1083,55 @@ async def process_price_range_input(message: Message, state: FSMContext):
         await state.set_state(ProductStates.waiting_for_phone)
 
         user_name = message.from_user.first_name
-        await message.answer(
-            f"{user_name}, диапазон цен установлен: {min_price}-{max_price} руб.\n\n"
-            "Теперь укажите контактный номер телефона в одном из допустимых форматов.\n"
-            "Корректные примеры:\n"
-            "— +7 (495) 777-10-66\n"
-            "— (81374) 4-55-75\n"
-            "— 8 905 207 04 90\n"
-            "— +7 905 2070490\n"
-            "— 88123855085"
-        )
+        await message.answer(f"✅ Диапазон цен установлен: {min_price}-{max_price} руб.")
+
+        # Переходим к новому запросу телефона с кнопкой
+        await ask_phone_number(message, user_name)
+
     except ValueError:
         await message.answer(
             "Цены должны быть числами. Введите диапазон в формате МИНИМУМ-МАКСИМУМ (например: 1200-1500):")
-
 
 def normalize_phone(phone: str) -> str:
     """Нормализация телефонного номера к формату +7XXXXXXXXXX"""
     # Удаляем все нецифровые символы, кроме +
     cleaned = re.sub(r'[^\d+]', '', phone)
 
-    # Если номер начинается с 8, заменяем на +7
-    if cleaned.startswith('8'):
+    # Обрабатываем разные форматы
+    if cleaned.startswith('8') and len(cleaned) == 11:
         cleaned = '+7' + cleaned[1:]
-    # Если номер начинается с 7, добавляем +
-    elif cleaned.startswith('7'):
+    elif cleaned.startswith('7') and len(cleaned) == 11:
         cleaned = '+' + cleaned
-    # Если номер начинается без кода страны, добавляем +7
     elif len(cleaned) == 10:
         cleaned = '+7' + cleaned
+    elif cleaned.startswith('+7') and len(cleaned) == 12:
+        pass  # Уже в правильном формате
+    elif cleaned.startswith('+') and len(cleaned) == 12:
+        pass  # Международный формат
 
     return cleaned
-
 
 def is_valid_phone(phone: str) -> bool:
     """Проверка валидности телефонного номера"""
     normalized = normalize_phone(phone)
 
-    # Проверяем формат +7XXXXXXXXXX (11 цифр после +7)
-    if re.match(r'^\+7\d{10}$', normalized):
+    # Основная проверка - российские номера
+    if re.match(r'^(\+7|7|8)\d{10}$', normalized.replace('+', '').replace(' ', '')):
         return True
 
-    # Проверяем российские номера без международного формата
-    if re.match(r'^8\d{10}$', phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '')):
-        return True
-
-    # Проверяем другие форматы
+    # Проверяем визуальные форматы
     patterns = [
         r'^\+7\s?\(\d{3}\)\s?\d{3}-\d{2}-\d{2}$',
-        r'^\(\d{5}\)\s?\d-\d{2}-\d{2}$',
+        r'^8\s?\(\d{3}\)\s?\d{3}-\d{2}-\d{2}$',
         r'^8\s?\d{3}\s?\d{3}\s?\d{2}\s?\d{2}$',
-        r'^\+7\s?\d{3}\s?\d{7}$',
-        r'^\d{11}$'
+        r'^\+7\s?\d{3}\s?\d{3}\s?\d{2}\s?\d{2}$',
+        r'^\d{11}$',
+        r'^\d{10}$'
     ]
+
+    cleaned_phone = re.sub(r'[^\d]', '', phone)
+    if len(cleaned_phone) in [10, 11]:
+        return True
 
     for pattern in patterns:
         if re.match(pattern, phone.strip()):
@@ -956,15 +1139,62 @@ def is_valid_phone(phone: str) -> bool:
 
     return False
 
+@router.message(StateFilter(ProductStates.waiting_for_phone), F.contact)
+async def process_contact_phone(message: Message, state: FSMContext):
+    """Обработка номера телефона из контакта"""
+    contact = message.contact
+    phone_number = contact.phone_number
+
+    # Нормализуем номер
+    normalized_phone = normalize_phone(phone_number)
+
+    if not is_valid_phone(normalized_phone):
+        await message.answer(
+            "❌ Неверный формат номера телефона из контакта.\n"
+            "Пожалуйста, введите номер вручную:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+        return
+
+    await state.update_data(contact_phone=normalized_phone, display_phone=phone_number)
+    await state.set_state(ProductStates.waiting_for_contact_method)
+
+    # Убираем клавиатуру
+    await message.answer(
+        f"✅ Номер получен: {phone_number}",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    user_name = message.from_user.first_name
+    await show_contact_methods(message, user_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_phone), F.text == "✏️ Ввести вручную")
+async def process_manual_phone_input(message: Message, state: FSMContext):
+    """Обработка выбора ручного ввода номера"""
+    await message.answer(
+        "Введите номер телефона вручную в одном из форматов:\n\n"
+        "Корректные примеры:\n"
+        "— +7 (495) 777-10-66\n"
+        "— (81374) 4-55-75\n"
+        "— 8 905 207 04 90\n"
+        "— +7 905 2070490\n"
+        "— 88123855085",
+        reply_markup=ReplyKeyboardRemove()
+    )
 
 @router.message(StateFilter(ProductStates.waiting_for_phone))
-async def process_phone(message: Message, state: FSMContext):
-    """Обработка телефонного номера"""
+async def process_phone_message(message: Message, state: FSMContext):
+    """Обработка ручного ввода номера телефона"""
     phone = message.text.strip()
+
+    # Если это команда ручного ввода, уже обработана выше
+    if phone == "✏️ Ввести вручную":
+        return
 
     if not is_valid_phone(phone):
         await message.answer(
-            "Неверный формат телефона. Пожалуйста, введите номер в одном из допустимых форматов:\n\n"
+            "❌ Неверный формат телефона. Пожалуйста, введите номер в одном из допустимых форматов:\n\n"
             "Корректные примеры:\n"
             "— +7 (495) 777-10-66\n"
             "— (81374) 4-55-75\n"
@@ -980,8 +1210,8 @@ async def process_phone(message: Message, state: FSMContext):
     await state.set_state(ProductStates.waiting_for_contact_method)
 
     user_name = message.from_user.first_name
+    await message.answer(f"✅ Номер подтвержден: {phone}")
     await show_contact_methods(message, user_name)
-
 
 @router.callback_query(F.data.startswith("contact_"))
 async def process_contact_method(callback: CallbackQuery, state: FSMContext):
@@ -1035,88 +1265,31 @@ async def process_main_album_images(message: Message, state: FSMContext):
 async def process_main_single_image(message: Message, state: FSMContext):
     """Обработка одиночного основного изображения"""
     if message.media_group_id:
-        # Это часть альбома, обрабатывается в process_main_album_images
+        # Это часть альбома, пропускаем - обработается в handle_main_images_album
         return
 
     # Одиночное фото
     largest_photo = message.photo[-1]
     photo_file_id = largest_photo.file_id
 
-    await state.update_data(main_images=[photo_file_id])
+    data = await state.get_data()
+    main_images = data.get('main_images', [])
+    main_images.append(photo_file_id)
+
+    await state.update_data(main_images=main_images)
 
     user_name = message.from_user.first_name
     await message.answer(
-        f"{user_name}, ✅ получено 1 основное изображение!\n\n"
-        "Теперь переходим к дополнительным фотографиям."
+        f"{user_name}, ✅ получено 1 основное изображение! Всего основных фото: {len(main_images)}\n\n"
+        "Продолжайте отправлять фото или нажмите /finish_main_images чтобы завершить."
     )
-
-    await state.set_state(ProductStates.waiting_for_additional_images)
-    await ask_additional_images(message, user_name)
-
-
-@router.message(Command("finish_main_images"))
-async def finish_main_images_command(message: Message, state: FSMContext):
-    """Завершение добавления основных изображений"""
-    data = await state.get_data()
-
-    # Проверяем, есть ли изображения в временном хранилище
-    user_albums = [album for album in temp_main_albums.values() if album['user_id'] == message.from_user.id]
-
-    main_images = data.get('main_images', [])
-
-    if user_albums:
-        # Добавляем фото из всех альбомов пользователя
-        for album in user_albums:
-            main_images.extend(album['photos'])
-
-        # Удаляем обработанные альбомы
-        for media_group_id, album in list(temp_main_albums.items()):
-            if album['user_id'] == message.from_user.id:
-                del temp_main_albums[media_group_id]
-
-    # Сохраняем основные изображения
-    await state.update_data(main_images=main_images)
-    await state.set_state(ProductStates.waiting_for_additional_images)
-
-    user_name = message.from_user.first_name
-    if main_images:
-        await message.answer(
-            f"{user_name}, ✅ получено {len(main_images)} основных изображений!\n\n"
-            "Теперь переходим к дополнительным фотографиям."
-        )
-    else:
-        await message.answer(
-            f"{user_name}, основных изображений нет. Переходим к дополнительным фотографиям."
-        )
-
-    await ask_additional_images(message, user_name)
-
-
-# Обработка дополнительных изображений
-@router.message(StateFilter(ProductStates.waiting_for_additional_images), F.media_group_id)
-async def process_additional_album_images(message: Message, state: FSMContext):
-    """Обработка альбома дополнительных изображений"""
-    media_group_id = message.media_group_id
-
-    if media_group_id not in temp_additional_albums:
-        temp_additional_albums[media_group_id] = {
-            'user_id': message.from_user.id,
-            'photos': [],
-            'created_at': datetime.now()
-        }
-
-    # Добавляем фото в альбом
-    if message.photo:
-        # Берем самое большое фото
-        largest_photo = message.photo[-1]
-        temp_additional_albums[media_group_id]['photos'].append(largest_photo.file_id)
 
 
 @router.message(StateFilter(ProductStates.waiting_for_additional_images), F.photo)
 async def process_additional_single_image(message: Message, state: FSMContext):
     """Обработка одиночного дополнительного изображения"""
     if message.media_group_id:
-        # Это часть альбома, обрабатывается в process_additional_album_images
+        # Это часть альбома, пропускаем - обработается в handle_additional_images_album
         return
 
     # Одиночное фото - добавляем к существующим
@@ -1134,33 +1307,54 @@ async def process_additional_single_image(message: Message, state: FSMContext):
         "Продолжайте отправлять фото или нажмите /finish_additional_images чтобы завершить."
     )
 
+@router.message(Command("finish_main_images"))
+async def finish_main_images_command(message: Message, state: FSMContext):
+    """Завершение добавления основных изображений"""
+    data = await state.get_data()
+    main_images = data.get('main_images', [])
+
+    await state.set_state(ProductStates.waiting_for_additional_images)
+
+    user_name = message.from_user.first_name
+    if main_images:
+        await message.answer(
+            f"{user_name}, ✅ завершено добавление основных изображений! Всего: {len(main_images)}\n\n"
+            "Теперь переходим к дополнительным фотографиям."
+        )
+    else:
+        await message.answer(
+            f"{user_name}, основных изображений нет. Переходим к дополнительным фотографиям."
+        )
+
+    await ask_additional_images(message, state, user_name)
+
 
 @router.message(Command("finish_additional_images"))
 async def finish_additional_images_command(message: Message, state: FSMContext):
     """Завершение добавления дополнительных изображений"""
     data = await state.get_data()
-
-    # Проверяем, есть ли изображения в временном хранилище
-    user_albums = [album for album in temp_additional_albums.values() if album['user_id'] == message.from_user.id]
-
     additional_images = data.get('additional_images', [])
 
-    if user_albums:
-        # Добавляем фото из всех альбомов пользователя
-        for album in user_albums:
-            additional_images.extend(album['photos'])
-
-        # Удаляем обработанные альбомы
-        for media_group_id, album in list(temp_additional_albums.items()):
-            if album['user_id'] == message.from_user.id:
-                del temp_additional_albums[media_group_id]
-
-    await state.update_data(additional_images=additional_images)
     await state.set_state(ProductStates.waiting_for_shuffle_images)
 
     user_name = message.from_user.first_name
-    await ask_shuffle_images(message, state, user_name)
 
+    # Показываем итоговую статистику
+    main_images = data.get('main_images', [])
+    total_main = len(main_images)
+    total_additional = len(additional_images)
+    total_all = total_main + total_additional
+
+    await message.answer(
+        f"{user_name}, завершено добавление дополнительных фото!\n\n"
+        f"📊 Статистика фото:\n"
+        f"• Основные: {total_main}\n"
+        f"• Дополнительные: {total_additional}\n"
+        f"• Всего: {total_all}\n\n"
+        "Теперь нужно решить, перемешивать ли фото."
+    )
+
+    await ask_shuffle_images(message, state, user_name)
 
 @router.callback_query(F.data.startswith("shuffle_"))
 async def process_shuffle_choice(callback: CallbackQuery, state: FSMContext):
@@ -1368,6 +1562,11 @@ async def process_brand_input(message: Message, state: FSMContext):
     """Обработка ручного ввода бренда с поиском"""
     brand_input = message.text.strip()
 
+    # Проверяем, не является ли это текстом кнопки
+    if brand_input in ["✏️ Ввести другой бренд", "Ввести другой бренд"]:
+        await message.answer("Введите название бренда:")
+        return
+
     if not brand_input:
         await message.answer("Бренд не может быть пустым. Введите название бренда:")
         return
@@ -1388,7 +1587,7 @@ async def process_brand_input(message: Message, state: FSMContext):
         for similar_brand in similar_brands:
             builder.button(text=similar_brand, callback_data=f"exact_brand_{similar_brand}")
 
-        builder.button(text="✏️ Ввести другой бренд", callback_data="brand_retry")
+        builder.button(text="✏️ Ввести другой бренд", callback_data="br_retry")
         builder.adjust(1)
 
         similar_list = "\n".join([f"• {brand}" for brand in similar_brands])
@@ -1405,11 +1604,12 @@ async def process_brand_input(message: Message, state: FSMContext):
             "Пожалуйста, проверьте написание и введите бренд еще раз:"
         )
 
-@router.callback_query(F.data == "brand_retry")
+@router.callback_query(F.data == "br_retry", StateFilter(ProductStates.waiting_for_brand))
 async def process_brand_retry(callback: CallbackQuery, state: FSMContext):
-    """Повторный ввод бренда"""
+    """Повторный ввод бренда - обрабатываем нажатие кнопки"""
     await callback.message.edit_text("Введите название бренда:")
     # Состояние остается ProductStates.waiting_for_brand
+    await callback.answer()
 
 
 async def process_brand_success(message: Message, state: FSMContext, user_name: str):
@@ -1430,7 +1630,8 @@ async def process_brand_success(message: Message, state: FSMContext, user_name: 
         await state.set_state(ProductStates.waiting_for_condition)
         await ask_condition(message, user_name)
 
-@router.callback_query(F.data.startswith("exact_brand_"))
+
+@router.callback_query(F.data.startswith("exact_brand_"), StateFilter(ProductStates.waiting_for_brand))
 async def process_exact_brand(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора точного бренда из похожих"""
     brand = callback.data[12:]  # Убираем "exact_brand_"
@@ -1438,6 +1639,7 @@ async def process_exact_brand(callback: CallbackQuery, state: FSMContext):
     await state.update_data(brand=brand)
     await callback.message.edit_text(f"✅ Бренд выбран: {brand}")
     await process_brand_success(callback.message, state, callback.from_user.first_name)
+    await callback.answer()
 
 
 @router.message(StateFilter(ProductStates.waiting_for_brand))
@@ -1524,7 +1726,6 @@ async def process_condition(callback: CallbackQuery, state: FSMContext):
     await ask_sale_type(callback.message, user_name)
 
 
-# Обработчики для типа продажи
 @router.callback_query(F.data.startswith("saletype_"))
 async def process_sale_type(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора типа продажи"""
@@ -1532,7 +1733,8 @@ async def process_sale_type(callback: CallbackQuery, state: FSMContext):
 
     sale_type_names = {
         "resale": "товар приобретен на продажу",
-        "manufacturer": "товар от производителя"
+        "manufacturer": "товар от производителя",
+        "personal": "продаю своё"  # Добавляем название для нового типа
     }
 
     await state.update_data(sale_type=sale_type)
@@ -1543,7 +1745,6 @@ async def process_sale_type(callback: CallbackQuery, state: FSMContext):
 
     await callback.message.edit_text(f"{user_name}, тип продажи: {sale_text}")
     await ask_placement_type(callback.message, user_name)
-
 
 # Обработчики для типа размещения
 @router.callback_query(F.data.startswith("placement_"))
@@ -1622,38 +1823,81 @@ async def process_cities(message: Message, state: FSMContext):
     await state.set_state(ProductStates.waiting_for_start_date)
     await ask_start_date(message, user_name)
 
-    @router.callback_query(CalendarCallback.filter(), StateFilter(ProductStates.waiting_for_start_date))
-    async def process_calendar(
-            callback: CallbackQuery,
-            callback_data: CalendarCallback,
-            state: FSMContext
-    ):
-        """Обработка выбора даты из календаря"""
-        calendar = ProductCalendar()
-        selected, date = await calendar.process_selection(callback, callback_data)
 
-        if selected:
-            user_name = callback.from_user.first_name
+# Обработчик для всех callback'ов календаря
+@router.callback_query(CalendarCallback.filter())
+async def handle_calendar_callback(
+        callback: CallbackQuery,
+        callback_data: CalendarCallback,
+        state: FSMContext
+):
+    """Обработка всех callback'ов календаря"""
+    current_state = await state.get_state()
 
-            if date is None:
-                # Пользователь выбрал "Пропустить" - завершаем без времени
-                await state.update_data(start_date=None, start_time=None)
-                await callback.message.answer(f"{user_name}, продажа начнется сразу после публикации.")
-                await complete_product_creation(callback.message, state, user_name)
-            else:
-                # Сохраняем дату и переходим к выбору времени
-                await state.update_data(start_date=date)
-                await state.set_state(ProductStates.waiting_for_start_time)
-                await callback.message.answer(
-                    f"{user_name}, дата начала продажи: {date.strftime('%d.%m.%Y')}"
-                )
-                await ask_start_time(callback.message, user_name)
+    # Проверяем, что мы в правильном состоянии
+    if current_state != ProductStates.waiting_for_start_date:
+        await callback.answer("Неверное состояние для выбора даты")
+        return
 
-    @router.callback_query(F.data == "ignore")
-    async def ignore_callback(callback: CallbackQuery):
-        """Игнорирование callback данных"""
-        await callback.answer()
+    calendar = ProductCalendar()
+    selected, date = await calendar.process_selection(callback, callback_data)
 
+    if selected:
+        user_name = callback.from_user.first_name
+
+        if date is None:
+            # Пользователь выбрал "Пропустить"
+            await state.update_data(start_date=None, start_time=None)
+            await callback.message.answer(f"{user_name}, продажа начнется сразу после публикации.")
+            await complete_product_creation(callback.message, state, user_name)
+        else:
+            # Сохраняем дату и переходим к выбору времени
+            await state.update_data(start_date=date)
+            await state.set_state(ProductStates.waiting_for_start_time)
+
+            builder = InlineKeyboardBuilder()
+            popular_times = [
+                "09:00", "10:00", "11:00", "12:00",
+                "13:00", "14:00", "15:00", "16:00",
+                "17:00", "18:00", "19:00", "20:00"
+            ]
+
+            for time in popular_times:
+                builder.button(text=time, callback_data=f"time_{time}")
+
+            builder.button(text="✏️ Ввести вручную", callback_data="time_custom")
+            builder.adjust(3)
+
+            await callback.message.answer(
+                f"{user_name}, дата начала продажи: {date.strftime('%d.%m.%Y')}\n\n"
+                "⏰ Теперь выберите время начала продажи:",
+                reply_markup=builder.as_markup()
+            )
+
+
+# Обновляем переход к запросу телефона
+@router.callback_query(F.data.startswith("contact_"))
+async def process_contact_method(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора способа связи"""
+    contact_method = callback.data[8:]  # Убираем "contact_"
+
+    contact_methods = {
+        "both": "По телефону и в сообщении",
+        "phone": "По телефону",
+        "message": "В сообщениях"
+    }
+
+    method_name = contact_methods.get(contact_method, "Не указано")
+    await state.update_data(contact_method=contact_method)
+
+    user_name = callback.from_user.first_name
+    await callback.message.edit_text(
+        f"{user_name}, способ связи: {method_name}\n\n"
+        "Теперь укажите номер телефона:"
+    )
+
+    await state.set_state(ProductStates.waiting_for_phone)
+    await ask_phone_number(callback.message, user_name)
 
 @router.callback_query(F.data.startswith("time_"), StateFilter(ProductStates.waiting_for_start_time))
 async def process_time_selection(callback: CallbackQuery, state: FSMContext):

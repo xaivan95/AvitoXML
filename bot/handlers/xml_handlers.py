@@ -133,7 +133,8 @@ def create_ad_element(product, city: str = "", ad_number: int = 1) -> ET.Element
         ET.SubElement(ad, "AdType").text = "Товар от производителя"
     elif ad_type == 'resale':
         ET.SubElement(ad, "AdType").text = "Товар приобретен на продажу"
-
+    elif ad_type == 'personal':
+        ET.SubElement(ad, "AdType").text = "Частное лицо"
     # Бренд
     brand = getattr(product, 'brand', '')
     if brand and brand != 'Не указан':
@@ -336,6 +337,12 @@ async def my_products_command(message: Message):
         await message.answer("У вас нет добавленных товаров. Используйте /new_product чтобы добавить товар.")
         return
 
+    sale_type_names = {
+        "resale": "🛒 На продажу",
+        "manufacturer": "🏭 От производителя",
+        "personal": "👤 Своё"
+    }
+
     text = f"📦 Ваши товары ({len(products)}):\n\n"
 
     for i, product in enumerate(products, 1):
@@ -354,19 +361,21 @@ async def my_products_command(message: Message):
             ads_count = 1
             location_info = "без привязки к городу"
 
+        sale_type = sale_type_names.get(getattr(product, 'sale_type', ''), "Не указан")
+
         text += f"{i}. {product.title}\n"
         text += f"   💰 Цена: {get_product_price(product) or 'Не указана'} руб.\n"
         text += f"   🏷️ Бренд: {getattr(product, 'brand', 'Не указан')}\n"
+        text += f"   📦 Тип: {sale_type}\n"  # Добавляем тип продажи
         text += f"   📍 Размещение: {location_info}\n"
         text += f"   🖼️ Фото: {getattr(product, 'total_images', 0)} шт.\n"
         text += "   ─────────────────────\n"
 
     text += "\nИспользуйте команды:\n"
     text += "/delete_product [номер] - удалить товар\n"
-    text += "/generate_xml - создать XML файл для загрузки на Авито"
+    text += "/generate_xml - создать XML файл для загрузки на Avito"
 
     await message.answer(text)
-
 
 @router.message(Command("delete_product"))
 async def delete_product_command(message: Message):

@@ -3,9 +3,10 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from bot.middleware.album_middleware import AlbumMiddleware
+from bot.middleware.middleware import UserStateMiddleware, CallbackUserStateMiddleware
 from config import BOT_TOKEN
 from bot.database import db
-from bot.middleware import UserStateMiddleware, CallbackUserStateMiddleware, AlbumMiddleware
 
 # Импорт роутеров
 from bot.handlers.common import router as common_router
@@ -24,9 +25,7 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     # Регистрация middleware
-    dp.message.middleware(UserStateMiddleware())
-    dp.message.middleware(AlbumMiddleware())  # Добавляем AlbumMiddleware
-    dp.callback_query.middleware(CallbackUserStateMiddleware())
+    dp.message.middleware(AlbumMiddleware(latency=0.5))
 
     # Регистрация роутеров
     dp.include_router(common_router)
