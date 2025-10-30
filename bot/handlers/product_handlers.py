@@ -14,7 +14,7 @@ from bot.database import db
 from bot.states import ProductStates
 import config
 import xml.etree.ElementTree as ET
-from typing import List
+from typing import List, Dict
 
 from нф import validate_city_nominatim
 
@@ -25,6 +25,48 @@ SIZE_CATEGORIES = [
 ]
 
 
+def load_cities_from_xml() -> List[Dict]:
+    """Загрузка городов из XML файла"""
+    try:
+        tree = ET.parse('cities.xml')
+        root = tree.getroot()
+
+        cities = []
+        for city_elem in root.findall('city'):
+            city_data = {
+                'name': city_elem.find('name').text if city_elem.find('name') is not None else '',
+                'population': int(city_elem.find('population').text) if city_elem.find('population') is not None else 0,
+                'region': city_elem.find('region').text if city_elem.find('region') is not None else ''
+            }
+            if city_data['name']:
+                cities.append(city_data)
+
+        # Сортируем по населению (от большего к меньшему)
+        cities.sort(key=lambda x: x['population'], reverse=True)
+        return cities
+
+    except Exception as e:
+        print(f"Error loading cities XML: {e}")
+        return get_default_cities()
+
+
+def get_default_cities() -> List[Dict]:
+    """Резервный список городов"""
+    return [
+        {'name': 'Москва', 'population': 12678079, 'region': 'Москва'},
+        {'name': 'Санкт-Петербург', 'population': 5398064, 'region': 'Санкт-Петербург'},
+        {'name': 'Новосибирск', 'population': 1625631, 'region': 'Новосибирская область'},
+        # ... добавьте другие города по необходимости
+    ]
+
+
+def get_cities_with_metro() -> List[Dict]:
+    """Города с метро"""
+    metro_cities = ['Москва', 'Санкт-Петербург', 'Нижний Новгород', 'Новосибирск',
+                    'Самара', 'Екатеринбург', 'Казань', 'Волгоград']
+
+    all_cities = load_cities_from_xml()
+    return [city for city in all_cities if city['name'] in metro_cities]
 # Добавьте новые вспомогательные функции
 async def ask_brand(message: Message, user_name: str = ""):
     """Запрос бренда товара"""
@@ -47,6 +89,24 @@ async def ask_brand(message: Message, user_name: str = ""):
         reply_markup=builder.as_markup()
     )
 
+
+async def ask_city_input(message: Message, user_name: str = ""):
+    """Запрос ввода города по одному"""
+    greeting = f"{user_name}, " if user_name else ""
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="✅ Завершить ввод городов")]],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+
+    await message.answer(
+        f"{greeting}введите название города:\n\n"
+        "🏙️ Город будет проверен и предложен для подтверждения\n"
+        "📝 Можно вводить города по одному\n"
+        "✅ Нажмите кнопку ниже чтобы завершить",
+        reply_markup=keyboard
+    )
 
 async def ask_size(message: Message, user_name: str = ""):
     """Запрос размера товара"""
@@ -798,6 +858,403 @@ async def ask_phone_number(message: Message, user_name: str = ""):
 
 # ========== ОСНОВНЫЕ ОБРАБОТЧИКИ ==========
 
+async def ask_metro_city(message: Message, user_name: str = ""):
+    """Запрос выбора города с метро"""
+    metro_cities = get_cities_with_metro()
+
+    builder = InlineKeyboardBuilder()
+    for city in metro_cities:
+        builder.button(text=city['name'], callback_data=f"metro_city_{city['name']}")
+
+    builder.adjust(2)
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}выберите город с метро:",
+        reply_markup=builder.as_markup()
+    )
+
+
+@router.callback_query(F.data.startswith("metro_city_"))
+async def process_metro_city(callback: CallbackQuery, state: FSMContext):
+    """Обработка выбора города с метро"""
+    city_name = callback.data[11:]  # Убираем "metro_city_"
+
+    await state.update_data(metro_city=city_name)
+    await state.set_state(ProductStates.waiting_for_metro_quantity)
+
+    user_name = callback.from_user.first_name
+    await callback.message.edit_text(f"{user_name}, выбран город: {city_name}")
+    await ask_metro_quantity(callback.message, user_name)
+
+
+async def ask_metro_quantity(message: Message, user_name: str = ""):
+    """Запрос количества объявлений для метро"""
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}введите количество объявлений:\n\n"
+        "🚇 Объявления будут распределены по станциям метро\n"
+        "📍 Каждое объявление получит случайную станцию"
+    )
+
+
+@router.message(StateFilter(ProductStates.waiting_for_metro_quantity))
+async def process_metro_quantity(message: Message, state: FSMContext):
+    """Обработка количества для метро"""
+    try:
+        quantity = int(message.text.strip())
+
+        if quantity <= 0:
+            await message.answer("Количество должно быть положительным числом. Введите количество:")
+            return
+
+        data = await state.get_data()
+        city_name = data.get('metro_city')
+
+        # Здесь нужно будет получить станции метро для города
+        metro_stations = await get_metro_stations(city_name)
+
+        if not metro_stations:
+            await message.answer(
+                f"❌ Не удалось получить станции метро для {city_name}\n"
+                "Попробуйте выбрать другой город:"
+            )
+            await ask_metro_city(message, message.from_user.first_name)
+            return
+
+        await state.update_data(
+            quantity=quantity,
+            cities=[city_name],
+            metro_stations=metro_stations,
+            placement_type='metro'
+        )
+
+        user_name = message.from_user.first_name
+
+        await message.answer(
+            f"{user_name}, ✅ настроено размещение по метро:\n"
+            f"🏙️ Город: {city_name}\n"
+            f"🚇 Станций метро: {len(metro_stations)}\n"
+            f"📊 Количество объявлений: {quantity}\n"
+            f"📍 Объявления будут привязаны к станциям метро"
+        )
+
+        await state.set_state(ProductStates.waiting_for_start_date)
+        await ask_start_date(message, user_name)
+
+    except ValueError:
+        await message.answer("Количество должно быть числом. Введите количество:")
+
+
+# Создаем отдельный обработчик для мультиразмещения
+@router.message(StateFilter(ProductStates.waiting_for_city_input))
+async def handle_city_input(message: Message, state: FSMContext):
+    """Общий обработчик ввода городов с учетом метода размещения"""
+    data = await state.get_data()
+    placement_method = data.get('placement_method')
+
+    # Проверяем команду завершения
+    if message.text == "✅ Завершить ввод городов":
+        await finish_city_input(message, state)
+        return
+
+    if placement_method == "multiple_in_city":
+        await process_single_city_for_multiple(message, state)
+    else:
+        await process_city_input(message, state)
+
+
+async def process_single_city_for_multiple(message: Message, state: FSMContext):
+    """Обработка одного города для мультиразмещения"""
+    city_name = message.text.strip()
+
+    if not city_name:
+        await message.answer("Введите название города:")
+        return
+
+    # Ищем город
+    result = await validate_city_nominatim(city_name)
+
+    if result['valid']:
+        city_data = result['data']
+
+        # Сохраняем полные данные города
+        selected_cities = [{
+            'name': city_data['name'],
+            'full_address': city_data['full_address'],
+            'lat': city_data.get('lat'),
+            'lon': city_data.get('lon'),
+            'type': city_data.get('type')
+        }]
+
+        # Сохраняем город и запрашиваем количество
+        await state.update_data(
+            selected_cities=selected_cities,
+            cities=[city_data['name']]  # Сохраняем как список из одного города
+        )
+        await state.set_state(ProductStates.waiting_for_quantity)
+
+        await message.answer(
+            f"✅ Город подтвержден!\n"
+            f"🏙️ {city_data['name']}\n"
+            f"📍 {city_data['full_address']}\n\n"
+            "Теперь введите количество объявлений для этого города:",
+            reply_markup=ReplyKeyboardRemove()
+        )
+
+    else:
+        await message.answer(
+            f"❌ Город '{city_name}' не найден.\n"
+            "Попробуйте ввести другое название:"
+        )
+
+async def ask_single_city_for_multiple(message: Message, user_name: str = ""):
+    """Запрос одного города для мультиразмещения"""
+    greeting = f"{user_name}, " if user_name else ""
+
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="✅ Завершить ввод городов")]],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+
+    await message.answer(
+        f"{greeting}введите название города для мультиразмещения:\n\n"
+        "🏙️ Будет создано несколько объявлений в одном городе\n"
+        "🔍 Город будет проверен\n"
+        "✅ Нажмите кнопку чтобы завершить ввод",
+        reply_markup=keyboard
+    )
+
+
+@router.message(StateFilter(ProductStates.waiting_for_city_input))
+async def process_city_input(message: Message, state: FSMContext):
+    """Обработка ввода города с проверкой на команду завершения"""
+    # Проверяем, не является ли это командой завершения
+    if message.text == "✅ Завершить ввод городов":
+        await finish_city_input(message, state)
+        return
+
+    city_name = message.text.strip()
+
+    if not city_name:
+        await message.answer("Введите название города:")
+        return
+
+    # Ищем город через Nominatim
+    result = await validate_city_nominatim(city_name)
+
+    if result['valid']:
+        city_data = result['data']
+
+        # Сохраняем временные данные для подтверждения
+        await state.update_data(temp_city=city_data)
+
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✅ Да, верно", callback_data="city_confirm")
+        builder.button(text="❌ Нет, другой город", callback_data="city_reject")
+        builder.adjust(2)
+
+        await message.answer(
+            f"🔍 Найден город:\n"
+            f"🏙️ {city_data['name']}\n"
+            f"📍 {city_data['full_address']}\n\n"
+            "Это правильный город?",
+            reply_markup=builder.as_markup()
+        )
+
+        await state.set_state(ProductStates.waiting_for_city_confirmation)
+
+    else:
+        await message.answer(
+            f"❌ Город '{city_name}' не найден.\n"
+            "Попробуйте ввести другое название:"
+        )
+
+
+@router.message(StateFilter(ProductStates.waiting_for_quantity))
+async def process_quantity_for_multiple(message: Message, state: FSMContext):
+    """Обработка количества для мультиразмещения"""
+    try:
+        quantity = int(message.text.strip())
+
+        if quantity <= 0:
+            await message.answer("Количество должно быть положительным числом. Введите количество:")
+            return
+
+        if quantity > 100:
+            await message.answer("Максимальное количество: 100. Введите меньшее число:")
+            return
+
+        data = await state.get_data()
+        city_data = data.get('selected_city')
+
+        await state.update_data(
+            quantity=quantity,
+            cities=[city_data['name']]  # Один город, но много объявлений
+        )
+
+        user_name = message.from_user.first_name
+
+        await message.answer(
+            f"{user_name}, ✅ настроено мультиразмещение:\n"
+            f"🏙️ Город: {city_data['name']}\n"
+            f"📊 Количество объявлений: {quantity}\n"
+            f"📍 Будет сгенерировано {quantity} разных адресов"
+        )
+
+        await state.set_state(ProductStates.waiting_for_start_date)
+        await ask_start_date(message, user_name)
+
+    except ValueError:
+        await message.answer("Количество должно быть числом. Введите количество:")
+
+
+async def finish_city_input(message: Message, state: FSMContext):
+    """Завершение ввода городов"""
+    data = await state.get_data()
+    selected_cities = data.get('selected_cities', [])
+
+    if not selected_cities:
+        # Если городов нет, предлагаем начать заново или пропустить
+        builder = InlineKeyboardBuilder()
+        builder.button(text="🔄 Начать ввод городов", callback_data="cities_restart")
+        builder.button(text="⏩ Пропустить без городов", callback_data="cities_skip")
+        builder.adjust(1)
+
+        await message.answer(
+            "❌ Вы не добавили ни одного города.\n\n"
+            "Выберите действие:",
+            reply_markup=builder.as_markup()
+        )
+        return
+
+    # Сохраняем только названия городов для дальнейшей обработки
+    city_names = [city['name'] for city in selected_cities]
+    await state.update_data(cities=city_names)
+    await state.set_state(ProductStates.waiting_for_start_date)
+
+    user_name = message.from_user.first_name
+    cities_list = ", ".join(city_names)
+
+    await message.answer(
+        f"{user_name}, ✅ завершен ввод городов!\n"
+        f"🏙️ Добавлено городов: {len(selected_cities)}\n"
+        f"📍 Список: {cities_list}",
+        reply_markup=ReplyKeyboardRemove()
+    )
+
+    await ask_start_date(message, user_name)
+
+
+@router.message(StateFilter(ProductStates.waiting_for_city_input))
+async def process_single_city_input(message: Message, state: FSMContext):
+    """Обработка ввода одного города"""
+    city_name = message.text.strip()
+
+    if not city_name:
+        await message.answer("Введите название города:")
+        return
+
+    # Ищем город через Nominatim
+    result = await validate_city_nominatim(city_name)
+
+    if result['valid']:
+        city_data = result['data']
+
+        # Сохраняем временные данные для подтверждения
+        await state.update_data(temp_city=city_data)
+
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✅ Да, верно", callback_data="city_confirm")
+        builder.button(text="❌ Нет, другой город", callback_data="city_reject")
+        builder.adjust(2)
+
+        await message.answer(
+            f"🔍 Найден город:\n"
+            f"🏙️ {city_data['name']}\n"
+            f"📍 {city_data['full_address']}\n\n"
+            "Это правильный город?",
+            reply_markup=builder.as_markup()
+        )
+
+        await state.set_state(ProductStates.waiting_for_city_confirmation)
+
+    else:
+        await message.answer(
+            f"❌ Город '{city_name}' не найден.\n"
+            "Попробуйте ввести другое название:"
+        )
+
+
+@router.callback_query(F.data == "cities_restart", StateFilter(ProductStates.waiting_for_city_input))
+async def restart_city_input(callback: CallbackQuery, state: FSMContext):
+    """Перезапуск ввода городов"""
+    await state.update_data(selected_cities=[])
+    await callback.message.edit_text("Введите название первого города:")
+    await callback.answer()
+
+
+@router.callback_query(F.data == "cities_skip", StateFilter(ProductStates.waiting_for_city_input))
+async def skip_city_input(callback: CallbackQuery, state: FSMContext):
+    """Пропуск ввода городов"""
+    await state.update_data(cities=[])
+    await state.set_state(ProductStates.waiting_for_start_date)
+
+    user_name = callback.from_user.first_name
+    await callback.message.edit_text(f"{user_name}, размещение будет без привязки к городам.")
+
+    await ask_start_date(callback.message, user_name)
+
+
+@router.callback_query(StateFilter(ProductStates.waiting_for_city_confirmation), F.data == "city_confirm")
+async def confirm_city(callback: CallbackQuery, state: FSMContext):
+    """Подтверждение города - сохраняем полные данные"""
+    data = await state.get_data()
+    city_data = data.get('temp_city')
+    selected_cities = data.get('selected_cities', [])
+
+    # Добавляем полные данные города в список
+    selected_cities.append({
+        'name': city_data['name'],
+        'full_address': city_data['full_address'],
+        'lat': city_data.get('lat'),
+        'lon': city_data.get('lon'),
+        'type': city_data.get('type')
+    })
+
+    await state.update_data(selected_cities=selected_cities)
+
+    # Возвращаемся к вводу следующего города
+    await state.set_state(ProductStates.waiting_for_city_input)
+
+    # Показываем клавиатуру для завершения
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text="✅ Завершить ввод городов")]],
+        resize_keyboard=True,
+        one_time_keyboard=True
+    )
+
+    await callback.message.edit_text(
+        f"✅ Город добавлен!\n"
+        f"🏙️ {city_data['name']}\n"
+        f"📍 {city_data['full_address']}\n\n"
+        f"📊 Всего городов: {len(selected_cities)}\n\n"
+        "Введите следующий город или завершите ввод:"
+    )
+
+    # Отправляем новое сообщение с клавиатурой
+    await callback.message.answer(
+        "Можете продолжить ввод городов:",
+        reply_markup=keyboard
+    )
+
+
+@router.callback_query(StateFilter(ProductStates.waiting_for_city_confirmation), F.data == "city_reject")
+async def reject_city(callback: CallbackQuery, state: FSMContext):
+    """Отклонение города"""
+    await state.set_state(ProductStates.waiting_for_city_input)
+    await callback.message.edit_text("Введите другой город:")
 
 @router.message(StateFilter(ProductStates.waiting_for_main_images), F.media_group_id)
 async def handle_main_images_album(message: Message, album: list[Message], state: FSMContext):
@@ -887,6 +1344,42 @@ async def back_to_categories(callback: CallbackQuery, state: FSMContext):
     user_name = callback.from_user.first_name
     await show_main_categories(callback.message, user_name)
 
+
+@router.message(StateFilter(ProductStates.waiting_for_quantity))
+async def process_quantity_from_xml(message: Message, state: FSMContext):
+    """Обработка количества для метода из XML"""
+    try:
+        quantity = int(message.text.strip())
+        cities = load_cities_from_xml()
+
+        if quantity <= 0:
+            await message.answer("Количество должно быть положительным числом. Введите количество:")
+            return
+
+        if quantity > len(cities):
+            await message.answer(f"Максимальное количество: {len(cities)}. Введите меньшее число:")
+            return
+
+        # Берем первые N городов по населению
+        selected_cities = [city['name'] for city in cities[:quantity]]
+
+        await state.update_data(
+            cities=selected_cities,
+            quantity=quantity
+        )
+
+        user_name = message.from_user.first_name
+        cities_list = ", ".join(selected_cities)
+
+        await message.answer(
+            f"{user_name}, ✅ выбрано {quantity} городов:\n{cities_list}"
+        )
+
+        await state.set_state(ProductStates.waiting_for_start_date)
+        await ask_start_date(message, user_name)
+
+    except ValueError:
+        await message.answer("Количество должно быть числом. Введите количество:")
 
 @router.callback_query(F.data.startswith("cat_"))
 async def process_main_category(callback: CallbackQuery, state: FSMContext):
@@ -1329,6 +1822,25 @@ async def finish_main_images_command(message: Message, state: FSMContext):
     await ask_additional_images(message, state, user_name)
 
 
+@router.message(Command("cities_status"), StateFilter(ProductStates.waiting_for_city_input))
+async def show_cities_status(message: Message, state: FSMContext):
+    """Показать текущий статус ввода городов"""
+    data = await state.get_data()
+    selected_cities = data.get('selected_cities', [])
+
+    if not selected_cities:
+        await message.answer("📭 Пока не добавлено ни одного города.")
+        return
+
+    cities_text = "📋 Добавленные города:\n\n"
+    for i, city in enumerate(selected_cities, 1):
+        cities_text += f"{i}. {city['name']}\n"
+        cities_text += f"   📍 {city['full_address']}\n\n"
+
+    cities_text += f"📊 Всего: {len(selected_cities)} городов"
+
+    await message.answer(cities_text)
+
 @router.message(Command("finish_additional_images"))
 async def finish_additional_images_command(message: Message, state: FSMContext):
     """Завершение добавления дополнительных изображений"""
@@ -1762,26 +2274,55 @@ async def process_placement_type(callback: CallbackQuery, state: FSMContext):
     await ask_placement_method(callback.message, user_name)
 
 
-# Обработчики для метода размещения
 @router.callback_query(F.data.startswith("method_"))
 async def process_placement_method(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора метода размещения"""
     method = callback.data[7:]  # Убираем "method_"
 
     await state.update_data(placement_method=method)
-
     user_name = callback.from_user.first_name
 
     if method == "exact_cities":
-        await state.set_state(ProductStates.waiting_for_cities)
-        await ask_cities(callback.message, user_name)
-    elif method in ["by_quantity", "multiple_in_city"]:
+        # Поштучный ввод городов
+        await state.set_state(ProductStates.waiting_for_city_input)
+        await state.update_data(selected_cities=[])  # Инициализируем пустой список
+        await callback.message.edit_text(
+            f"{user_name}, выбран ввод точных городов.\n\n"
+            "🏙️ Вы будете вводить города по одному\n"
+            "🔍 Каждый город будет проверен\n"
+            "✅ Подтверждайте найденные города"
+        )
+        await ask_city_input(callback.message, user_name)
+
+    elif method == "by_quantity":
+        # По количеству из XML
         await state.set_state(ProductStates.waiting_for_quantity)
-        await ask_quantity(callback.message, user_name)
+        cities = load_cities_from_xml()
+        await callback.message.edit_text(
+            f"{user_name}, выбран метод по количеству.\n\n"
+            f"🏙️ В базе {len(cities)} городов\n"
+            f"📍 Будут выбраны города с наибольшим населением"
+        )
+        await ask_quantity_from_xml(callback.message, user_name)
+
+    elif method == "multiple_in_city":
+        # Несколько объявлений в одном городе
+        await state.set_state(ProductStates.waiting_for_city_input)
+        await state.update_data(
+            selected_cities=[],
+            placement_method="multiple_in_city"
+        )
+        await callback.message.edit_text(
+            f"{user_name}, выбран метод мультиразмещения.\n\n"
+            "🏙️ Сначала выберите один город\n"
+            "📊 Затем укажите количество объявлений\n"
+            "📍 В городе будут созданы разные адреса"
+        )
+        await ask_single_city_for_multiple(callback.message, user_name)
+
     else:
         # Завершаем создание товара
         await complete_product_creation(callback.message, state, user_name)
-
 
 @router.message(StateFilter(ProductStates.waiting_for_quantity))
 async def process_quantity(message: Message, state: FSMContext):

@@ -24,7 +24,11 @@ class ProductStates(StatesGroup):
     waiting_for_placement_type = State()
     waiting_for_placement_method = State()
     waiting_for_cities = State()
+    waiting_for_city_input = State()  # Для поштучного ввода городов
+    waiting_for_city_confirmation = State()  # Для подтверждения города
     waiting_for_quantity = State()
+    waiting_for_metro_city = State()
+    waiting_for_metro_quantity = State()
     # Добавляем новое состояние для даты старта
     waiting_for_start_date = State()
     waiting_for_start_time = State()  # Добавляем новое состояние для времени

@@ -65,26 +65,43 @@ def get_delivery_discount_name(discount_code: str) -> str:
 
 
 def generate_product_xml(products: list) -> str:
-    """Генерация XML для списка товаров"""
-    # Создаем корневой элемент
+    """Генерация XML с учетом полных данных о городах"""
     root = ET.Element("Ads", formatVersion="3", target="Avito.ru")
 
     for product in products:
-        # Создаем объявление для каждого города или множественные объявления
-        cities = getattr(product, 'cities', [])
-        quantity = getattr(product, 'quantity', 1)
+        # Получаем данные о размещении
+        cities_data = getattr(product, 'selected_cities', None) or []
         placement_method = getattr(product, 'placement_method', '')
+        quantity = getattr(product, 'quantity', 1)
+        metro_stations = getattr(product, 'metro_stations', [])
 
-        if placement_method == "multiple_in_city" and cities:
-            # Создаем несколько объявлений в одном городе
+        if placement_method == "multiple_in_city" and cities_data:
+            # Мультиразмещение в одном городе
+            city = cities_data[0]['name']
             for i in range(quantity):
-                ad = create_ad_element(product, cities[0] if cities else "", i + 1)
+                ad = create_ad_element(product, city, i + 1)
                 root.append(ad)
-        elif cities:
-            # Создаем по одному объявлению в каждом городе
+
+        elif placement_method == "by_quantity":
+            # По количеству из XML
+            cities = getattr(product, 'cities', [])
             for city in cities:
                 ad = create_ad_element(product, city)
                 root.append(ad)
+
+        elif placement_method == "exact_cities" and cities_data:
+            # Точные города с полными данными
+            for city_data in cities_data:
+                ad = create_ad_element(product, city_data['name'])
+                root.append(ad)
+
+        elif placement_method == "metro" and metro_stations:
+            # По станциям метро
+            city = getattr(product, 'metro_city', '')
+            for i, station in enumerate(metro_stations[:quantity]):
+                ad = create_ad_element(product, city, i + 1, station)
+                root.append(ad)
+
         else:
             # Одно объявление без конкретного города
             ad = create_ad_element(product)
@@ -98,7 +115,7 @@ def generate_product_xml(products: list) -> str:
     return pretty_xml
 
 
-def create_ad_element(product, city: str = "", ad_number: int = 1) -> ET.Element:
+def create_ad_element(product, city: str = "", ad_number: int = 1, metro_station: str = None) -> ET.Element:
     """Создание элемента объявления"""
     ad = ET.Element("Ad")
 
@@ -115,8 +132,8 @@ def create_ad_element(product, city: str = "", ad_number: int = 1) -> ET.Element
     # Категория
     ET.SubElement(ad, "Category").text = product.category
 
-    # Адрес
-    address = generate_address(city, ad_number)
+    # Адрес - генерируем в зависимости от метода
+    address = generate_address(city, ad_number, metro_station)
     ET.SubElement(ad, "Address").text = address
 
     # Контактный телефон
@@ -203,27 +220,30 @@ def get_product_price(product) -> int:
         return 0  # Без цены
 
 
-def generate_address(city: str, ad_number: int) -> str:
-    """Генерация адреса"""
-    if not city:
-        return "Россия"
-
-    # Случайные улицы для генерации разных адресов
-    streets = [
-        "ул. Ленина", "ул. Центральная", "ул. Советская", "ул. Мира",
-        "ул. Молодежная", "ул. Школьная", "ул. Садовая", "ул. Лесная",
-        "пр. Победы", "пр. Мира", "бульвар Свободы", "пер. Почтовый"
-    ]
-
-    street = random.choice(streets)
-    building = random.randint(1, 100)
-
-    if ad_number > 1:
-        # Для множественных объявлений добавляем номер квартиры
-        apartment = ad_number
-        return f"{city}, {street}, д. {building}, кв. {apartment}"
-    else:
+def generate_address(city: str, ad_number: int = 1, metro_station: str = None) -> str:
+    """Генерация адреса в зависимости от метода размещения"""
+    if metro_station:
+        # Для метро - адрес рядом со станцией
+        streets = [f"ул. возле станции {metro_station}", f"пл. у метро {metro_station}"]
+        street = random.choice(streets)
+        building = random.randint(1, 50)
         return f"{city}, {street}, д. {building}"
+    else:
+        # Обычный адрес в городе
+        streets = [
+            "ул. Ленина", "ул. Центральная", "ул. Советская", "ул. Мира",
+            "ул. Молодежная", "ул. Школьная", "ул. Садовая", "ул. Лесная",
+            "пр. Победы", "пр. Мира", "бульвар Свободы", "пер. Почтовый"
+        ]
+        street = random.choice(streets)
+        building = random.randint(1, 100)
+
+        if ad_number > 1:
+            # Для мультиразмещения - добавляем номер квартиры
+            apartment = ad_number
+            return f"{city}, {street}, д. {building}, кв. {apartment}"
+        else:
+            return f"{city}, {street}, д. {building}"
 
 
 def add_custom_params(ad: ET.Element, product):
