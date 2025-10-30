@@ -25,21 +25,49 @@ SIZE_CATEGORIES = [
 ]
 
 
+async def ask_quantity_from_xml(message: Message, user_name: str = ""):
+    """Запрос количества объявлений для метода из XML"""
+    cities = load_cities_from_xml()
+    total_cities = len(cities)
+
+    # Показываем примеры городов
+    sample_cities = ", ".join([city['name'] for city in cities[:5]])
+
+    greeting = f"{user_name}, " if user_name else ""
+    await message.answer(
+        f"{greeting}введите количество объявлений (максимум {total_cities}):\n\n"
+        f"🏙️ Будут использованы города из базы данных\n"
+        f"📊 Всего доступно городов: {total_cities}\n"
+        f"📍 Пример: {sample_cities}...\n"
+        f"🎯 Будут выбраны города с наибольшим населением"
+    )
+
+
 def load_cities_from_xml() -> List[Dict]:
-    """Загрузка городов из XML файла"""
+    """Загрузка городов из XML файла с обработкой ошибок"""
     try:
         tree = ET.parse('cities.xml')
         root = tree.getroot()
 
         cities = []
         for city_elem in root.findall('city'):
-            city_data = {
-                'name': city_elem.find('name').text if city_elem.find('name') is not None else '',
-                'population': int(city_elem.find('population').text) if city_elem.find('population') is not None else 0,
-                'region': city_elem.find('region').text if city_elem.find('region') is not None else ''
-            }
-            if city_data['name']:
-                cities.append(city_data)
+            try:
+                name_elem = city_elem.find('name')
+                population_elem = city_elem.find('population')
+                region_elem = city_elem.find('region')
+
+                if name_elem is not None and name_elem.text:
+                    city_data = {
+                        'name': name_elem.text.strip(),
+                        'population': int(
+                            population_elem.text) if population_elem is not None and population_elem.text else 0,
+                        'region': region_elem.text if region_elem is not None else ''
+                    }
+                    cities.append(city_data)
+
+            except (ValueError, AttributeError) as e:
+                print(f"Error parsing city element: {e}")
+                continue
 
         # Сортируем по населению (от большего к меньшему)
         cities.sort(key=lambda x: x['population'], reverse=True)
@@ -48,6 +76,22 @@ def load_cities_from_xml() -> List[Dict]:
     except Exception as e:
         print(f"Error loading cities XML: {e}")
         return get_default_cities()
+
+
+def get_default_cities() -> List[Dict]:
+    """Резервный список городов"""
+    return [
+        {'name': 'Москва', 'population': 12678079, 'region': 'Москва'},
+        {'name': 'Санкт-Петербург', 'population': 5398064, 'region': 'Санкт-Петербург'},
+        {'name': 'Новосибирск', 'population': 1625631, 'region': 'Новосибирская область'},
+        {'name': 'Екатеринбург', 'population': 1493749, 'region': 'Свердловская область'},
+        {'name': 'Нижний Новгород', 'population': 1244254, 'region': 'Нижегородская область'},
+        {'name': 'Казань', 'population': 1257391, 'region': 'Татарстан'},
+        {'name': 'Челябинск', 'population': 1187965, 'region': 'Челябинская область'},
+        {'name': 'Омск', 'population': 1125695, 'region': 'Омская область'},
+        {'name': 'Самара', 'population': 1144759, 'region': 'Самарская область'},
+        {'name': 'Ростов-на-Дону', 'population': 1137704, 'region': 'Ростовская область'}
+    ]
 
 
 def get_default_cities() -> List[Dict]:
@@ -633,6 +677,21 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
             await message.answer(f"Ошибка: не заполнены обязательные поля: {', '.join(missing_fields)}")
             return
 
+        # Проверяем и нормализуем данные о городах
+        placement_method = data.get('placement_method')
+        cities = data.get('cities', [])
+        selected_cities = data.get('selected_cities', [])
+        quantity = data.get('quantity', 1)
+
+        # Если есть полные данные о городах, используем их
+        if selected_cities and not cities:
+            cities = [city['name'] for city in selected_cities]
+
+        # Если cities - не список, преобразуем
+        if cities and not isinstance(cities, list):
+            cities = [cities]
+
+
         # Формируем информацию о дате старта
         start_date_info = "сразу после публикации"
         if data.get('start_datetime'):
@@ -677,9 +736,10 @@ async def complete_product_creation(message: Message, state: FSMContext, user_na
             'condition': data.get('condition', ''),
             'sale_type': data.get('sale_type', ''),
             'placement_type': data.get('placement_type', ''),
-            'placement_method': data.get('placement_method', ''),
-            'cities': data.get('cities', []),
-            'quantity': data.get('quantity', 1),
+            'cities': cities or [],
+            'selected_cities': selected_cities,
+            'placement_method': placement_method,
+            'quantity': quantity,
             # Добавляем дату и время старта
             'start_date': data.get('start_date'),
             'start_time': data.get('start_time'),
@@ -1073,8 +1133,24 @@ async def process_city_input(message: Message, state: FSMContext):
 
 
 @router.message(StateFilter(ProductStates.waiting_for_quantity))
+async def handle_quantity_input(message: Message, state: FSMContext):
+    """Общий обработчик количества - определяет контекст"""
+    data = await state.get_data()
+    placement_method = data.get('placement_method')
+
+    if placement_method == "multiple_in_city":
+        await process_quantity_for_multiple(message, state)
+    elif placement_method == "by_quantity":
+        await process_quantity_from_xml(message, state)
+    elif placement_method == "metro":
+        await process_metro_quantity(message, state)
+    else:
+        # По умолчанию - обычная обработка
+        await process_general_quantity(message, state)
+
+
 async def process_quantity_for_multiple(message: Message, state: FSMContext):
-    """Обработка количества для мультиразмещения"""
+    """Обработка количества для мультиразмещения в одном городе"""
     try:
         quantity = int(message.text.strip())
 
@@ -1087,11 +1163,22 @@ async def process_quantity_for_multiple(message: Message, state: FSMContext):
             return
 
         data = await state.get_data()
-        city_data = data.get('selected_city')
+        selected_cities = data.get('selected_cities', [])
+
+        if not selected_cities:
+            await message.answer(
+                "❌ Ошибка: город не выбран.\n"
+                "Пожалуйста, начните заново с выбора города."
+            )
+            return
+
+        # Берем первый (и единственный) город из списка
+        city_data = selected_cities[0]
 
         await state.update_data(
             quantity=quantity,
-            cities=[city_data['name']]  # Один город, но много объявлений
+            cities=[city_data['name']],  # Сохраняем название города
+            selected_cities=selected_cities  # Сохраняем полные данные
         )
 
         user_name = message.from_user.first_name
@@ -1109,6 +1196,26 @@ async def process_quantity_for_multiple(message: Message, state: FSMContext):
     except ValueError:
         await message.answer("Количество должно быть числом. Введите количество:")
 
+
+async def process_general_quantity(message: Message, state: FSMContext):
+    """Обработка количества для общего случая"""
+    try:
+        quantity = int(message.text.strip())
+
+        if quantity <= 0:
+            await message.answer("Количество должно быть положительным числом. Введите количество:")
+            return
+
+        await state.update_data(quantity=quantity)
+
+        user_name = message.from_user.first_name
+        await message.answer(f"{user_name}, количество установлено: {quantity}")
+
+        await state.set_state(ProductStates.waiting_for_start_date)
+        await ask_start_date(message, user_name)
+
+    except ValueError:
+        await message.answer("Количество должно быть числом. Введите количество:")
 
 async def finish_city_input(message: Message, state: FSMContext):
     """Завершение ввода городов"""
@@ -1344,42 +1451,6 @@ async def back_to_categories(callback: CallbackQuery, state: FSMContext):
     user_name = callback.from_user.first_name
     await show_main_categories(callback.message, user_name)
 
-
-@router.message(StateFilter(ProductStates.waiting_for_quantity))
-async def process_quantity_from_xml(message: Message, state: FSMContext):
-    """Обработка количества для метода из XML"""
-    try:
-        quantity = int(message.text.strip())
-        cities = load_cities_from_xml()
-
-        if quantity <= 0:
-            await message.answer("Количество должно быть положительным числом. Введите количество:")
-            return
-
-        if quantity > len(cities):
-            await message.answer(f"Максимальное количество: {len(cities)}. Введите меньшее число:")
-            return
-
-        # Берем первые N городов по населению
-        selected_cities = [city['name'] for city in cities[:quantity]]
-
-        await state.update_data(
-            cities=selected_cities,
-            quantity=quantity
-        )
-
-        user_name = message.from_user.first_name
-        cities_list = ", ".join(selected_cities)
-
-        await message.answer(
-            f"{user_name}, ✅ выбрано {quantity} городов:\n{cities_list}"
-        )
-
-        await state.set_state(ProductStates.waiting_for_start_date)
-        await ask_start_date(message, user_name)
-
-    except ValueError:
-        await message.answer("Количество должно быть числом. Введите количество:")
 
 @router.callback_query(F.data.startswith("cat_"))
 async def process_main_category(callback: CallbackQuery, state: FSMContext):
@@ -2279,30 +2350,21 @@ async def process_placement_method(callback: CallbackQuery, state: FSMContext):
     """Обработка выбора метода размещения"""
     method = callback.data[7:]  # Убираем "method_"
 
+    # Явно сохраняем метод размещения
     await state.update_data(placement_method=method)
     user_name = callback.from_user.first_name
 
     if method == "exact_cities":
         # Поштучный ввод городов
         await state.set_state(ProductStates.waiting_for_city_input)
-        await state.update_data(selected_cities=[])  # Инициализируем пустой список
-        await callback.message.edit_text(
-            f"{user_name}, выбран ввод точных городов.\n\n"
-            "🏙️ Вы будете вводить города по одному\n"
-            "🔍 Каждый город будет проверен\n"
-            "✅ Подтверждайте найденные города"
-        )
+        await state.update_data(selected_cities=[])
+        await callback.message.edit_text(f"{user_name}, выбран ввод точных городов.")
         await ask_city_input(callback.message, user_name)
 
     elif method == "by_quantity":
         # По количеству из XML
         await state.set_state(ProductStates.waiting_for_quantity)
-        cities = load_cities_from_xml()
-        await callback.message.edit_text(
-            f"{user_name}, выбран метод по количеству.\n\n"
-            f"🏙️ В базе {len(cities)} городов\n"
-            f"📍 Будут выбраны города с наибольшим населением"
-        )
+        await callback.message.edit_text(f"{user_name}, выбран метод по количеству.")
         await ask_quantity_from_xml(callback.message, user_name)
 
     elif method == "multiple_in_city":
@@ -2310,41 +2372,14 @@ async def process_placement_method(callback: CallbackQuery, state: FSMContext):
         await state.set_state(ProductStates.waiting_for_city_input)
         await state.update_data(
             selected_cities=[],
-            placement_method="multiple_in_city"
+            placement_method="multiple_in_city"  # Явно указываем
         )
-        await callback.message.edit_text(
-            f"{user_name}, выбран метод мультиразмещения.\n\n"
-            "🏙️ Сначала выберите один город\n"
-            "📊 Затем укажите количество объявлений\n"
-            "📍 В городе будут созданы разные адреса"
-        )
+        await callback.message.edit_text(f"{user_name}, выбран метод мультиразмещения.")
         await ask_single_city_for_multiple(callback.message, user_name)
 
     else:
         # Завершаем создание товара
         await complete_product_creation(callback.message, state, user_name)
-
-@router.message(StateFilter(ProductStates.waiting_for_quantity))
-async def process_quantity(message: Message, state: FSMContext):
-    """Обработка ввода количества"""
-    try:
-        quantity = int(message.text.strip())
-        if quantity <= 0:
-            await message.answer("Количество должно быть положительным числом. Введите количество:")
-            return
-
-        await state.update_data(quantity=quantity)
-
-        user_name = message.from_user.first_name
-        await message.answer(f"{user_name}, количество объявлений: {quantity}")
-
-        # Переходим к выбору даты старта вместо завершения
-        await state.set_state(ProductStates.waiting_for_start_date)
-        await ask_start_date(message, user_name)
-
-    except ValueError:
-        await message.answer("Количество должно быть числом. Введите количество:")
-
 
 @router.message(StateFilter(ProductStates.waiting_for_cities))
 async def process_cities(message: Message, state: FSMContext):
