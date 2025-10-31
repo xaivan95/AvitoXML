@@ -253,7 +253,7 @@ class ProductService:
             "(в этом случае продажа начнется сразу после публикации).",
             reply_markup=await calendar.start_calendar()
         )
-
+    #TODO сохраняет с ID бота
     @staticmethod
     async def complete_product_creation(message: Message, state, user_name: str = ""):
         """Завершение создания товара и сохранение в базу"""
@@ -273,7 +273,7 @@ class ProductService:
             # Сохраняем товар в базу (если есть база данных)
             try:
                 from bot.database import db
-                await db.add_product(message.from_user.id, data)
+                await db.add_product(message.chat.id, data)
                 await db.clear_user_state(message.from_user.id)
             except Exception as e:
                 print(f"Database error: {e}")

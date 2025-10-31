@@ -6,7 +6,8 @@ from aiogram.fsm.context import FSMContext
 class BaseHandler(ABC):
     """Базовый класс для всех обработчиков"""
 
-    def __init__(self):
+    def __init__(self, db=None):
+        self.db = db
         self.router = Router()
         self._register_handlers()
 

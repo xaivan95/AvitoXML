@@ -32,5 +32,7 @@ class ProductStates(StatesGroup):
     # Добавляем новое состояние для даты старта
     waiting_for_start_date = State()
     waiting_for_start_time = State()  # Добавляем новое состояние для времени
-    waiting_for_bag_type = State()
-    waiting_for_bag_gender = State()
+    waiting_for_bag_type = State()      # Ожидание выбора вида сумки
+    waiting_for_bag_gender = State()    # Ожидание выбора назначения
+    waiting_for_bag_color = State()      # Новое: ожидание выбора цвета
+    waiting_for_bag_material = State()   # Новое: ожидание выбора материала

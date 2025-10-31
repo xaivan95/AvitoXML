@@ -16,9 +16,6 @@ class StartHandlers(BaseHandler):
         self.router.message.register(self.help_command, Command("help"))
         self.router.message.register(self.about_command, Command("about"))
 
-        # Callback'и из стартового меню
-        self.router.callback_query.register(self.new_product_callback, F.data == "new_product")
-        self.router.callback_query.register(self.my_products_callback, F.data == "my_products")
         self.router.callback_query.register(self.help_callback, F.data == "help")
 
     async def start_command(self, message: Message):
@@ -128,3 +125,6 @@ class StartHandlers(BaseHandler):
         )
 
         await message.answer(about_text)
+
+
+
