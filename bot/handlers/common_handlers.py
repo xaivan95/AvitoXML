@@ -3,9 +3,13 @@ import os
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from random import random
+from typing import Optional
 from xml.dom import minidom
 
-from aiogram import Router, F
+from bot.database import Database
+from bot.services import XMLGeneratorFactory
+
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, Contact, BufferedInputFile
 from aiogram.filters import Command, StateFilter, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -14,6 +18,7 @@ import re
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.calendar import CalendarCallback, ProductCalendar
+from bot.services.image_service import ImageService
 from bot.services.product_service import ProductService
 from bot.states import ProductStates
 from bot.handlers.base import BaseHandler, StateManager
@@ -23,6 +28,18 @@ from bot.services.phone_service import PhoneService
 
 class CommonHandlers(BaseHandler):
     """Общие обработчики"""
+
+    def __init__(self, db: Database, bot: Optional[Bot] = None):
+        router = Router()
+        super().__init__(router, db, bot)  # ✅ Теперь передаем 3 аргумента
+
+        # Инициализация ImageService если bot передан
+        if bot:
+            from bot.services.image_service import ImageService
+            self.image_service = ImageService(bot)
+        else:
+            self.image_service = None
+
     def _register_handlers(self):
         # Обработка телефона
         self.router.message.register(
@@ -177,6 +194,157 @@ class CommonHandlers(BaseHandler):
             F.data.startswith("accessory_gender_"),
             StateFilter(ProductStates.waiting_for_accessory_gender)
         )
+
+        self.router.callback_query.register(
+            self.process_clothing_size,
+            F.data.startswith("clothing_size_"),
+            StateFilter(ProductStates.waiting_for_clothing_size)
+        )
+
+        self.router.callback_query.register(
+            self.process_clothing_color,
+            F.data.startswith("clothing_color_"),
+            StateFilter(ProductStates.waiting_for_clothing_color)
+        )
+
+        self.router.callback_query.register(
+            self.process_clothing_material,
+            F.data.startswith("clothing_material_"),
+            StateFilter(ProductStates.waiting_for_clothing_material)
+        )
+
+        self.router.message.register(
+            self.process_clothing_manufacturer_color,
+            StateFilter(ProductStates.waiting_for_clothing_manufacturer_color)
+        )
+
+        self.router.message.register(
+            self.create_test_product_command,
+            Command("create_test")
+        )
+
+    async def create_test_product_command(self, message: Message):
+        """Создание тестового товара по команде"""
+        try:
+            user_id = message.from_user.id
+            user_name = message.from_user.first_name
+
+            # Создаем тестовый товар
+            test_product = await self.db.create_test_product(user_id)
+
+            if test_product:
+                await message.answer(
+                    f"✅ {user_name}, тестовый товар успешно создан!\n\n"
+                    "Теперь вы можете:\n"
+                    "• Посмотреть его через /my_products\n"
+                    "• Сгенерировать XML через /generate_xml\n"
+                    "• Создать свой товар через /new_product\n\n"
+                    "💡 <b>Рекомендуем:</b> Начните с /generate_xml чтобы увидеть результат работы системы!"
+                )
+            else:
+                await message.answer(
+                    f"❌ {user_name}, не удалось создать тестовый товар.\n"
+                    "Возможно, у вас уже есть товары или произошла ошибка.\n\n"
+                    "Попробуйте команду /my_products чтобы проверить ваши товары."
+                )
+
+        except Exception as e:
+            print(f"Error in create_test_product_command: {e}")
+            await message.answer("❌ Ошибка при создании тестового товара")
+
+    async def process_clothing_size(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора размера одежды"""
+        size_data = callback.data[14:]  # Убираем "clothing_size_"
+
+        await StateManager.safe_update(state, clothing_size=size_data)
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, размер одежды: {size_data}")
+
+        # Определяем, нужно ли запрашивать материал
+        data = await StateManager.get_data_safe(state)
+        category_name = data.get('category_name', '')
+        needs_full_properties = self._needs_full_clothing_properties(category_name)
+
+        if needs_full_properties:
+            # Запрашиваем материал
+            await state.set_state(ProductStates.waiting_for_clothing_material)
+            await self._ask_clothing_material(callback.message, user_name)
+        else:
+            # Пропускаем материал, переходим к цвету
+            await StateManager.safe_update(state, clothing_material="")
+            await state.set_state(ProductStates.waiting_for_clothing_color)
+
+            # Для исключенных категорий цвет можно пропустить
+            can_skip_color = not self._needs_full_clothing_properties(category_name)
+            await self._ask_clothing_color(callback.message, user_name, can_skip=can_skip_color)
+
+    async def process_clothing_material(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора материала одежды"""
+        material_data = callback.data[17:]  # Убираем "clothing_material_"
+
+        if material_data == "skip":
+            await StateManager.safe_update(state, clothing_material="")
+            material_text = "не указан"
+        else:
+            await StateManager.safe_update(state, clothing_material=material_data)
+            material_text = material_data
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, материал одежды: {material_text}")
+
+        # Переходим к выбору цвета
+        await state.set_state(ProductStates.waiting_for_clothing_color)
+
+        data = await StateManager.get_data_safe(state)
+        category_name = data.get('category_name', '')
+
+        # Для полных свойств цвет обязателен, для исключенных - можно пропустить
+        can_skip_color = not self._needs_full_clothing_properties(category_name)
+        await self._ask_clothing_color(callback.message, user_name, can_skip=can_skip_color)
+
+    async def process_clothing_color(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора цвета одежды"""
+        color_data = callback.data[15:]  # Убираем "clothing_color_"
+
+        color_names = {
+            "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
+            "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
+            "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
+            "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
+            "gold": "Золотой", "skip": "Пропустить"
+        }
+
+        if color_data == "skip":
+            await StateManager.safe_update(state, clothing_color="")
+            color_text = "не указан"
+        else:
+            await StateManager.safe_update(state, clothing_color=color_data)
+            color_text = color_names.get(color_data, color_data)
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, цвет одежды: {color_text}")
+
+        # Переходим к вводу цвета от производителя
+        await state.set_state(ProductStates.waiting_for_clothing_manufacturer_color)
+        await self._ask_clothing_manufacturer_color(callback.message, user_name)
+
+    async def process_clothing_manufacturer_color(self, message: Message, state: FSMContext):
+        """Обработка ввода цвета от производителя для одежды"""
+        manufacturer_color = message.text.strip()
+
+        await StateManager.safe_update(state, clothing_manufacturer_color=manufacturer_color)
+
+        user_name = message.from_user.first_name
+        if manufacturer_color:
+            await message.answer(f"{user_name}, цвет от производителя: {manufacturer_color}")
+        else:
+            await message.answer(f"{user_name}, цвет от производителя не указан")
+
+        # Продолжаем процесс - переходим к состоянию товара
+        await state.set_state(ProductStates.waiting_for_condition)
+        from bot.services.product_service import ProductService
+        await ProductService.ask_condition(message, user_name)
 
     async def _ask_accessory_color(self, message: Message, user_name: str):
         """Запрос цвета для аксессуаров"""
@@ -843,12 +1011,15 @@ class CommonHandlers(BaseHandler):
         category_name = data.get('category_name', '')
 
         await message.answer(f"✅ Бренд подтвержден: {brand}")
+
+        # Определяем тип категории
         is_shoe = self._is_shoe_category(category_name)
         is_sport_shoe = self._is_sport_shoe_category(category_name)
         is_accessory = self._is_accessory_category(category_name)
-        # Проверяем категорию
         is_bag_category = self._is_bag_category(category_name)
         is_backpack_category = self._is_backpack_category(category_name)
+        is_clothing = self._is_clothing_category(category_name)  # Новая проверка
+
         if is_shoe:
             # Для обуви запрашиваем цвет, материал и цвет от производителя
             await state.set_state(ProductStates.waiting_for_shoe_color)
@@ -865,6 +1036,9 @@ class CommonHandlers(BaseHandler):
             # Для обычных сумок запрашиваем вид
             await state.set_state(ProductStates.waiting_for_bag_type)
             await self._ask_bag_type(message, user_name)
+        elif is_clothing:
+            # Для одежды запрашиваем дополнительные свойства
+            await self._handle_clothing_properties(message, state, user_name, category_name)
         else:
             # Для других категорий проверяем нужен ли размер
             needs_size = self._needs_size_category(category_name)
@@ -877,6 +1051,148 @@ class CommonHandlers(BaseHandler):
                 await state.set_state(ProductStates.waiting_for_condition)
                 from bot.services.product_service import ProductService
                 await ProductService.ask_condition(message, user_name)
+
+    def _is_clothing_category(self, category_name: str) -> bool:
+        """Проверяет, является ли категория одеждой"""
+        if not category_name:
+            return False
+
+        clothing_keywords = [
+            "Мужская одежда", "Женская одежда", "Одежда"
+        ]
+
+        return any(clothing_keyword in category_name for clothing_keyword in clothing_keywords)
+
+    async def _handle_clothing_properties(self, message: Message, state: FSMContext, user_name: str,
+                                          category_name: str):
+        """Обработка свойств одежды"""
+        # Начинаем с запроса размера одежды
+        await state.set_state(ProductStates.waiting_for_clothing_size)
+        await self._ask_clothing_size(message, user_name)
+
+    async def _ask_clothing_size(self, message: Message, user_name: str):
+        """Запрос размера одежды"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        clothing_sizes = [
+            "40 (XXS)", "42 (XS)", "44 (XS/S)", "46 (S)", "48 (M)", "50 (L)",
+            "52 (L/XL)", "54 (XL)", "56 (XXL)", "58 (XXL)", "60 (3XL)", "62 (4XL)",
+            "64 (5XL)", "66 (6XL)", "68 (7XL)", "70 (7XL)", "72 (8XL)", "74 (8XL)",
+            "76 (9XL)", "78 (10XL)", "80 (10XL)", "82+ (10XL+)", "One size", "Без размера"
+        ]
+
+        for size in clothing_sizes:
+            builder.button(text=size, callback_data=f"clothing_size_{size}")
+
+        builder.adjust(2)
+
+        await message.answer(
+            f"{user_name}, выберите размер одежды:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_color(self, message: Message, user_name: str, can_skip: bool = False):
+        """Запрос цвета одежды"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        colors = [
+            ("🔴 Красный", "red"),
+            ("⚪ Белый", "white"),
+            ("🎀 Розовый", "pink"),
+            ("🍷 Бордовый", "burgundy"),
+            ("🔵 Синий", "blue"),
+            ("🟡 Жёлтый", "yellow"),
+            ("💙 Голубой", "light_blue"),
+            ("🟣 Фиолетовый", "purple"),
+            ("🟠 Оранжевый", "orange"),
+            ("🌈 Разноцветный", "multicolor"),
+            ("⚫ Чёрный", "black"),
+            ("🟤 Коричневый", "brown"),
+            ("🟢 Зелёный", "green"),
+            ("🔘 Серый", "gray"),
+            ("🥚 Бежевый", "beige"),
+            ("💿 Серебряный", "silver"),
+            ("🌟 Золотой", "gold")
+        ]
+
+        for color_name, color_code in colors:
+            builder.button(text=color_name, callback_data=f"clothing_color_{color_code}")
+
+        if can_skip:
+            builder.button(text="⏩ Пропустить", callback_data="clothing_color_skip")
+
+        builder.adjust(3, 3, 3, 3, 3, 1)
+
+        skip_note = "\n💡 Цвет можно пропустить" if can_skip else ""
+
+        await message.answer(
+            f"{user_name}, выберите цвет одежды:{skip_note}",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_material(self, message: Message, user_name: str):
+        """Запрос материала одежды"""
+        materials = self._load_clothing_materials()
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+
+        for material in materials:
+            builder.button(text=material, callback_data=f"clothing_material_{material}")
+
+        builder.button(text="⏩ Пропустить", callback_data="clothing_material_skip")
+        builder.adjust(2)
+
+        await message.answer(
+            f"{user_name}, выберите материал одежды:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_manufacturer_color(self, message: Message, user_name: str):
+        """Запрос цвета от производителя для одежды"""
+        await message.answer(
+            f"{user_name}, введите цвет от производителя (например: 'угольный черный', 'кофе с молоком' и т.д.):\n\n"
+            "💡 Это точное название цвета, указанное производителем. Можно пропустить, отправив любое сообщение."
+        )
+
+    def _load_clothing_materials(self):
+        """Загрузка материалов для одежды"""
+        try:
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('materials.xml')
+            root = tree.getroot()
+
+            materials = []
+            for material_elem in root.findall('.//MaterialsOdezhda'):
+                materials.append(material_elem.text)
+
+            return materials
+        except Exception as e:
+            print(f"Error loading materials from XML: {e}")
+            # Возвращаем базовый список материалов
+            return [
+                "Хлопок", "Лён", "Шерсть", "Шёлк", "Кашемир", "Вискоза",
+                "Полиэстер", "Нейлон", "Акрил", "Эластан", "Кожа", "Замша",
+                "Джинса", "Флис", "Вельвет", "Бархат", "Атлас", "Сетка"
+            ]
+
+    def _needs_full_clothing_properties(self, category_name: str) -> bool:
+        """Проверяет, нужны ли полные свойства одежды (материал + размер + цвет)"""
+        if not category_name:
+            return False
+
+        category_lower = category_name.lower()
+
+        # Категории, для которых НЕ нужны полные свойства
+        excluded_categories = [
+            "нижнее бельё", "нижнее белье", "дублёнки", "дубленки", "шубы", "другое"
+        ]
+
+        return not any(excluded in category_lower for excluded in excluded_categories)
 
     def _is_men_shoe_category(self, category_name: str) -> bool:
         """Проверяет, является ли категория мужской обувью"""
@@ -1076,260 +1392,195 @@ class CommonHandlers(BaseHandler):
             return "Не указана"
 
     async def generate_xml_command(self, message: Message):
-        """Генерация XML файла для Avito"""
+        """Генерация ZIP архива с XML и изображениями для Avito"""
         try:
             user_id = message.from_user.id
+            user_name = message.from_user.first_name
+
+            progress_msg = await message.answer("🔄 Начинаю генерацию архива...")
+
             products = await self.db.get_user_products(user_id)
 
             if not products:
-                await message.answer(
+                await progress_msg.edit_text(
                     "❌ У вас нет товаров для генерации XML.\n\n"
                     "Сначала создайте товары с помощью /new_product"
                 )
                 return
 
-            # Создаем XML структуру
-            xml_content = self._create_avito_xml(products)
+            await progress_msg.edit_text("📥 Получаю данные товаров...")
 
-            # Сохраняем во временный файл
-            filename = f"avito_export_{user_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xml"
-            with open(filename, 'w', encoding='utf-8') as f:
-                f.write(xml_content)
+            # Получаем полные данные о товарах
+            full_products = []
+            total_images = 0
+            telegram_images_count = 0
+            url_images_count = 0
 
-            # Отправляем файл пользователю
-            with open(filename, 'rb') as f:
-                file_content = f.read()
-                await message.answer_document(
-                    document=BufferedInputFile(file_content, filename=filename),
-                    caption="✅ XML файл для Avito готов!\n\n"
-                            "Вы можете загрузить этот файл в личном кабинете Avito."
-                )
+            for product in products:
+                full_product = await self._get_full_product_data(product)
+                full_products.append(full_product)
 
-            # Удаляем временный файл
-            os.remove(filename)
+                for img_ref in full_product.get('all_images', []):
+                    total_images += 1
+                    if self.image_service.is_telegram_file_id(img_ref):
+                        telegram_images_count += 1
+                    elif self.image_service.is_url(img_ref):
+                        url_images_count += 1
+
+            await progress_msg.edit_text(
+                f"📊 Найдено:\n"
+                f"• Товаров: {len(full_products)}\n"
+                f"• Изображений: {total_images}\n"
+                f"• Telegram file_id: {telegram_images_count}\n"
+                f"• URL: {url_images_count}\n\n"
+                f"🔄 Генерирую архив..."
+            )
+
+            # Генерируем ZIP архив с ImageService
+            from bot.services.XMLGeneratorFactory import XMLGeneratorFactory
+
+            first_product = full_products[0] if full_products else {}
+            category_name = first_product.get('category_name', '')
+
+            # Создаем генератор с ImageService
+            generator = XMLGeneratorFactory.get_generator(category_name)
+            generator.image_service = self.image_service
+
+            # NOTE: Здесь может быть проблема с асинхронностью
+            # В реальном коде нужно сделать generate_zip_archive асинхронным
+            zip_buffer = generator.generate_zip_archive(full_products)
+
+            await progress_msg.edit_text("✅ Архив готов! Отправляю...")
+
+            # Отправляем архив пользователю
+            filename = f"avito_export_{user_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+
+            await message.answer_document(
+                document=BufferedInputFile(zip_buffer.getvalue(), filename=filename),
+                caption=f"✅ {user_name}, ZIP архив для Avito готов!\n\n"
+                        f"Содержит:\n"
+                        f"• 📄 avito.xml - файл с {len(full_products)} объявлениями\n"
+                        f"• 🖼️ Изображения в формате 1.jpg, 2.jpg...\n"
+                        f"• 📝 README.txt - инструкция\n\n"
+                        f"💡 **Как использовать:**\n"
+                        f"1. Загрузите ВЕСЬ архив в личном кабинете Avito\n"
+                        f"2. Не распаковывайте архив!\n"
+                        f"3. Система автоматически свяжет изображения"
+            )
+
+            await progress_msg.delete()
 
         except Exception as e:
-            await message.answer("❌ Ошибка при генерации XML файла")
+            print(f"Error generating XML archive: {e}")
+            try:
+                await progress_msg.edit_text(
+                    f"❌ Ошибка при генерации архива: {str(e)}\n\n"
+                    "Возможные причины:\n"
+                    "• Проблемы с интернет-соединением\n"
+                    "• Недоступность изображений\n"
+                    "• Ошибка формирования XML\n\n"
+                    "Попробуйте команду /check_images для диагностики"
+                )
+            except:
+                await message.answer("❌ Ошибка при генерации архива")
 
-    def _create_avito_xml(self, products: list) -> str:
-        """Создание XML структуры для Avito"""
-        # Создаем корневой элемент
+    async def _get_full_product_data(self, product: dict) -> dict:
+        """Получение полных данных о товаре"""
+        try:
+            # Сначала пробуем получить полные данные из базы
+            product_id = product.get('product_id')
+            if product_id:
+                full_product = await self.db.get_product_by_id(product_id)
+                if full_product:
+                    print(f"DEBUG: Got full product data from DB for {product_id}")
+                    return full_product
+
+            # Если не получилось, используем базовые данные и добавляем недостающие поля
+            full_product = product.copy()
+
+            # Добавляем обязательные поля с значениями по умолчанию
+            default_fields = {
+                'cities': [],
+                'all_images': [],
+                'selected_metro_stations': [],
+                'brand': 'Не указан',
+                'condition': '',
+                'sale_type': '',
+                'contact_phone': '',
+                'contact_method': 'both',
+                'bag_type': '',
+                'bag_gender': '',
+                'bag_color': '',
+                'bag_material': '',
+                'clothing_size': '',
+                'clothing_color': '',
+                'clothing_material': '',
+                'clothing_manufacturer_color': '',
+                'shoe_color': '',
+                'shoe_material': '',
+                'shoe_manufacturer_color': '',
+                'accessory_color': '',
+                'accessory_gender': '',
+                'size': '',
+                'price_type': 'none',
+                'price': 0,
+                'price_min': 0,
+                'price_max': 0
+            }
+
+            for field, default_value in default_fields.items():
+                if field not in full_product:
+                    full_product[field] = default_value
+
+            # Заполняем изображения если их нет
+            if not full_product['all_images']:
+                main_images = full_product.get('main_images', [])
+                additional_images = full_product.get('additional_images', [])
+                full_product['all_images'] = main_images + additional_images
+
+            # Заполняем города если их нет
+            if not full_product['cities']:
+                full_product['cities'] = full_product.get('selected_cities', ['Москва'])
+
+            print(
+                f"DEBUG: Final product data - Category: {full_product.get('category_name')}, Brand: {full_product.get('brand')}")
+
+            return full_product
+
+        except Exception as e:
+            print(f"Error in _get_full_product_data: {e}")
+            return product
+
+    def _create_simple_xml(self, products: list) -> str:
+        """Создание простого XML (резервный вариант)"""
         root = ET.Element("Ads", formatVersion="3", target="Avito.ru")
 
-        ad_count = 0
-
         for product in products:
-            # Получаем города для размещения
-            cities = product.get('cities', [])
-            quantity = product.get('quantity', 1)
-            placement_method = product.get('placement_method', 'exact_cities')
+            ad = ET.SubElement(root, "Ad")
+            ET.SubElement(ad, "Id").text = product.get('product_id', 'unknown')
+            ET.SubElement(ad, "Title").text = product.get('title', 'Без названия')
+            ET.SubElement(ad, "Description").text = product.get('description', '')
 
-            # Создаем объявления в зависимости от метода размещения
-            if placement_method == 'multiple_in_city' and cities:
-                # Мультиразмещение в одном городе
-                for i in range(quantity):
-                    ad = self._create_ad_element(product, cities[0], i + 1)
-                    root.append(ad)
-                    ad_count += 1
+            price = self._get_product_price(product)
+            if price > 0:
+                ET.SubElement(ad, "Price").text = str(price)
 
-            elif placement_method == 'by_quantity' and cities:
-                # Размещение по количеству в разных городах
-                for i in range(min(quantity, len(cities))):
-                    city = cities[i] if i < len(cities) else cities[0]
-                    ad = self._create_ad_element(product, city, i + 1)
-                    root.append(ad)
-                    ad_count += 1
+        ET.SubElement(root, "TotalAds").text = str(len(products))
 
-            elif placement_method == 'metro' and product.get('selected_metro_stations'):
-                # Размещение по станциям метро
-                metro_stations = product.get('selected_metro_stations', [])
-                metro_city = product.get('metro_city', 'Москва')
-
-                for i, station in enumerate(metro_stations[:quantity]):
-                    ad = self._create_ad_element(product, metro_city, i + 1, station)
-                    root.append(ad)
-                    ad_count += 1
-
-            else:
-                # Обычное размещение по городам
-                for i, city in enumerate(cities[:quantity]):
-                    ad = self._create_ad_element(product, city, i + 1)
-                    root.append(ad)
-                    ad_count += 1
-
-        # Добавляем информацию о количестве объявлений
-        ET.SubElement(root, "TotalAds").text = str(ad_count)
-
-        # Конвертируем в красивый XML
         rough_string = ET.tostring(root, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ")
 
-    def _create_ad_element(self, product: dict, city: str, ad_number: int = 1, metro_station: str = None) -> ET.Element:
-        """Создание элемента объявления"""
-        ad = ET.Element("Ad")
+    def _get_product_price(self, product: dict) -> int:
+        """Получение цены товара"""
+        price_type = product.get('price_type', 'none')
 
-        # Базовые поля
-        product_id = product.get('product_id', 'unknown')
-        ET.SubElement(ad, "Id").text = f"{product_id}_{ad_number}" if ad_number > 1 else product_id
-        ET.SubElement(ad, "Title").text = product.get('title', 'Без названия')
-        ET.SubElement(ad, "Description").text = product.get('description', '')
-
-        # Цена
-        price = self._get_product_price(product)
-        if price > 0:
-            ET.SubElement(ad, "Price").text = str(price)
-
-        # Категория
-        category = product.get('category', '')
-        if category:
-            ET.SubElement(ad, "Category").text = category
-            # Добавляем параметры для сумок
-        bag_type = product.get('bag_type')
-        bag_gender = product.get('bag_gender')
-        bag_color = product.get('bag_color')
-        bag_material = product.get('bag_material')
-        # Вид сумки
-        # Определяем тип товара
-        category_name = product.get('category_name', '')
-        is_backpack = self._is_backpack_category(category_name)
-
-        if is_backpack:
-            # Для рюкзаков добавляем только назначение и цвет
-            if bag_gender:
-                bag_gender_names = {"women": "Женщины", "men": "Мужчины", "unisex": "Унисекс"}
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Для кого"
-                ET.SubElement(param, "Value").text = bag_gender_names.get(bag_gender, bag_gender)
-
-            if bag_color:
-                color_names = {
-                    "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
-                    "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
-                    "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
-                    "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
-                    "gold": "Золотой"
-                }
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Цвет"
-                ET.SubElement(param, "Value").text = color_names.get(bag_color, bag_color)
+        if price_type == 'fixed' and product.get('price'):
+            return product['price']
+        elif price_type == 'range' and product.get('price_min') and product.get('price_max'):
+            return random.randint(product['price_min'], product['price_max'])
         else:
-            # Для обычных сумок добавляем все параметры
-            if bag_type:
-                bag_type_names = {
-                    "shoulder": "Через плечо", "crossbody": "Кросс-боди", "sport": "Спортивная",
-                    "clutch": "Клатч", "waist": "Поясная", "shopper": "Шопер",
-                    "beach": "Пляжная", "with_handles": "С ручками", "accessory": "Аксессуар для сумки"
-                }
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Вид одежды, обуви, аксессуаров"
-                ET.SubElement(param, "Value").text = bag_type_names.get(bag_type, bag_type)
-
-            if bag_gender:
-                bag_gender_names = {"women": "Женщины", "men": "Мужчины", "unisex": "Унисекс"}
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Для кого"
-                ET.SubElement(param, "Value").text = bag_gender_names.get(bag_gender, bag_gender)
-
-            if bag_color:
-                color_names = {
-                    "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
-                    "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
-                    "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
-                    "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
-                    "gold": "Золотой"
-                }
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Цвет"
-                ET.SubElement(param, "Value").text = color_names.get(bag_color, bag_color)
-
-            if bag_material:
-                material_names = {
-                    "natural_leather": "Натуральная кожа",
-                    "artificial_leather": "Искусственная кожа",
-                    "other": "Другой"
-                }
-                param = ET.SubElement(ad, "Param")
-                ET.SubElement(param, "Name").text = "Материал товара"
-                ET.SubElement(param, "Value").text = material_names.get(bag_material, bag_material)
-
-        # Адрес
-        address = self._generate_address(city, ad_number, metro_station)
-        ET.SubElement(ad, "Address").text = address
-
-        # Контактный телефон
-        contact_phone = product.get('contact_phone', '')
-        if contact_phone:
-            ET.SubElement(ad, "ContactPhone").text = contact_phone
-
-        shoe_color = product.get('shoe_color')
-        shoe_material = product.get('shoe_material')
-
-        if shoe_color:
-            param = ET.SubElement(ad, "Param")
-            ET.SubElement(param, "Name").text = "Цвет"
-            ET.SubElement(param, "Value").text = shoe_color
-
-        if shoe_material:
-            param = ET.SubElement(ad, "Param")
-            ET.SubElement(param, "Name").text = "Материал основной части"
-            ET.SubElement(param, "Value").text = shoe_material
-        # Состояние товара
-        condition = product.get('condition', '')
-        if condition:
-            condition_names = {
-                "new_with_tag": "Новое с биркой",
-                "excellent": "Отличное",
-                "good": "Хорошее",
-                "satisfactory": "Удовлетворительное"
-            }
-            ET.SubElement(ad, "Condition").text = condition_names.get(condition, condition)
-
-        # Тип объявления
-        sale_type = product.get('sale_type', '')
-        if sale_type:
-            sale_type_names = {
-                "manufacturer": "Товар от производителя",
-                "resale": "Товар приобретен на продажу",
-                "personal": "Частное лицо"
-            }
-            ET.SubElement(ad, "AdType").text = sale_type_names.get(sale_type, "Товар от производителя")
-
-        # Бренд
-        brand = product.get('brand', '')
-        if brand and brand != 'Не указан':
-            ET.SubElement(ad, "GoodsType").text = brand
-
-        # Размер
-        size = product.get('size', '')
-        if size:
-            param = ET.SubElement(ad, "Param")
-            ET.SubElement(param, "Name").text = "Размер"
-            ET.SubElement(param, "Value").text = size
-
-        # Способ связи
-        contact_method = product.get('contact_method', 'both')
-        if contact_method:
-            param = ET.SubElement(ad, "Param")
-            ET.SubElement(param, "Name").text = "Способ связи"
-            if contact_method == 'both':
-                ET.SubElement(param, "Value").text = "По телефону и в сообщениях"
-            elif contact_method == 'phone':
-                ET.SubElement(param, "Value").text = "По телефону"
-            elif contact_method == 'message':
-                ET.SubElement(param, "Value").text = "В сообщениях"
-
-        # Дата начала (если указана)
-        start_date = product.get('start_date')
-        if start_date:
-            ET.SubElement(ad, "DateBegin").text = start_date.strftime('%Y-%m-%d')
-
-        # Мультиобъявление
-        multioffer = product.get('multioffer', False)
-        if multioffer:
-            ET.SubElement(ad, "MultiOffer").text = "true"
-
-        return ad
+            return 0
 
     def _generate_address(self, city: str, ad_number: int = 1, metro_station: str = None) -> str:
         """Генерация адреса"""

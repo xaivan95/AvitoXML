@@ -1,10 +1,11 @@
 # bot/handlers/location_handlers.py
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove, KeyboardButton, ReplyKeyboardMarkup
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from bot.database import Database
 from bot.states import ProductStates
 from bot.handlers.base import BaseHandler, StateManager
 from bot.services.location_service import LocationService
@@ -14,6 +15,9 @@ from bot.keyboards.builders import KeyboardBuilder
 
 class LocationHandlers(BaseHandler):
     """Обработчики для работы с локациями"""
+    def __init__(self, db: Database, bot: Bot = None):
+        router = Router()
+        super().__init__(router, db, bot)
 
     def _register_handlers(self):
         # Метро

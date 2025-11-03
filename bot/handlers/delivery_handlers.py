@@ -1,9 +1,10 @@
 # bot/handlers/delivery_handlers.py
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 
+from bot.database import Database
 from bot.states import ProductStates
 from bot.handlers.base import BaseHandler, StateManager
 from bot.services.delivery_service import DeliveryService
@@ -11,6 +12,9 @@ from bot.services.delivery_service import DeliveryService
 
 class DeliveryHandlers(BaseHandler):
     """Обработчики для работы с доставкой"""
+    def __init__(self, db: Database, bot: Bot = None):
+        router = Router()
+        super().__init__(router, db, bot)
 
     def _register_handlers(self):
         # Авито доставка

@@ -90,6 +90,115 @@ class Database:
         self.data_file = 'bot_data.json'
         self._loaded = False
 
+    # В вашем классе базы данных добавьте следующие методы:
+
+    # В классе Database замените ошибочные методы на эти:
+
+    async def get_product_cities(self, product_id: str) -> list:
+        """Получить города для товара"""
+        try:
+            # Ищем товар по ID и возвращаем его города
+            for product in self.products:
+                if product.product_id == product_id:
+                    return product.cities
+            return []
+        except Exception as e:
+            print(f"Error getting product cities: {e}")
+            return []
+
+    async def get_product_images(self, product_id: str) -> list:
+        """Получить изображения товара"""
+        try:
+            # Ищем товар по ID и возвращаем его изображения
+            for product in self.products:
+                if product.product_id == product_id:
+                    return product.all_images
+            return []
+        except Exception as e:
+            print(f"Error getting product images: {e}")
+            return []
+
+    async def get_product_metro_stations(self, product_id: str) -> list:
+        """Получить станции метро для товара"""
+        try:
+            # Ищем товар по ID и возвращаем его станции метро
+            for product in self.products:
+                if product.product_id == product_id:
+                    return product.selected_metro_stations
+            return []
+        except Exception as e:
+            print(f"Error getting product metro stations: {e}")
+            return []
+
+    async def get_product_by_id(self, product_id: str) -> dict:
+        """Получить полные данные товара по ID"""
+        try:
+            # Ищем товар по ID
+            for product in self.products:
+                if product.product_id == product_id:
+                    # Преобразуем объект Product в словарь
+                    product_dict = {
+                        'user_id': product.user_id,
+                        'product_id': product.product_id,
+                        'title': product.title,
+                        'description': product.description,
+                        'price': product.price,
+                        'price_type': product.price_type,
+                        'price_min': product.price_min,
+                        'price_max': product.price_max,
+                        'category': product.category,
+                        'category_name': product.category_name,
+                        'contact_phone': product.contact_phone,
+                        'display_phone': product.display_phone,
+                        'contact_method': product.contact_method,
+                        'main_images': product.main_images,
+                        'additional_images': product.additional_images,
+                        'all_images': product.all_images,
+                        'total_images': product.total_images,
+                        'shuffle_images': product.shuffle_images,
+                        'avito_delivery': product.avito_delivery,
+                        'delivery_services': product.delivery_services,
+                        'delivery_discount': product.delivery_discount,
+                        'multioffer': product.multioffer,
+                        'brand': product.brand,
+                        'size': product.size,
+                        'condition': product.condition,
+                        'sale_type': product.sale_type,
+                        'placement_type': product.placement_type,
+                        'placement_method': product.placement_method,
+                        'cities': product.cities,
+                        'selected_cities': product.selected_cities,
+                        'quantity': product.quantity,
+                        'metro_city': product.metro_city,
+                        'metro_stations': product.metro_stations,
+                        'selected_metro_stations': product.selected_metro_stations,
+                        'start_date': product.start_date,
+                        'start_time': product.start_time,
+                        'start_datetime': product.start_datetime,
+                        'created_at': product.created_at
+                    }
+
+                    # Добавляем свойства для сумок, одежды и обуви
+                    bag_fields = ['bag_type', 'bag_gender', 'bag_color', 'bag_material']
+                    clothing_fields = ['clothing_size', 'clothing_color', 'clothing_material',
+                                       'clothing_manufacturer_color']
+                    shoe_fields = ['shoe_color', 'shoe_material', 'shoe_manufacturer_color']
+                    accessory_fields = ['accessory_color', 'accessory_gender']
+
+                    # Проверяем наличие этих полей в данных состояния
+                    user_state = await self.get_user_state(product.user_id)
+                    if user_state and user_state.data:
+                        for field in bag_fields + clothing_fields + shoe_fields + accessory_fields:
+                            if field in user_state.data:
+                                product_dict[field] = user_state.data[field]
+
+                    return product_dict
+            return None
+
+        except Exception as e:
+            print(f"Error getting product by ID: {e}")
+            return None
+
     async def create_pool(self):
         """Совместимость с main.py - ничего не делаем, так как используем файлы"""
         if not self._loaded:
@@ -368,6 +477,68 @@ class Database:
             logger.error(f"Error in get_user_products: {e}")
             return []
 
+    async def create_test_product(self, user_id: int):
+        """Создание тестового товара для пользователя"""
+        try:
+            # Проверяем, нет ли уже тестовых товаров у пользователя
+            user_products = await self.get_user_products(user_id)
+            if user_products:
+                return None  # У пользователя уже есть товары
+
+            # Создаем тестовый товар
+            test_product_data = {
+                'product_id': str(uuid.uuid4()),
+                'title': 'Тестовое платье для проверки системы',
+                'description': 'Элегантное вечернее платье из качественного материала. Идеально подходит для особых мероприятий. Состояние отличное, носилось один раз. ' * 20,
+                # Длинное описание
+                'price': 2500,
+                'price_type': 'fixed',
+                'category': 'women_clothing',
+                'category_name': 'Женская одежда - Платья',
+                'contact_phone': '+79991234567',
+                'display_phone': '+7 (999) 123-45-67',
+                'contact_method': 'both',
+                'main_images': [],
+                'additional_images': [],
+                'all_images': [
+                    'AgACAgIAAxkBAAIJkGkEpN5NHtDvAp-nfM5TYRuRqYZOAAJQ_TEb6iUhSP9EtpFTD5fdAQADAgADeQADNgQ'
+                ],
+                'total_images': 1,
+                'shuffle_images': False,
+                'avito_delivery': True,
+                'delivery_services': ['ПВЗ', 'Курьер'],
+                'delivery_discount': 'none',
+                'multioffer': False,
+                'brand': 'Zara',
+                'size': '48 (M)',
+                'condition': 'excellent',
+                'sale_type': 'resale',
+                'placement_type': 'cities',
+                'placement_method': 'exact_cities',
+                'cities': ['Москва', 'Санкт-Петербург'],
+                'selected_cities': ['Москва', 'Санкт-Петербург'],
+                'quantity': 1,
+                'metro_city': 'Москва',
+                'metro_stations': [],
+                'selected_metro_stations': [],
+                'start_date': datetime.now(),
+                'start_time': '10:00',
+                'start_datetime': datetime.now(),
+                # Свойства одежды
+                'clothing_size': '48 (M)',
+                'clothing_color': 'black',
+                'clothing_material': 'Хлопок',
+                'clothing_manufacturer_color': 'угольный черный'
+            }
+
+            product = await self.add_product(user_id, test_product_data)
+            print(f"✅ Создан тестовый товар для пользователя {user_id}")
+            return product
+
+        except Exception as e:
+            print(f"❌ Ошибка создания тестового товара: {e}")
+            return None
+
     async def delete_product(self, user_id: int, product_index: int):
         user_products = await self.get_user_products(user_id)
         if 0 <= product_index < len(user_products):
@@ -379,7 +550,6 @@ class Database:
                     await self.save_data()
                     return True
         return False
-
 
 # Глобальный экземпляр базы данных
 db = Database()

@@ -1,9 +1,10 @@
 # bot/handlers/product_handlers.py
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 
+from bot.database import Database
 from bot.states import ProductStates
 from bot.services.product_service import ProductService
 from bot.services.location_service import LocationService
@@ -13,6 +14,9 @@ from bot.handlers.base import BaseHandler, StateManager
 
 class ProductHandlers(BaseHandler):
     """Обработчики для создания товара"""
+    def __init__(self, db: Database, bot: Bot = None):
+        router = Router()
+        super().__init__(router, db, bot)
 
     def _register_handlers(self):
         # Команды
@@ -41,6 +45,251 @@ class ProductHandlers(BaseHandler):
 
         # Контактные данные
         self.router.callback_query.register(self.process_contact_method, F.data.startswith("contact_"))
+
+        # Обработка размера одежды
+        self.router.callback_query.register(
+            self.process_clothing_size,
+            F.data.startswith("clothing_size_"),
+            StateFilter(ProductStates.waiting_for_clothing_size)
+        )
+
+        # Обработка цвета одежды
+        self.router.callback_query.register(
+            self.process_clothing_color,
+            F.data.startswith("clothing_color_"),
+            StateFilter(ProductStates.waiting_for_clothing_color)
+        )
+
+        # Обработка материала одежды
+        self.router.callback_query.register(
+            self.process_clothing_material,
+            F.data.startswith("clothing_material_"),
+            StateFilter(ProductStates.waiting_for_clothing_material)
+        )
+
+        # Обработка цвета от производителя для одежды
+        self.router.message.register(
+            self.process_clothing_manufacturer_color,
+            StateFilter(ProductStates.waiting_for_clothing_manufacturer_color)
+        )
+
+    def _needs_full_clothing_properties(self, category_name: str) -> bool:
+        """Проверяет, нужны ли полные свойства одежды (материал + размер + цвет)"""
+        if not category_name:
+            return False
+
+        category_lower = category_name.lower()
+
+        # Категории, для которых НЕ нужны полные свойства
+        excluded_categories = [
+            "нижнее бельё", "нижнее белье", "дублёнки", "дубленки", "шубы", "другое"
+        ]
+
+        return not any(excluded in category_lower for excluded in excluded_categories)
+
+    async def _ask_clothing_size(self, message: Message, user_name: str):
+        """Запрос размера одежды"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        clothing_sizes = [
+            "40 (XXS)", "42 (XS)", "44 (XS/S)", "46 (S)", "48 (M)", "50 (L)",
+            "52 (L/XL)", "54 (XL)", "56 (XXL)", "58 (XXL)", "60 (3XL)", "62 (4XL)",
+            "64 (5XL)", "66 (6XL)", "68 (7XL)", "70 (7XL)", "72 (8XL)", "74 (8XL)",
+            "76 (9XL)", "78 (10XL)", "80 (10XL)", "82+ (10XL+)", "One size", "Без размера"
+        ]
+
+        for size in clothing_sizes:
+            builder.button(text=size, callback_data=f"clothing_size_{size}")
+
+        builder.adjust(2)
+
+        await message.answer(
+            f"{user_name}, выберите размер одежды:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_color(self, message: Message, user_name: str, can_skip: bool = False):
+        """Запрос цвета одежды"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        colors = [
+            ("🔴 Красный", "red"),
+            ("⚪ Белый", "white"),
+            ("🎀 Розовый", "pink"),
+            ("🍷 Бордовый", "burgundy"),
+            ("🔵 Синий", "blue"),
+            ("🟡 Жёлтый", "yellow"),
+            ("💙 Голубой", "light_blue"),
+            ("🟣 Фиолетовый", "purple"),
+            ("🟠 Оранжевый", "orange"),
+            ("🌈 Разноцветный", "multicolor"),
+            ("⚫ Чёрный", "black"),
+            ("🟤 Коричневый", "brown"),
+            ("🟢 Зелёный", "green"),
+            ("🔘 Серый", "gray"),
+            ("🥚 Бежевый", "beige"),
+            ("💿 Серебряный", "silver"),
+            ("🌟 Золотой", "gold")
+        ]
+
+        for color_name, color_code in colors:
+            builder.button(text=color_name, callback_data=f"clothing_color_{color_code}")
+
+        if can_skip:
+            builder.button(text="⏩ Пропустить", callback_data="clothing_color_skip")
+
+        builder.adjust(3, 3, 3, 3, 3, 1)
+
+        skip_note = "\n💡 Цвет можно пропустить" if can_skip else ""
+
+        await message.answer(
+            f"{user_name}, выберите цвет одежды:{skip_note}",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_material(self, message: Message, user_name: str):
+        """Запрос материала одежды"""
+        materials = self._load_clothing_materials()
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+
+        for material in materials:
+            builder.button(text=material, callback_data=f"clothing_material_{material}")
+
+        builder.button(text="⏩ Пропустить", callback_data="clothing_material_skip")
+        builder.adjust(2)
+
+        await message.answer(
+            f"{user_name}, выберите материал одежды:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_clothing_manufacturer_color(self, message: Message, user_name: str):
+        """Запрос цвета от производителя для одежды"""
+        await message.answer(
+            f"{user_name}, введите цвет от производителя (например: 'угольный черный', 'кофе с молоком' и т.д.):\n\n"
+            "💡 Это точное название цвета, указанное производителем. Можно пропустить, отправив любое сообщение."
+        )
+
+    def _load_clothing_materials(self):
+        """Загрузка материалов для одежды"""
+        try:
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('materials.xml')
+            root = tree.getroot()
+
+            materials = []
+            for material_elem in root.findall('.//MaterialsOdezhda'):
+                materials.append(material_elem.text)
+
+            return materials
+        except Exception as e:
+            print(f"Error loading materials from XML: {e}")
+            # Возвращаем базовый список материалов
+            return [
+                "Хлопок", "Лён", "Шерсть", "Шёлк", "Кашемир", "Вискоза",
+                "Полиэстер", "Нейлон", "Акрил", "Эластан", "Кожа", "Замша",
+                "Джинса", "Флис", "Вельвет", "Бархат", "Атлас", "Сетка"
+            ]
+
+    async def process_clothing_size(self, callback: CallbackQuery, state: FSMContext):
+            """Обработка выбора размера одежды"""
+            size_data = callback.data[14:]  # Убираем "clothing_size_"
+
+            await StateManager.safe_update(state, clothing_size=size_data)
+
+            user_name = callback.from_user.first_name
+            await callback.message.edit_text(f"{user_name}, размер одежды: {size_data}")
+
+            # Определяем, нужно ли запрашивать материал
+            data = await StateManager.get_data_safe(state)
+            category_name = data.get('category_name', '')
+            needs_full_properties = self._needs_full_clothing_properties(category_name)
+
+            if needs_full_properties:
+                # Запрашиваем материал
+                await state.set_state(ProductStates.waiting_for_clothing_material)
+                await self._ask_clothing_material(callback.message, user_name)
+            else:
+                # Пропускаем материал, переходим к цвету
+                await StateManager.safe_update(state, clothing_material="")
+                await state.set_state(ProductStates.waiting_for_clothing_color)
+
+                # Для исключенных категорий цвет можно пропустить
+                can_skip_color = not self._needs_full_clothing_properties(category_name)
+                await self._ask_clothing_color(callback.message, user_name, can_skip=can_skip_color)
+
+    async def process_clothing_material(self, callback: CallbackQuery, state: FSMContext):
+            """Обработка выбора материала одежды"""
+            material_data = callback.data[17:]  # Убираем "clothing_material_"
+
+            if material_data == "skip":
+                await StateManager.safe_update(state, clothing_material="")
+                material_text = "не указан"
+            else:
+                await StateManager.safe_update(state, clothing_material=material_data)
+                material_text = material_data
+
+            user_name = callback.from_user.first_name
+            await callback.message.edit_text(f"{user_name}, материал одежды: {material_text}")
+
+            # Переходим к выбору цвета
+            await state.set_state(ProductStates.waiting_for_clothing_color)
+
+            data = await StateManager.get_data_safe(state)
+            category_name = data.get('category_name', '')
+
+            # Для полных свойств цвет обязателен, для исключенных - можно пропустить
+            can_skip_color = not self._needs_full_clothing_properties(category_name)
+            await self._ask_clothing_color(callback.message, user_name, can_skip=can_skip_color)
+
+    async def process_clothing_color(self, callback: CallbackQuery, state: FSMContext):
+            """Обработка выбора цвета одежды"""
+            color_data = callback.data[15:]  # Убираем "clothing_color_"
+
+            color_names = {
+                "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
+                "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
+                "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
+                "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
+                "gold": "Золотой", "skip": "Пропустить"
+            }
+
+            if color_data == "skip":
+                await StateManager.safe_update(state, clothing_color="")
+                color_text = "не указан"
+            else:
+                await StateManager.safe_update(state, clothing_color=color_data)
+                color_text = color_names.get(color_data, color_data)
+
+            user_name = callback.from_user.first_name
+            await callback.message.edit_text(f"{user_name}, цвет одежды: {color_text}")
+
+            # Переходим к вводу цвета от производителя
+            await state.set_state(ProductStates.waiting_for_clothing_manufacturer_color)
+            await self._ask_clothing_manufacturer_color(callback.message, user_name)
+
+    async def process_clothing_manufacturer_color(self, message: Message, state: FSMContext):
+            """Обработка ввода цвета от производителя для одежды"""
+            manufacturer_color = message.text.strip()
+
+            await StateManager.safe_update(state, clothing_manufacturer_color=manufacturer_color)
+
+            user_name = message.from_user.first_name
+            if manufacturer_color:
+                await message.answer(f"{user_name}, цвет от производителя: {manufacturer_color}")
+            else:
+                await message.answer(f"{user_name}, цвет от производителя не указан")
+
+            # Продолжаем процесс - переходим к состоянию товара
+            await state.set_state(ProductStates.waiting_for_condition)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_condition(message, user_name)
 
     async def new_product_command(self, message: Message, state: FSMContext):
         """Начало создания нового товара"""
@@ -120,13 +369,10 @@ class ProductHandlers(BaseHandler):
                 category_info['subcategory_name'] = subcategory_name
 
             await StateManager.safe_update(state, **category_info)
-            await state.set_state(ProductStates.waiting_for_title)
 
-            await callback.message.edit_text(
-                f"{callback.from_user.first_name}, ✅ категория выбрана: "
-                f"{category_info['category_name']}\n\n"
-                "Теперь введите заголовок объявления:"
-            )
+            # ВСЕГДА сначала запрашиваем заголовок, потом дополнительные свойства
+            await state.set_state(ProductStates.waiting_for_title)
+            await self._ask_product_title(callback.message, callback.from_user.first_name)
 
     async def process_subsubcategory(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора подкатегории ТРЕТЬЕГО уровня"""
@@ -153,13 +399,10 @@ class ProductHandlers(BaseHandler):
 
         if category_info:
             await StateManager.safe_update(state, **category_info)
-            await state.set_state(ProductStates.waiting_for_title)
 
-            await callback.message.edit_text(
-                f"{callback.from_user.first_name}, ✅ категория выбрана: "
-                f"{category_info['category_name']}\n\n"
-                "Теперь введите заголовок объявления:"
-            )
+            # ВСЕГДА сначала запрашиваем заголовок, потом дополнительные свойства
+            await state.set_state(ProductStates.waiting_for_title)
+            await self._ask_product_title(callback.message, callback.from_user.first_name)
         else:
             # Отладочная информация
             print(
@@ -200,6 +443,12 @@ class ProductHandlers(BaseHandler):
             print(f"Error in back_to_subcategories: {e}")
             await callback.answer("❌ Ошибка при возврате к подкатегориям")
 
+    async def _ask_product_title(self, message: Message, user_name: str):
+        """Запрос заголовка товара"""
+        await message.answer(
+            f"{user_name}, введите заголовок объявления (максимум 100 символов):"
+        )
+
     async def process_product_title(self, message: Message, state: FSMContext):
         """Обработка заголовка товара"""
         title = message.text.strip()
@@ -208,8 +457,8 @@ class ProductHandlers(BaseHandler):
             await message.answer("Заголовок не может быть пустым. Введите заголовок объявления:")
             return
 
-        if len(title) > 100:
-            await message.answer("Заголовок не должен превышать 100 символов. Введите более короткий заголовок:")
+        if len(title) > 50:
+            await message.answer("Заголовок не должен превышать 50 символов. Введите более короткий заголовок:")
             return
 
         await StateManager.safe_update(state, title=title)
@@ -217,7 +466,7 @@ class ProductHandlers(BaseHandler):
 
         await message.answer(
             f"{message.from_user.first_name}, введите текст объявления, "
-            "не менее 100 и не более 3500 символов:"
+            "не менее 100 и не более 7500 символов:"
         )
 
     async def process_product_description(self, message: Message, state: FSMContext):
@@ -231,8 +480,8 @@ class ProductHandlers(BaseHandler):
             )
             return
 
-        if len(description) > 3500:
-            await message.answer("Описание не должно превышать 3500 символов. Сократите текст и попробуйте снова:")
+        if len(description) > 7500:
+            await message.answer("Описание не должно превышать 7500 символов. Сократите текст и попробуйте снова:")
             return
 
         await StateManager.safe_update(state, description=description)

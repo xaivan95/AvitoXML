@@ -1,5 +1,5 @@
 # bot/handlers/image_handlers.py
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
@@ -40,10 +40,10 @@ async def _ask_shuffle_images(message: Message, state: FSMContext, user_name: st
 class ImageHandlers(BaseHandler):
     """Обработчики для работы с изображениями"""
 
-    def __init__(self):
-        self.temp_main_albums: Dict[str, Dict] = {}
-        self.temp_additional_albums: Dict[str, Dict] = {}
-        super().__init__()
+    def __init__(self, bot: Bot = None):
+        router = Router()
+        # ImageHandlers может не требовать db
+        super().__init__(router, None, bot)
 
     def _register_handlers(self):
         # Основные изображения

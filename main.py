@@ -39,7 +39,7 @@ async def main():
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
 
-    routers = initialize_handlers(db)
+    routers = initialize_handlers(db, bot)
     for router in routers:
         dp.include_router(router)
 

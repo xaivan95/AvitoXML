@@ -1,14 +1,18 @@
 # bot/handlers/start_handlers.py (дополнение)
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, CommandStart
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from bot.database import Database
 from bot.handlers.base import BaseHandler
 
 
 class StartHandlers(BaseHandler):
     """Обработчики стартовых команд"""
+    def __init__(self, db: Database, bot: Bot = None):
+        router = Router()
+        super().__init__(router, db, bot)
 
     def _register_handlers(self):
         # Команды

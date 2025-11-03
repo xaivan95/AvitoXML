@@ -1,15 +1,21 @@
 from abc import ABC, abstractmethod
-from aiogram import Router
+from typing import Optional
+
+from aiogram import Router, Bot
 from aiogram.fsm.context import FSMContext
+
+from bot.database import Database
 
 
 class BaseHandler(ABC):
     """Базовый класс для всех обработчиков"""
 
-    def __init__(self, db=None):
+    def __init__(self, router: Router, db: Database, bot: Optional[Bot] = None):
+        self.router = router
         self.db = db
-        self.router = Router()
+        self.bot = bot
         self._register_handlers()
+
 
     @abstractmethod
     def _register_handlers(self):

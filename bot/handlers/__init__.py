@@ -6,14 +6,14 @@ from .delivery_handlers import DeliveryHandlers
 from .common_handlers import CommonHandlers
 
 
-def initialize_handlers(db):
-    """Инициализировать все обработчики с передачей базы данных"""
+def initialize_handlers(db, bot=None):
+    """Инициализировать все обработчики"""
     start_handlers = StartHandlers(db)
     product_handlers = ProductHandlers(db)
     image_handlers = ImageHandlers()
     location_handlers = LocationHandlers(db)
     delivery_handlers = DeliveryHandlers(db)
-    common_handlers = CommonHandlers(db)  # ✅ Теперь db передается
+    common_handlers = CommonHandlers(db, bot)  # ✅ Передаем bot
 
     return [
         start_handlers.router,
