@@ -36,3 +36,9 @@ class ProductStates(StatesGroup):
     waiting_for_bag_gender = State()    # Ожидание выбора назначения
     waiting_for_bag_color = State()      # Новое: ожидание выбора цвета
     waiting_for_bag_material = State()   # Новое: ожидание выбора материала
+    waiting_for_shoe_color = State()        # Ожидание ввода цвета
+    waiting_for_shoe_material = State()     # Ожидание выбора материала
+    waiting_for_shoe_manufacturer_color = State() # Ожидание ввода цвета от производителя
+    waiting_for_accessory_color = State()      # Ожидание выбора цвета
+    waiting_for_accessory_gender = State()     # Ожидание выбора "Для кого"
+    waiting_for_subsubcategory = State()  # Ожидание выбора подкатегории третьего уровня

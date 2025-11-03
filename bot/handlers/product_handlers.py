@@ -20,8 +20,12 @@ class ProductHandlers(BaseHandler):
 
         # Категории
         self.router.callback_query.register(self.process_main_category, F.data.startswith("cat_"))
-        self.router.callback_query.register(self.process_subcategory, F.data.startswith("sub_"))
+        self.router.callback_query.register(self.process_subcategory, F.data.startswith("sub_"),
+                                            StateFilter(ProductStates.waiting_for_subcategory))
+        self.router.callback_query.register(self.process_subsubcategory, F.data.startswith("sub_"),
+                                            StateFilter(ProductStates.waiting_for_subsubcategory))
         self.router.callback_query.register(self.back_to_categories, F.data == "back_categories")
+        self.router.callback_query.register(self.back_to_subcategories, F.data.startswith("back_sub_"))
 
         # Основные данные товара
         self.router.message.register(self.process_product_title, StateFilter(ProductStates.waiting_for_title))
@@ -79,8 +83,57 @@ class ProductHandlers(BaseHandler):
         )
 
     async def process_subcategory(self, callback: CallbackQuery, state: FSMContext):
-        """Обработка выбора подкатегории"""
+        """Обработка выбора подкатегории ВТОРОГО уровня"""
+        import config
+
         subcategory_id = callback.data[4:]
+        print(f"DEBUG: Selected subcategory ID (2nd level): {subcategory_id}")
+
+        data = await StateManager.get_data_safe(state)
+        main_category_id = data.get('main_category_id')
+        print(f"DEBUG: Main category ID: {main_category_id}")
+
+        if not main_category_id:
+            await callback.answer("Ошибка: основная категория не выбрана")
+            return
+
+        # Получаем информацию о подкатегории
+        category_info = ProductService.process_subcategory_selection(main_category_id, subcategory_id)
+        print(f"DEBUG: Category info: {category_info}")
+
+        if not category_info:
+            await callback.answer("Подкатегория не найдена")
+            return
+
+        if category_info.get('has_subcategories'):
+            print(f"DEBUG: Has subcategories, showing subsubcategories")
+            # Есть вложенные подкатегории - показываем их
+            await state.set_state(ProductStates.waiting_for_subsubcategory)
+            await ProductService.show_subsubcategories(callback.message, subcategory_id, callback.from_user.first_name)
+        else:
+            print(f"DEBUG: No subcategories, continuing process")
+            # Проверяем, что все данные есть
+            if not category_info.get('category_name') or 'None' in category_info.get('category_name', ''):
+                # Если название некорректное, получаем его вручную
+                subcategory_name = ProductService.get_subcategory_name(main_category_id, subcategory_id)
+                category_info['category_name'] = f"{data.get('main_category_name')} - {subcategory_name}"
+                category_info['subcategory_name'] = subcategory_name
+
+            await StateManager.safe_update(state, **category_info)
+            await state.set_state(ProductStates.waiting_for_title)
+
+            await callback.message.edit_text(
+                f"{callback.from_user.first_name}, ✅ категория выбрана: "
+                f"{category_info['category_name']}\n\n"
+                "Теперь введите заголовок объявления:"
+            )
+
+    async def process_subsubcategory(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора подкатегории ТРЕТЬЕГО уровня"""
+        import config
+
+        subsubcategory_id = callback.data[4:]
+        print(f"DEBUG: Selected subsubcategory ID (3rd level): {subsubcategory_id}")
 
         data = await StateManager.get_data_safe(state)
         main_category_id = data.get('main_category_id')
@@ -89,22 +142,30 @@ class ProductHandlers(BaseHandler):
             await callback.answer("Ошибка: основная категория не выбрана")
             return
 
-        category_info = ProductService.process_subcategory_selection(
-            main_category_id, subcategory_id
-        )
+        # Пробуем найти подкатегорию третьего уровня
+        category_info = ProductService.find_subsubcategory(main_category_id, subsubcategory_id)
+        print(f"DEBUG: Subsubcategory info: {category_info}")
 
         if not category_info:
-            await callback.answer("Подкатегория не найдена")
-            return
+            # Если не нашли через специальный метод, пробуем через общий
+            category_info = ProductService.process_subcategory_selection(main_category_id, subsubcategory_id)
+            print(f"DEBUG: Subsubcategory info (fallback): {category_info}")
 
-        await StateManager.safe_update(state, **category_info)
-        await state.set_state(ProductStates.waiting_for_title)
+        if category_info:
+            await StateManager.safe_update(state, **category_info)
+            await state.set_state(ProductStates.waiting_for_title)
 
-        await callback.message.edit_text(
-            f"{callback.from_user.first_name}, ✅ категория выбрана: "
-            f"{category_info['category_name']}\n\n"
-            "Теперь введите заголовок объявления:"
-        )
+            await callback.message.edit_text(
+                f"{callback.from_user.first_name}, ✅ категория выбрана: "
+                f"{category_info['category_name']}\n\n"
+                "Теперь введите заголовок объявления:"
+            )
+        else:
+            # Отладочная информация
+            print(
+                f"DEBUG: Failed to find category info for main_category_id={main_category_id}, subsubcategory_id={subsubcategory_id}")
+            ProductService.debug_category_structure(main_category_id, subsubcategory_id)
+            await callback.answer("❌ Ошибка при выборе категории")
 
     async def back_to_categories(self, callback: CallbackQuery, state: FSMContext):
         """Возврат к выбору категорий"""
@@ -113,6 +174,31 @@ class ProductHandlers(BaseHandler):
             callback.message,
             callback.from_user.first_name
         )
+
+    async def back_to_subcategories(self, callback: CallbackQuery, state: FSMContext):
+        """Возврат к подкатегориям из подкатегорий третьего уровня"""
+        try:
+            # Получаем ID родительской подкатегории из callback_data
+            # Формат: "back_sub_52" где 52 - ID родительской подкатегории
+            parent_subcategory_id = callback.data[10:]  # Убираем "back_sub_"
+
+            # Находим основную категорию
+            data = await StateManager.get_data_safe(state)
+            main_category_id = data.get('main_category_id')
+
+            if not main_category_id:
+                await callback.message.edit_text("❌ Ошибка: основная категория не найдена")
+                return
+
+            # Показываем подкатегории снова
+            await state.set_state(ProductStates.waiting_for_subcategory)
+            await ProductService.show_subcategories(callback.message, main_category_id, callback.from_user.first_name)
+
+            await callback.answer()
+
+        except Exception as e:
+            print(f"Error in back_to_subcategories: {e}")
+            await callback.answer("❌ Ошибка при возврате к подкатегориям")
 
     async def process_product_title(self, message: Message, state: FSMContext):
         """Обработка заголовка товара"""

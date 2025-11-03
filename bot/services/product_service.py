@@ -1,8 +1,11 @@
 # bot/services/product_service.py
 import uuid
-from aiogram.types import Message
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from bot.calendar import ProductCalendar
+from bot.handlers.base import StateManager
+from bot.states import ProductStates
 
 
 class ProductService:
@@ -49,8 +52,14 @@ class ProductService:
 
         builder = InlineKeyboardBuilder()
 
-        for subcat_id, subcat_name in subcategories.items():
-            builder.button(text=subcat_name, callback_data=f"sub_{subcat_id}")
+        for subcat_id, subcat_data in subcategories.items():
+            # Проверяем, есть ли вложенные подкатегории
+            if isinstance(subcat_data, dict) and "name" in subcat_data:
+                # Это категория с подкатегориями
+                builder.button(text=f"📁 {subcat_data['name']}", callback_data=f"sub_{subcat_id}")
+            else:
+                # Это обычная подкатегория
+                builder.button(text=subcat_data, callback_data=f"sub_{subcat_id}")
 
         builder.button(text="🔙 Назад к категориям", callback_data="back_categories")
         builder.adjust(1)
@@ -58,6 +67,45 @@ class ProductService:
         greeting = f"{user_name}, " if user_name else ""
         await message.answer(
             f"{greeting}выберите подкатегорию для {category_data['name']}:",
+            reply_markup=builder.as_markup()
+        )
+
+    @staticmethod
+    async def show_subsubcategories(message: Message, subcategory_id: str, user_name: str = ""):
+        """Показать подкатегории третьего уровня"""
+        import config
+
+        # Ищем подкатегорию во всех категориях
+        subcategory_data = None
+        parent_category_name = ""
+
+        for cat_id, cat_data in config.AVITO_CATEGORIES.items():
+            subcategories = cat_data.get("subcategories", {})
+            if subcategory_id in subcategories:
+                subcategory_data = subcategories[subcategory_id]
+                parent_category_name = cat_data["name"]
+                break
+
+        if not subcategory_data or not isinstance(subcategory_data, dict):
+            await message.answer("Ошибка: подкатегория не найдена или не имеет вложенных категорий")
+            return
+
+        subsubcategories = subcategory_data.get("subcategories", {})
+        if not subsubcategories:
+            await message.answer("В этой подкатегории нет дополнительных категорий")
+            return
+
+        builder = InlineKeyboardBuilder()
+
+        for subsubcat_id, subsubcat_name in subsubcategories.items():
+            builder.button(text=subsubcat_name, callback_data=f"sub_{subsubcat_id}")
+
+        builder.button(text="🔙 Назад к подкатегориям", callback_data=f"back_sub_{subcategory_id}")
+        builder.adjust(1)
+
+        greeting = f"{user_name}, " if user_name else ""
+        await message.answer(
+            f"{greeting}выберите тип {subcategory_data['name']} для {parent_category_name}:",
             reply_markup=builder.as_markup()
         )
 
@@ -76,23 +124,114 @@ class ProductService:
         if not category_data:
             return None
 
+        # Ищем подкатегорию в основном списке и во вложенных подкатегориях
         subcategories = category_data.get("subcategories", {})
-        subcategory_name = subcategories.get(subcategory_id)
 
-        if not subcategory_name:
+        # Сначала проверяем прямые подкатегории
+        subcategory_data = subcategories.get(subcategory_id)
+
+        if subcategory_data:
+            if isinstance(subcategory_data, dict) and "subcategories" in subcategory_data:
+                # Это категория с подкатегориями - возвращаем специальный маркер
+                return {
+                    'has_subcategories': True,
+                    'subcategory_id': subcategory_id,
+                    'category_name': f"{category_data['name']} - {subcategory_data['name']}",
+                    'subcategory_name': subcategory_data['name']
+                }
+            else:
+                # Это конечная подкатегория второго уровня
+                subcategory_name = subcategory_data
+
+                if not subcategory_name:
+                    return None
+
+                # Получаем ID категории для Avito
+                avito_category_id = config.CATEGORY_IDS.get(
+                    subcategory_id,
+                    config.CATEGORY_IDS.get(main_category_id)
+                )
+
+                return {
+                    'has_subcategories': False,
+                    'category': avito_category_id,
+                    'category_name': f"{category_data['name']} - {subcategory_name}",
+                    'subcategory_name': subcategory_name
+                }
+
+        # Если не нашли в прямых подкатегориях, ищем во вложенных
+        for subcat_id, subcat_data in subcategories.items():
+            if isinstance(subcat_data, dict) and "subcategories" in subcat_data:
+                subsubcategories = subcat_data.get("subcategories", {})
+                if subcategory_id in subsubcategories:
+                    # Нашли подкатегорию третьего уровня
+                    subsubcategory_name = subsubcategories[subcategory_id]
+
+                    # Получаем ID категории для Avito
+                    avito_category_id = config.CATEGORY_IDS.get(
+                        subcategory_id,
+                        config.CATEGORY_IDS.get(main_category_id)
+                    )
+
+                    return {
+                        'has_subcategories': False,
+                        'category': avito_category_id,
+                        'category_name': f"{category_data['name']} - {subcat_data['name']} - {subsubcategory_name}",
+                        'subcategory_name': subsubcategory_name
+                    }
+
+        return None
+
+    @staticmethod
+    def find_subsubcategory(main_category_id: str, subsubcategory_id: str):
+        """Поиск подкатегории третьего уровня"""
+        import config
+
+        category_data = config.AVITO_CATEGORIES.get(main_category_id)
+        if not category_data:
             return None
 
-        # Получаем ID категории для Avito
-        avito_category_id = config.CATEGORY_IDS.get(
-            subcategory_id,
-            config.CATEGORY_IDS.get(main_category_id)
-        )
+        subcategories = category_data.get("subcategories", {})
 
-        return {
-            'category': avito_category_id,
-            'category_name': f"{category_data['name']} - {subcategory_name}",
-            'subcategory_name': subcategory_name
-        }
+        for subcat_id, subcat_data in subcategories.items():
+            if isinstance(subcat_data, dict) and "subcategories" in subcat_data:
+                subsubcategories = subcat_data.get("subcategories", {})
+                if subsubcategory_id in subsubcategories:
+                    subsubcategory_name = subsubcategories[subsubcategory_id]
+
+                    # Получаем ID категории для Avito
+                    avito_category_id = config.CATEGORY_IDS.get(
+                        subsubcategory_id,
+                        config.CATEGORY_IDS.get(main_category_id)
+                    )
+
+                    return {
+                        'category': avito_category_id,
+                        'category_name': f"{category_data['name']} - {subcat_data['name']} - {subsubcategory_name}",
+                        'subcategory_name': subsubcategory_name,
+                        'parent_subcategory_name': subcat_data['name']
+                    }
+
+        return None
+
+    @staticmethod
+    def get_subcategory_name(main_category_id: str, subcategory_id: str) -> str:
+        """Получить название подкатегории"""
+        import config
+
+        category_data = config.AVITO_CATEGORIES.get(main_category_id)
+        if not category_data:
+            return "Неизвестная категория"
+
+        subcategories = category_data.get("subcategories", {})
+        subcategory_data = subcategories.get(subcategory_id)
+
+        if isinstance(subcategory_data, dict) and "name" in subcategory_data:
+            return subcategory_data['name']
+        elif isinstance(subcategory_data, str):
+            return subcategory_data
+        else:
+            return "Неизвестная подкатегория"
 
     @staticmethod
     async def show_price_type_options(message: Message, user_name: str = ""):
@@ -157,21 +296,31 @@ class ProductService:
         """Запрос размера товара"""
         builder = InlineKeyboardBuilder()
 
-        # Размеры одежды
-        clothing_sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "46", "48", "50", "52", "54", "56", "58"]
-        # Размеры обуви
-        shoe_sizes = ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
+        # Группируем размеры по диапазонам для лучшего отображения
+        size_ranges = [
+            # Малые размеры
+            ["36", "36,5", "37", "37,5"],
+            # Средние размеры
+            ["38", "38,5", "39", "39,5"],
+            ["40", "40,5", "41", "41,5"],
+            # Большие размеры
+            ["42", "42,5", "43", "43,5"],
+            ["44", "44,5", "45", "45,5"],
+            # Очень большие размеры
+            ["46", "46,5", "47", "47,5", "48+"]
+        ]
 
-        for size in clothing_sizes + shoe_sizes:
-            builder.button(text=size, callback_data=f"size_{size}")
+        # Добавляем кнопки размеров по группам
+        for size_group in size_ranges:
+            for size in size_group:
+                builder.button(text=size, callback_data=f"size_{size}")
 
-        builder.button(text="✏️ Ввести другой размер", callback_data="size_custom")
-        builder.button(text="⏩ Пропустить", callback_data="size_skip")
-        builder.adjust(4)
+        # Первые 4 группы по 4 кнопки, последняя группа 5 кнопок, затем 2 кнопки действий
+        builder.adjust(4, 4, 4, 4, 5, 2)
 
         greeting = f"{user_name}, " if user_name else ""
         await message.answer(
-            f"{greeting}выберите размер товара:",
+            f"{greeting}выберите размер обуви:",
             reply_markup=builder.as_markup()
         )
 

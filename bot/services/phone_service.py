@@ -67,30 +67,6 @@ class PhoneService:
         )
 
     @staticmethod
-    async def ask_size(message: Message, user_name: str = ""):
-        """Запрос размера товара"""
-        builder = InlineKeyboardBuilder()
-
-        # Размеры одежды
-        clothing_sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "46", "48", "50", "52", "54", "56", "58"]
-        # Размеры обуви
-        shoe_sizes = ["35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
-
-        for size in clothing_sizes + shoe_sizes:
-            builder.button(text=size, callback_data=f"size_{size}")
-
-        builder.button(text="✏️ Ввести другой размер", callback_data="size_custom")
-        builder.button(text="⏩ Пропустить", callback_data="size_skip")
-
-        builder.adjust(4)
-
-        greeting = f"{user_name}, " if user_name else ""
-        await message.answer(
-            f"{greeting}выберите размер товара:",
-            reply_markup=builder.as_markup()
-        )
-
-    @staticmethod
     async def ask_condition(message: Message, user_name: str = ""):
         """Запрос состояния товара"""
         builder = InlineKeyboardBuilder()
@@ -132,27 +108,6 @@ class PhoneService:
         greeting = f"{user_name}, " if user_name else ""
         await message.answer(
             f"{greeting}выберите тип продажи:",
-            reply_markup=builder.as_markup()
-        )
-
-    @staticmethod
-    async def ask_placement_type(message: Message, user_name: str = ""):
-        """Запрос типа размещения"""
-        builder = InlineKeyboardBuilder()
-
-        placement_types = [
-            ("🏙️ По городам", "cities"),
-            ("🚇 По станциям метро", "metro")
-        ]
-
-        for placement_name, placement_code in placement_types:
-            builder.button(text=placement_name, callback_data=f"placement_{placement_code}")
-
-        builder.adjust(1)
-
-        greeting = f"{user_name}, " if user_name else ""
-        await message.answer(
-            f"{greeting}выберите вариант размещения объявлений:",
             reply_markup=builder.as_markup()
         )
 

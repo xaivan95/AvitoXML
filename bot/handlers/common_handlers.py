@@ -82,16 +82,18 @@ class CommonHandlers(BaseHandler):
             F.data.startswith("saletype_")
         )
 
-        # Обработка типа размещения
-        self.router.callback_query.register(
-            self.process_placement_type,
-            F.data.startswith("placement_")
-        )
-
-        # Обработка метода размещения
+        # Обработка метода размещения (только для мультиобъявлений)
         self.router.callback_query.register(
             self.process_placement_method,
-            F.data.startswith("method_")
+            F.data.startswith("method_"),
+            StateFilter(ProductStates.waiting_for_placement_type)  # Только в этом состоянии
+        )
+
+        # Обработка типа размещения (города/метро) - только для мультиобъявлений
+        self.router.callback_query.register(
+            self.process_placement_type,
+            F.data.startswith("placement_"),
+            StateFilter(ProductStates.waiting_for_placement_type)  # Только в этом состоянии
         )
 
         # Обработка времени
@@ -145,6 +147,349 @@ class CommonHandlers(BaseHandler):
             F.data.startswith("bag_material_"),
             StateFilter(ProductStates.waiting_for_bag_material)
         )
+
+        self.router.callback_query.register(
+            self.process_shoe_color,
+            F.data.startswith("shoe_color_"),
+            StateFilter(ProductStates.waiting_for_shoe_color)  # ✅ Важно: фильтр состояния
+        )
+        # Обработка материала для мужской обуви
+        self.router.callback_query.register(
+            self.process_shoe_material,
+            F.data.startswith("shoe_material_"),
+            StateFilter(ProductStates.waiting_for_shoe_material)
+        )
+
+        self.router.message.register(
+            self.process_shoe_manufacturer_color,
+            StateFilter(ProductStates.waiting_for_shoe_manufacturer_color)
+        )
+
+        self.router.callback_query.register(
+            self.process_accessory_color,
+            F.data.startswith("accessory_color_"),
+            StateFilter(ProductStates.waiting_for_accessory_color)
+        )
+
+        # Обработка "Для кого" для аксессуаров
+        self.router.callback_query.register(
+            self.process_accessory_gender,
+            F.data.startswith("accessory_gender_"),
+            StateFilter(ProductStates.waiting_for_accessory_gender)
+        )
+
+    async def _ask_accessory_color(self, message: Message, user_name: str):
+        """Запрос цвета для аксессуаров"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        colors = [
+            ("🔴 Красный", "red"),
+            ("⚪ Белый", "white"),
+            ("🎀 Розовый", "pink"),
+            ("🍷 Бордовый", "burgundy"),
+            ("🔵 Синий", "blue"),
+            ("🟡 Жёлтый", "yellow"),
+            ("💙 Голубой", "light_blue"),
+            ("🟣 Фиолетовый", "purple"),
+            ("🟠 Оранжевый", "orange"),
+            ("🌈 Разноцветный", "multicolor"),
+            ("⚫ Чёрный", "black"),
+            ("🟤 Коричневый", "brown"),
+            ("🟢 Зелёный", "green"),
+            ("🔘 Серый", "gray"),
+            ("🥚 Бежевый", "beige"),
+            ("💿 Серебряный", "silver"),
+            ("🌟 Золотой", "gold")
+        ]
+
+        # Добавляем кнопки цветов
+        for color_name, color_code in colors:
+            builder.button(text=color_name, callback_data=f"accessory_color_{color_code}")
+
+        # Добавляем кнопку пропуска
+        builder.button(text="⏩ Пропустить", callback_data="accessory_color_skip")
+
+        builder.adjust(3, 3, 3, 3, 3, 1)
+
+        await message.answer(
+            f"{user_name}, выберите цвет аксессуара:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_accessory_gender(self, message: Message, user_name: str):
+        """Запрос 'Для кого' для аксессуаров"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        genders = [
+            ("👩 Женщины", "women"),
+            ("👨 Мужчины", "men"),
+            ("👥 Унисекс", "unisex")
+        ]
+
+        for gender_name, gender_code in genders:
+            builder.button(text=gender_name, callback_data=f"accessory_gender_{gender_code}")
+
+        builder.adjust(2)
+
+        await message.answer(
+            f"{user_name}, для кого предназначен аксессуар:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def process_accessory_color(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора цвета для аксессуаров"""
+        color_data = callback.data[16:]  # Убираем "accessory_color_"
+
+        color_names = {
+            "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
+            "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
+            "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
+            "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
+            "gold": "Золотой", "skip": "Пропустить"
+        }
+
+        if color_data == "skip":
+            await StateManager.safe_update(state, accessory_color="")
+            color_text = "не указан"
+        else:
+            await StateManager.safe_update(state, accessory_color=color_data)
+            color_text = color_names.get(color_data, color_data)
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, цвет аксессуара: {color_text}")
+
+        # Переходим к выбору "Для кого" (обязательно)
+        await state.set_state(ProductStates.waiting_for_accessory_gender)
+        await self._ask_accessory_gender(callback.message, user_name)
+
+    async def process_accessory_gender(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора 'Для кого' для аксессуаров"""
+        gender_data = callback.data[17:]  # Убираем "accessory_gender_"
+
+        gender_names = {
+            "women": "Женщины",
+            "men": "Мужчины",
+            "unisex": "Унисекс"
+        }
+
+        if gender_data not in gender_names:
+            await callback.answer("❌ Неизвестное значение")
+            return
+
+        await StateManager.safe_update(state, accessory_gender=gender_data)
+
+        user_name = callback.from_user.first_name
+        gender_text = gender_names[gender_data]
+
+        await callback.message.edit_text(f"{user_name}, для кого: {gender_text}")
+
+        # Продолжаем процесс
+        await self._continue_after_accessory_properties(callback.message, state, user_name)
+
+    async def _continue_after_accessory_properties(self, message: Message, state: FSMContext, user_name: str):
+        """Продолжить после выбора свойств аксессуара"""
+        # Переходим к следующему шагу - состоянию товара
+        await state.set_state(ProductStates.waiting_for_condition)
+
+        from bot.services.product_service import ProductService
+        await ProductService.ask_condition(message, user_name)
+
+    async def process_shoe_manufacturer_color(self, message: Message, state: FSMContext):
+        """Обработка ввода цвета от производителя"""
+        manufacturer_color = message.text.strip()
+
+        # Сохраняем цвет от производителя (даже если пустая строка)
+        await StateManager.safe_update(state, shoe_manufacturer_color=manufacturer_color)
+
+        user_name = message.from_user.first_name
+        if manufacturer_color:
+            await message.answer(f"{user_name}, цвет от производителя: {manufacturer_color}")
+        else:
+            await message.answer(f"{user_name}, цвет от производителя не указан")
+
+        # Продолжаем процесс
+        await self._continue_after_shoe_properties(message, state, user_name)
+
+    async def _continue_after_shoe_properties(self, message: Message, state: FSMContext, user_name: str):
+        """Продолжить после выбора свойств обуви"""
+        # Переходим к следующему шагу - состоянию товара
+        await state.set_state(ProductStates.waiting_for_condition)
+
+        from bot.services.product_service import ProductService
+        await ProductService.ask_condition(message, user_name)
+
+    def _get_category_right_part(self, category_name: str) -> str:
+        """Получить правую часть категории после дефиса"""
+        if not category_name:
+            return ""
+
+        category_parts = category_name.split('-')
+        if len(category_parts) > 1:
+            return category_parts[-1].strip().lower()
+        else:
+            return category_name.strip().lower()
+
+    def _load_shoe_materials(self):
+        """Загрузка материалов из materials.xml"""
+        try:
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('materials.xml')
+            root = tree.getroot()
+
+            materials = []
+            for material_elem in root.findall('.//MaterialsOdezhda'):
+                materials.append(material_elem.text)
+
+            return materials
+        except Exception as e:
+            print(f"Error loading materials from XML: {e}")
+            # Возвращаем базовый список материалов на случай ошибки
+            return [
+                "Алова", "Атлас", "Байка", "Бархат", "Велюр",
+                "Войлок", "Дерево", "Кожа", "Замша", "Текстиль"
+            ]
+
+    async def _ask_shoe_color(self, message: Message, user_name: str, is_sport_shoe: bool = False):
+        """Запрос цвета для обуви"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        colors = [
+            ("🔴 Красный", "red"),
+            ("⚪ Белый", "white"),
+            ("🎀 Розовый", "pink"),
+            ("🍷 Бордовый", "burgundy"),
+            ("🔵 Синий", "blue"),
+            ("🟡 Жёлтый", "yellow"),
+            ("💙 Голубой", "light_blue"),
+            ("🟣 Фиолетовый", "purple"),
+            ("🟠 Оранжевый", "orange"),
+            ("🌈 Разноцветный", "multicolor"),
+            ("⚫ Чёрный", "black"),
+            ("🟤 Коричневый", "brown"),
+            ("🟢 Зелёный", "green"),
+            ("🔘 Серый", "gray"),
+            ("🥚 Бежевый", "beige"),
+            ("💿 Серебряный", "silver"),
+            ("🌟 Золотой", "gold")
+        ]
+
+        # Добавляем кнопки цветов
+        for color_name, color_code in colors:
+            builder.button(text=color_name, callback_data=f"shoe_color_{color_code}")
+
+        # Для спортивной обуви добавляем кнопку пропуска
+        if is_sport_shoe:
+            builder.button(text="⏩ Пропустить", callback_data="shoe_color_skip")
+
+        builder.adjust(3, 3, 3, 3, 3, 1)  # 5 рядов по 3 кнопки + 1 кнопка пропуска (если есть)
+
+        skip_note = "\n💡 Для спортивной обуви цвет можно пропустить" if is_sport_shoe else ""
+
+        await message.answer(
+            f"{user_name}, выберите цвет обуви:{skip_note}",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_shoe_material(self, message: Message, user_name: str):
+        """Запрос материала для мужской обуви"""
+        materials = self._load_shoe_materials()
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+
+        # Добавляем материалы из XML
+        for material in materials:
+            builder.button(text=material, callback_data=f"shoe_material_{material}")
+
+        # Добавляем кнопку пропуска
+        builder.button(text="⏩ Пропустить", callback_data="shoe_material_skip")
+
+        builder.adjust(2)  # По 2 кнопки в ряду
+
+        await message.answer(
+            f"{user_name}, выберите материал основной части обуви:",
+            reply_markup=builder.as_markup()
+        )
+
+    async def _ask_shoe_manufacturer_color(self, message: Message, user_name: str):
+        """Запрос цвета от производителя для обуви"""
+        await message.answer(
+            f"{user_name}, введите цвет от производителя (например: 'угольный черный', 'кофе с молоком' и т.д.):"
+        )
+
+    async def process_shoe_color(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора цвета обуви"""
+        color_data = callback.data[11:]  # Убираем "shoe_color_"
+
+        color_names = {
+            "red": "Красный", "white": "Белый", "pink": "Розовый", "burgundy": "Бордовый",
+            "blue": "Синий", "yellow": "Жёлтый", "light_blue": "Голубой", "purple": "Фиолетовый",
+            "orange": "Оранжевый", "multicolor": "Разноцветный", "gray": "Серый", "beige": "Бежевый",
+            "black": "Чёрный", "brown": "Коричневый", "green": "Зелёный", "silver": "Серебряный",
+            "gold": "Золотой", "skip": "Пропустить"
+        }
+
+        if color_data == "skip":
+            await StateManager.safe_update(state, shoe_color="")
+            color_text = "не указан"
+        else:
+            await StateManager.safe_update(state, shoe_color=color_data)
+            color_text = color_names.get(color_data, color_data)
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, цвет обуви: {color_text}")
+
+        # Переходим к выбору материала
+        await state.set_state(ProductStates.waiting_for_shoe_material)
+        await self._ask_shoe_material(callback.message, user_name)
+
+    async def process_shoe_material(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора материала обуви"""
+        material_data = callback.data[14:]  # Убираем "shoe_material_"
+
+        if material_data == "skip":
+            await StateManager.safe_update(state, shoe_material="")
+            material_text = "не указан"
+        else:
+            await StateManager.safe_update(state, shoe_material=material_data)
+            material_text = material_data
+
+        user_name = callback.from_user.first_name
+        await callback.message.edit_text(f"{user_name}, материал обуви: {material_text}")
+
+        # Определяем следующий шаг в зависимости от типа обуви
+        await self._determine_next_step_after_material(callback.message, state, user_name)
+
+    async def _determine_next_step_after_material(self, message: Message, state: FSMContext, user_name: str):
+        """Определить следующий шаг после выбора материала"""
+        data = await StateManager.get_data_safe(state)
+        category_name = data.get('category_name', '')
+        is_sport_shoe = self._is_sport_shoe_category(category_name)
+
+        if is_sport_shoe:
+            # Спортивная обувь - пропускаем цвет от производителя
+            await StateManager.safe_update(state, shoe_manufacturer_color="")
+
+            # Сразу переходим к состоянию товара
+            await self._continue_after_shoe_properties(message, state, user_name)
+        else:
+            # Неспортивная обувь - запрашиваем цвет от производителя
+            await state.set_state(ProductStates.waiting_for_shoe_manufacturer_color)
+            await self._ask_shoe_manufacturer_color(message, user_name)
+
+    async def _continue_after_shoe_properties(self, message: Message, state: FSMContext, user_name: str):
+        """Продолжить после выбора свойств обуви"""
+        # Переходим к следующему шагу - состоянию товара
+        await state.set_state(ProductStates.waiting_for_condition)
+
+        from bot.services.product_service import ProductService
+        await ProductService.ask_condition(message, user_name)
 
     async def process_bag_color(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора цвета сумки/рюкзака"""
@@ -491,7 +836,6 @@ class CommonHandlers(BaseHandler):
         from bot.services.product_service import ProductService
         await ProductService.ask_condition(message, user_name)
 
-    # Обновляем метод _process_brand_success для обработки сумок
     async def _process_brand_success(self, message: Message, state: FSMContext, user_name: str):
         """Продолжение процесса после успешного выбора бренда"""
         data = await StateManager.get_data_safe(state)
@@ -499,12 +843,21 @@ class CommonHandlers(BaseHandler):
         category_name = data.get('category_name', '')
 
         await message.answer(f"✅ Бренд подтвержден: {brand}")
-
+        is_shoe = self._is_shoe_category(category_name)
+        is_sport_shoe = self._is_sport_shoe_category(category_name)
+        is_accessory = self._is_accessory_category(category_name)
         # Проверяем категорию
         is_bag_category = self._is_bag_category(category_name)
         is_backpack_category = self._is_backpack_category(category_name)
-
-        if is_backpack_category:
+        if is_shoe:
+            # Для обуви запрашиваем цвет, материал и цвет от производителя
+            await state.set_state(ProductStates.waiting_for_shoe_color)
+            await self._ask_shoe_color(message, user_name, is_sport_shoe=is_sport_shoe)
+        elif is_accessory:
+            # Для аксессуаров - запрашиваем цвет и "Для кого"
+            await state.set_state(ProductStates.waiting_for_accessory_color)
+            await self._ask_accessory_color(message, user_name)
+        elif is_backpack_category:
             # Для рюкзаков запрашиваем цвет и назначение
             await state.set_state(ProductStates.waiting_for_bag_gender)
             await self._ask_bag_gender(message, user_name, is_backpack=True)
@@ -524,6 +877,20 @@ class CommonHandlers(BaseHandler):
                 await state.set_state(ProductStates.waiting_for_condition)
                 from bot.services.product_service import ProductService
                 await ProductService.ask_condition(message, user_name)
+
+    def _is_men_shoe_category(self, category_name: str) -> bool:
+        """Проверяет, является ли категория мужской обувью"""
+        if not category_name:
+            return False
+
+        category_right_part = self._get_category_right_part(category_name)
+
+        men_shoe_keywords = [
+            "кроссовки", "ботинки и полуботинки", "туфли", "кеды",
+            "сапоги и полусапоги", "кроссовки", "кроссовки", "кроссовки"
+        ]
+
+        return any(keyword in category_right_part for keyword in men_shoe_keywords)
 
     def _is_bag_category(self, category_name: str) -> bool:
         """Проверяет, является ли категория сумкой"""
@@ -545,6 +912,51 @@ class CommonHandlers(BaseHandler):
 
         return any(keyword in category_for_check for keyword in bag_keywords)
 
+    def _is_shoe_category(self, category_name: str) -> bool:
+        """Проверяет, является ли категория обувью (мужской или женской)"""
+        if not category_name:
+            return False
+
+        category_right_part = self._get_category_right_part(category_name)
+
+        shoe_keywords = [
+            "кроссовки", "ботинки и полуботинки", "туфли", "кеды", "сапоги",
+            "сапоги и полусапоги", "мокасины и лоферы", "спортивная обувь", "угги, валенки, дутики",
+            "рабочая обувь", "резиновая обувь", "сандалии", "шлёпанцы и сланцы",
+            "домашняя обувь", "слипоны и эспадрильи", "кроссовки", "уход за обувью",
+            "босоножки", "ботильоны", "кроссовки и кеды", "полусапоги",
+            "балетки", "сабо и мюли"
+        ]
+
+        return any(keyword in category_right_part for keyword in shoe_keywords)
+
+    def _is_accessory_category(self, category_name: str) -> bool:
+        """Проверяет, является ли категория аксессуаром"""
+        if not category_name:
+            return False
+
+        category_right_part = self._get_category_right_part(category_name)
+
+        accessory_keywords = [
+            "аксессуары для волос", "зонты", "украшения", "головные уборы", "ремни, пояса, подтяжки", "перчатки и варежки", "галстуки и бабочки",
+            "другое", "носки, чулки, колготки", "платки и шарфы", "швейная фурнитура", "очки"
+        ]
+
+        return any(keyword in category_right_part.lower() for keyword in accessory_keywords)
+
+    def _is_sport_shoe_category(self, category_name: str) -> bool:
+        """Проверяет, является ли категория спортивной обувью"""
+        if not category_name:
+            return False
+
+        category_right_part = self._get_category_right_part(category_name)
+
+        sport_shoe_keywords = [
+            "спортивная обувь", "рабочая обувь", "резиновая обувь", "домашняя обувь", "уход за обувью"
+        ]
+
+        return any(keyword in category_right_part for keyword in sport_shoe_keywords)
+
     def _is_backpack_category(self, category_name: str) -> bool:
         """Проверяет, является ли категория рюкзаком"""
         if not category_name:
@@ -560,7 +972,8 @@ class CommonHandlers(BaseHandler):
             category_for_check = category_name.strip().lower()
 
         backpack_keywords = [
-            "рюкзак"
+            "рюкзак", "чемоданы и дорожные сумки", "портфели и борсетки",
+            "кошельки, визитницы, ключницы", "косметички и бьюти–кейсы"
         ]
 
         return any(keyword in category_for_check for keyword in backpack_keywords)
@@ -849,6 +1262,18 @@ class CommonHandlers(BaseHandler):
         if contact_phone:
             ET.SubElement(ad, "ContactPhone").text = contact_phone
 
+        shoe_color = product.get('shoe_color')
+        shoe_material = product.get('shoe_material')
+
+        if shoe_color:
+            param = ET.SubElement(ad, "Param")
+            ET.SubElement(param, "Name").text = "Цвет"
+            ET.SubElement(param, "Value").text = shoe_color
+
+        if shoe_material:
+            param = ET.SubElement(ad, "Param")
+            ET.SubElement(param, "Name").text = "Материал основной части"
+            ET.SubElement(param, "Value").text = shoe_material
         # Состояние товара
         condition = product.get('condition', '')
         if condition:
@@ -1215,19 +1640,34 @@ class CommonHandlers(BaseHandler):
             "personal": "продаю своё"
         }
 
+        # Сохраняем тип продажи
         await StateManager.safe_update(state, sale_type=sale_type)
-        await state.set_state(ProductStates.waiting_for_placement_type)
 
         user_name = callback.from_user.first_name
         sale_text = sale_type_names.get(sale_type, "не указан")
 
         await callback.message.edit_text(f"{user_name}, тип продажи: {sale_text}")
 
-        from bot.services.product_service import ProductService
-        await ProductService.ask_placement_type(callback.message, user_name)
+        # Получаем значение multioffer из состояния
+        data = await StateManager.get_data_safe(state)
+        is_multioffer = data.get('multioffer', False)
+
+        if is_multioffer:
+            # Мультиобъявление - показываем варианты размещения
+            await state.set_state(ProductStates.waiting_for_placement_type)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_placement_type(callback.message, user_name)
+        else:
+            # Не мультиобъявление (личная продажа) - сразу запрашиваем один город
+            await state.set_state(ProductStates.waiting_for_city_input)
+            await StateManager.safe_update(state, selected_cities=[])
+
+            await callback.message.answer(
+                f"{user_name}, введите название города для размещения объявления:"
+            )
 
     async def process_placement_type(self, callback: CallbackQuery, state: FSMContext):
-        """Обработка выбора типа размещения"""
+        """Обработка выбора типа размещения для мультиобъявлений"""
         placement_type = callback.data[10:]  # Убираем "placement_"
 
         await StateManager.safe_update(state, placement_type=placement_type)
@@ -1235,35 +1675,39 @@ class CommonHandlers(BaseHandler):
         user_name = callback.from_user.first_name
 
         if placement_type == "cities":
-            await state.set_state(ProductStates.waiting_for_placement_method)
-
-            from aiogram.utils.keyboard import InlineKeyboardBuilder
-            builder = InlineKeyboardBuilder()
-
-            placement_methods = [
-                ("📍 Указать точные города", "exact_cities"),
-                ("📊 По количеству объявлений", "by_quantity"),
-                ("🏢 Несколько объявлений в городе", "multiple_in_city")
-            ]
-
-            for method_name, method_code in placement_methods:
-                builder.button(text=method_name, callback_data=f"method_{method_code}")
-
-            builder.adjust(1)
-
-            await callback.message.edit_text(
-                f"{user_name}, размещение: по городам\n\n"
-                "Выберите вариант размещения:",
-                reply_markup=builder.as_markup()
-            )
+            # Для мультиобъявления по городам - показываем варианты методов
+            await callback.message.edit_text(f"{user_name}, размещение: по городам")
+            await self._ask_placement_methods(callback.message, user_name)
 
         elif placement_type == "metro":
+            # Для метро - сразу переходим к выбору города метро
             await state.set_state(ProductStates.waiting_for_metro_city)
-
             await callback.message.edit_text(f"{user_name}, размещение: по станциям метро")
 
             from bot.services.metro_service import MetroService
             await MetroService.ask_metro_city(callback.message, user_name)
+
+    async def _ask_placement_methods(self, message: Message, user_name: str):
+        """Запрос методов размещения для мультиобъявлений по городам"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        placement_methods = [
+            ("📍 Указать точные города", "exact_cities"),
+            ("📊 По количеству объявлений", "by_quantity"),
+            ("🏢 Несколько объявлений в городе", "multiple_in_city")
+        ]
+
+        for method_name, method_code in placement_methods:
+            builder.button(text=method_name, callback_data=f"method_{method_code}")
+
+        builder.adjust(1)
+
+        await message.answer(
+            f"{user_name}, выберите вариант размещения:",
+            reply_markup=builder.as_markup()
+        )
 
     async def process_placement_method(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора метода размещения"""

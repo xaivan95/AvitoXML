@@ -175,17 +175,76 @@ class LocationHandlers(BaseHandler):
     async def handle_city_input(self, message: Message, state: FSMContext):
         """Общий обработчик ввода городов"""
         data = await StateManager.get_data_safe(state)
+        sale_type = data.get('sale_type')
         placement_method = data.get('placement_method')
 
-        # Проверяем команду завершения
-        if message.text == "✅ Завершить ввод городов":
-            await self._finish_city_input(message, state)
+        # Определяем тип: мультиобъявление или личная продажа
+        is_multioffer = sale_type in ["resale", "manufacturer"]
+
+        if not is_multioffer:
+            # Личная продажа - один город
+            await self._process_single_city_personal(message, state)
+        else:
+            # Мультиобъявление - логика в зависимости от метода
+            if message.text == "✅ Завершить ввод городов":
+                if placement_method in ["multiple_in_city", "exact_cities"]:
+                    await self._finish_city_input(message, state)
+                return
+
+            if placement_method == "multiple_in_city":
+                await self._process_single_city_for_multiple(message, state)
+            elif placement_method == "exact_cities":
+                await self._process_single_city_for_multiple(message, state)
+            else:
+                await self._process_single_city_personal(message, state)
+
+    async def _process_single_city_personal(self, message: Message, state: FSMContext):
+        """Обработка одного города для личной продажи"""
+        city_name = message.text.strip()
+
+        if not city_name:
+            await message.answer("Введите название города:")
             return
 
-        if placement_method == "multiple_in_city":
-            await self._process_single_city_for_multiple(message, state)
+        # Ищем город через Nominatim
+        from нф import validate_city_nominatim
+        result = await validate_city_nominatim(city_name)
+
+        if result['valid']:
+            city_data = result['data']
+
+            selected_cities = [{
+                'name': city_data['name'],
+                'full_address': city_data['full_address'],
+                'lat': city_data.get('lat'),
+                'lon': city_data.get('lon'),
+                'type': city_data.get('type')
+            }]
+
+            await StateManager.safe_update(
+                state,
+                selected_cities=selected_cities,
+                cities=[city_data['name']],
+                placement_method="single_city"
+            )
+
+            user_name = message.from_user.first_name
+            await message.answer(
+                f"✅ Город подтвержден!\n"
+                f"🏙️ {city_data['name']}\n"
+                f"📍 {city_data['full_address']}",
+                reply_markup=ReplyKeyboardRemove()
+            )
+
+            # Сразу переходим к дате начала
+            await state.set_state(ProductStates.waiting_for_start_date)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_start_date(message, user_name)
         else:
-            await self._process_city_input(message, state)
+            await message.answer(
+                f"❌ Город '{city_name}' не найден.\n"
+                "Попробуйте ввести другое название:"
+            )
 
     async def _process_single_city_for_multiple(self, message: Message, state: FSMContext):
         """Обработка одного города для мультиразмещения"""
