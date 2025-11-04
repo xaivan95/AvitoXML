@@ -1413,30 +1413,16 @@ class CommonHandlers(BaseHandler):
             # Получаем полные данные о товарах
             full_products = []
             total_images = 0
-            telegram_images_count = 0
-            url_images_count = 0
 
             for product in products:
                 full_product = await self._get_full_product_data(product)
                 full_products.append(full_product)
-
-                for img_ref in full_product.get('all_images', []):
-                    total_images += 1
-                    if self.image_service.is_telegram_file_id(img_ref):
-                        telegram_images_count += 1
-                    elif self.image_service.is_url(img_ref):
-                        url_images_count += 1
+                total_images += len(full_product.get('all_images', []))
 
             await progress_msg.edit_text(
-                f"📊 Найдено:\n"
-                f"• Товаров: {len(full_products)}\n"
-                f"• Изображений: {total_images}\n"
-                f"• Telegram file_id: {telegram_images_count}\n"
-                f"• URL: {url_images_count}\n\n"
-                f"🔄 Генерирую архив..."
-            )
+                f"📊 Найдено {len(full_products)} товаров с {total_images} изображениями\n\n🔄 Генерирую архив...")
 
-            # Генерируем ZIP архив с ImageService
+            # Генерируем ZIP архив (асинхронно)
             from bot.services.XMLGeneratorFactory import XMLGeneratorFactory
 
             first_product = full_products[0] if full_products else {}
@@ -1446,9 +1432,8 @@ class CommonHandlers(BaseHandler):
             generator = XMLGeneratorFactory.get_generator(category_name)
             generator.image_service = self.image_service
 
-            # NOTE: Здесь может быть проблема с асинхронностью
-            # В реальном коде нужно сделать generate_zip_archive асинхронным
-            zip_buffer = generator.generate_zip_archive(full_products)
+            # Асинхронный вызов
+            zip_buffer = await generator.generate_zip_archive(full_products)
 
             await progress_msg.edit_text("✅ Архив готов! Отправляю...")
 

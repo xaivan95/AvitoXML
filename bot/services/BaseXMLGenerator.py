@@ -82,97 +82,93 @@ class BaseXMLGenerator(ABC):
         return reparsed.toprettyxml(indent="  ")
 
     async def generate_zip_archive(self, products: list) -> BytesIO:
-            """Генерация ZIP архива с XML и изображениями"""
-            temp_dir = tempfile.mkdtemp()
+        """Генерация ZIP архива с XML и изображениями (асинхронная версия)"""
+        temp_dir = tempfile.mkdtemp()
 
-            try:
-                zip_buffer = BytesIO()
+        try:
+            zip_buffer = BytesIO()
 
-                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                    # Генерируем XML
-                    xml_content = self.generate_xml_content(products)
-                    zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                # Генерируем XML
+                xml_content = self.generate_xml_content(products)
+                zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
 
-                    # Собираем все уникальные изображения из всех товаров
-                    all_image_refs = []
-                    image_product_map = {}
+                # Собираем все уникальные изображения из всех товаров
+                all_image_refs = []
+                image_product_map = {}
 
-                    for product in products:
-                        images = product.get('all_images', [])
-                        shuffle = product.get('shuffle_images', False)
+                for product in products:
+                    images = product.get('all_images', [])
+                    shuffle = product.get('shuffle_images', False)
 
-                        if shuffle:
-                            random.shuffle(images)
+                    if shuffle:
+                        random.shuffle(images)
 
-                        for img_ref in images:
-                            if img_ref and img_ref not in image_product_map:
-                                all_image_refs.append(img_ref)
-                                image_product_map[img_ref] = product.get('product_id', 'unknown')
+                    for img_ref in images:
+                        if img_ref and img_ref not in image_product_map:
+                            all_image_refs.append(img_ref)
+                            image_product_map[img_ref] = product.get('product_id', 'unknown')
 
-                    print(f"📸 Найдено {len(all_image_refs)} уникальных изображений для архива")
+                print(f"📸 Найдено {len(all_image_refs)} уникальных изображений для архива")
 
-                    # Обрабатываем и добавляем изображения в архив
-                    successful_downloads = 0
-                    for i, image_ref in enumerate(all_image_refs[:50], 1):
-                        try:
-                            filename = f"{i}.jpg"
-                            image_path = os.path.join(temp_dir, filename)
+                # Обрабатываем и добавляем изображения в архив
+                successful_downloads = 0
+                for i, image_ref in enumerate(all_image_refs[:50], 1):
+                    try:
+                        filename = f"{i}.jpg"
+                        image_path = os.path.join(temp_dir, filename)
 
-                            print(f"⬇️ Обрабатываем изображение {i}: {image_ref[:50]}...")
+                        print(f"⬇️ Обрабатываем изображение {i}: {image_ref[:50]}...")
 
-                            if self.image_service:
-                                # Используем ImageService для скачивания
-                                image_content = await self.image_service.process_image_for_export(image_ref)
+                        if self.image_service:
+                            # Используем ImageService для скачивания (асинхронно)
+                            image_content = await self.image_service.process_image_for_export(image_ref)
 
-                                if image_content:
-                                    # Сохраняем изображение
+                            if image_content:
+                                # Сохраняем изображение
+                                with open(image_path, 'wb') as f:
+                                    f.write(image_content)
+
+                                zip_file.write(image_path, filename)
+                                successful_downloads += 1
+                                print(f"✅ Изображение {filename} успешно добавлено")
+                            else:
+                                print(f"❌ Не удалось скачать изображение {image_ref}")
+                        else:
+                            # Старая логика для URL (синхронная)
+                            if self._is_url(image_ref):
+                                response = requests.get(image_ref, timeout=30, stream=True)
+                                if response.status_code == 200:
                                     with open(image_path, 'wb') as f:
-                                        f.write(image_content)
+                                        for chunk in response.iter_content(chunk_size=8192):
+                                            f.write(chunk)
 
                                     zip_file.write(image_path, filename)
                                     successful_downloads += 1
                                     print(f"✅ Изображение {filename} успешно добавлено")
                                 else:
-                                    print(f"❌ Не удалось скачать изображение {image_ref}")
+                                    print(f"❌ Ошибка скачивания {image_ref}: статус {response.status_code}")
                             else:
-                                # Старая логика для URL (для обратной совместимости)
-                                if self._is_url(image_ref):
-                                    response = requests.get(image_ref, timeout=30, stream=True)
-                                    if response.status_code == 200:
-                                        with open(image_path, 'wb') as f:
-                                            for chunk in response.iter_content(chunk_size=8192):
-                                                f.write(chunk)
+                                print(f"❌ Пропускаем не-URL изображение: {image_ref}")
 
-                                        if self._is_valid_image(image_path):
-                                            zip_file.write(image_path, filename)
-                                            successful_downloads += 1
-                                            print(f"✅ Изображение {filename} успешно добавлено")
-                                        else:
-                                            print(f"❌ Файл {filename} не является валидным изображением")
-                                            os.remove(image_path)
-                                    else:
-                                        print(f"❌ Ошибка скачивания {image_ref}: статус {response.status_code}")
-                                else:
-                                    print(f"❌ Пропускаем не-URL изображение (вероятно file_id): {image_ref}")
+                    except Exception as e:
+                        print(f"❌ Ошибка при обработке изображения {image_ref}: {e}")
+                        continue
 
-                        except Exception as e:
-                            print(f"❌ Ошибка при обработке изображения {image_ref}: {e}")
-                            continue
+                print(f"✅ В архив добавлено {successful_downloads} изображений")
 
-                    print(f"✅ В архив добавлено {successful_downloads} изображений")
+                # Добавляем README файл
+                readme_content = self._generate_readme(products, successful_downloads)
+                zip_file.writestr('README.txt', readme_content.encode('utf-8'))
 
-                    # Добавляем README файл
-                    readme_content = self._generate_readme(products, successful_downloads)
-                    zip_file.writestr('README.txt', readme_content.encode('utf-8'))
+            zip_buffer.seek(0)
+            return zip_buffer
 
-                zip_buffer.seek(0)
-                return zip_buffer
-
-            except Exception as e:
-                print(f"❌ Критическая ошибка при создании архива: {e}")
-                return self._create_fallback_zip(products)
-            finally:
-                shutil.rmtree(temp_dir, ignore_errors=True)
+        except Exception as e:
+            print(f"❌ Критическая ошибка при создании архива: {e}")
+            return await self._create_fallback_zip(products)
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     def _is_url(self, file_reference: str) -> bool:
             """Проверяет, является ли строка URL"""
@@ -196,28 +192,20 @@ class BaseXMLGenerator(ABC):
 
     Убедитесь, что все изображения имеют правильные форматы (JPEG, PNG)."""
 
-    def _create_fallback_zip(self, products: list) -> BytesIO:
-        """Создает архив только с XML (резервный вариант)"""
+    async def _create_fallback_zip(self, products: list) -> BytesIO:
+        """Создает архив только с XML (асинхронная версия)"""
         zip_buffer = BytesIO()
 
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
             xml_content = self.generate_xml_content(products)
             zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
 
-            # Добавляем информацию об ошибке
-            error_info = f"""ВНИМАНИЕ: Изображения не были добавлены в архив из-за ошибки.
-
-    Причина: Не удалось скачать изображения с указанных URL.
-
-    Рекомендации:
-    1. Проверьте доступность изображений по URL
-    2. Убедитесь, что изображения доступны без авторизации
-    3. Попробуйте использовать прямые ссылки на изображения
+            error_info = f"""ВНИМАНИЕ: Изображения не были добавлены в архив.
 
     Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     Total products: {len(products)}"""
 
-            zip_file.writestr('ERROR_IMAGES.txt', error_info.encode('utf-8'))
+            zip_file.writestr('INFO.txt', error_info.encode('utf-8'))
 
         zip_buffer.seek(0)
         return zip_buffer
