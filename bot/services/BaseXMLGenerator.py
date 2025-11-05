@@ -37,6 +37,16 @@ class BaseXMLGenerator(ABC):
         ad_count = 0
 
         for product in products:
+            # Для КАЖДОГО товара определяем свой генератор
+            category_name = product.get('category_name', '')
+            from bot.services.XMLGeneratorFactory import XMLGeneratorFactory
+            generator = XMLGeneratorFactory.get_generator(category_name)
+
+            # Настраиваем generator так же как основной
+            generator.image_service = self.image_service
+
+            print(f"🔧 Используем генератор {generator.__class__.__name__} для товара: {category_name}")
+
             # Получаем города для размещения
             cities = product.get('cities', [])
             quantity = product.get('quantity', 1)
@@ -46,7 +56,7 @@ class BaseXMLGenerator(ABC):
             if placement_method == 'multiple_in_city' and cities:
                 # Мультиразмещение в одном городе
                 for i in range(quantity):
-                    ad = self.generate_ad(product, cities[0], i + 1, None, images_map)
+                    ad = generator.generate_ad(product, cities[0], i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 
@@ -54,7 +64,7 @@ class BaseXMLGenerator(ABC):
                 # Размещение по количеству в разных городах
                 for i in range(min(quantity, len(cities))):
                     city = cities[i] if i < len(cities) else cities[0]
-                    ad = self.generate_ad(product, city, i + 1, None, images_map)
+                    ad = generator.generate_ad(product, city, i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 
@@ -64,14 +74,14 @@ class BaseXMLGenerator(ABC):
                 metro_city = product.get('metro_city', 'Москва')
 
                 for i, station in enumerate(metro_stations[:quantity]):
-                    ad = self.generate_ad(product, metro_city, i + 1, station, images_map)
+                    ad = generator.generate_ad(product, metro_city, i + 1, station, images_map)
                     root.append(ad)
                     ad_count += 1
 
             else:
                 # Обычное размещение по городам
                 for i, city in enumerate(cities[:quantity]):
-                    ad = self.generate_ad(product, city, i + 1, None, images_map)
+                    ad = generator.generate_ad(product, city, i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 

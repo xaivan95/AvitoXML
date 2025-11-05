@@ -35,6 +35,12 @@ class DeliveryHandlers(BaseHandler):
             F.data.startswith("discount_")
         )
 
+        # Процент скидки на доставку
+        self.router.message.register(
+            self.process_delivery_discount_percent,
+            StateFilter(ProductStates.waiting_for_delivery_discount_percent)
+        )
+
         # Мультиобъявление
         self.router.callback_query.register(
             self.process_multioffer,
@@ -96,17 +102,49 @@ class DeliveryHandlers(BaseHandler):
         }
 
         await StateManager.safe_update(state, delivery_discount=discount_type)
-        await state.set_state(ProductStates.waiting_for_multioffer)
 
         user_name = callback.from_user.first_name
         discount_text = discount_names.get(discount_type, "не указано")
 
-        await callback.message.edit_text(
-            f"{user_name}, скидка на доставку: {discount_text}\n\n"
-            "Теперь уточним тип объявления."
-        )
+        if discount_type == "discount":
+            # Если выбрана скидка, запрашиваем процент
+            await state.set_state(ProductStates.waiting_for_delivery_discount_percent)
+            await callback.message.edit_text(
+                f"{user_name}, выбрана скидка на доставку.\n\n"
+                "Теперь укажите процент скидки:"
+            )
+            await DeliveryService.ask_delivery_discount_percent(callback.message, user_name)
+        else:
+            # Для бесплатной доставки или без скидки сразу переходим дальше
+            await state.set_state(ProductStates.waiting_for_multioffer)
+            await callback.message.edit_text(
+                f"{user_name}, скидка на доставку: {discount_text}\n\n"
+                "Теперь уточним тип объявления."
+            )
+            await DeliveryService.ask_multioffer(callback.message, user_name)
 
-        await DeliveryService.ask_multioffer(callback.message, user_name)
+    async def process_delivery_discount_percent(self, message: Message, state: FSMContext):
+        """Обработка ввода процента скидки на доставку"""
+        try:
+            discount_percent = int(message.text.strip())
+
+            if discount_percent < 1 or discount_percent > 100:
+                await message.answer("Процент скидки должен быть от 1 до 100. Введите корректное значение:")
+                return
+
+            await StateManager.safe_update(state, delivery_discount_percent=discount_percent)
+            await state.set_state(ProductStates.waiting_for_multioffer)
+
+            user_name = message.from_user.first_name
+            await message.answer(
+                f"{user_name}, скидка на доставку: {discount_percent}%\n\n"
+                "Теперь уточним тип объявления."
+            )
+
+            await DeliveryService.ask_multioffer(message, user_name)
+
+        except ValueError:
+            await message.answer("Процент скидки должен быть числом от 1 до 100. Введите корректное значение:")
 
     async def process_multioffer(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора мультиобъявления"""

@@ -6290,3 +6290,1479 @@ Traceback (most recent call last):
 aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectionError: Connector is closed.
 2025-11-05 14:42:27,121 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
 2025-11-05 14:42:27,122 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:11:42,660 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:11:42,660 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:11:42,941 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:11:42,949 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:11:42,949 - __main__ - INFO - Starting bot...
+2025-11-05 15:11:43,593 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:11:43,751 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:12:42,081 - aiogram.event - INFO - Update id=605933627 is handled. Duration 517 ms by bot id=8133839029
+2025-11-05 15:12:51,209 - aiogram.event - INFO - Update id=605933626 is handled. Duration 19962 ms by bot id=8133839029
+2025-11-05 15:13:38,626 - aiogram.event - INFO - Update id=605933629 is handled. Duration 19390 ms by bot id=8133839029
+2025-11-05 15:13:41,813 - aiogram.event - INFO - Update id=605933628 is handled. Duration 51409 ms by bot id=8133839029
+2025-11-05 15:13:42,064 - aiogram.event - INFO - Update id=605933630 is handled. Duration 247 ms by bot id=8133839029
+2025-11-05 15:13:48,560 - aiogram.event - INFO - Update id=605933632 is handled. Duration 710 ms by bot id=8133839029
+2025-11-05 15:13:51,042 - aiogram.event - INFO - Update id=605933633 is handled. Duration 363 ms by bot id=8133839029
+2025-11-05 15:13:52,232 - aiogram.event - INFO - Update id=605933634 is handled. Duration 314 ms by bot id=8133839029
+2025-11-05 15:13:54,442 - aiogram.event - INFO - Update id=605933635 is handled. Duration 324 ms by bot id=8133839029
+2025-11-05 15:13:57,845 - aiogram.event - INFO - Update id=605933636 is handled. Duration 512 ms by bot id=8133839029
+2025-11-05 15:13:59,403 - aiogram.event - INFO - Update id=605933637 is handled. Duration 366 ms by bot id=8133839029
+2025-11-05 15:14:02,598 - aiogram.event - INFO - Update id=605933631 is not handled. Duration 19310 ms by bot id=8133839029
+2025-11-05 15:14:02,598 - aiogram.event - ERROR - Cause exception while process update id=605933631 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 804, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 463, in finish_socket_func
+    return ov.getresult()
+           ~~~~~~~~~~~~^^
+OSError: [WinError 121] Превышен таймаут семафора
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [WinError 121] Превышен таймаут семафора
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\start_handlers.py", line 93, in new_product_callback
+    await ProductService.show_main_categories(callback.message, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 32, in show_main_categories
+    await message.answer(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+2025-11-05 15:14:03,064 - aiogram.event - INFO - Update id=605933638 is handled. Duration 420 ms by bot id=8133839029
+2025-11-05 15:14:04,316 - aiogram.event - INFO - Update id=605933639 is handled. Duration 192 ms by bot id=8133839029
+2025-11-05 15:14:20,412 - aiogram.event - INFO - Update id=605933640 is handled. Duration 4 ms by bot id=8133839029
+2025-11-05 15:14:20,412 - aiogram.event - INFO - Update id=605933641 is handled. Duration 4 ms by bot id=8133839029
+2025-11-05 15:14:23,324 - aiogram.event - INFO - Update id=605933642 is handled. Duration 405 ms by bot id=8133839029
+2025-11-05 15:14:24,775 - aiogram.event - INFO - Update id=605933643 is handled. Duration 457 ms by bot id=8133839029
+2025-11-05 15:14:26,049 - aiogram.event - INFO - Update id=605933644 is handled. Duration 331 ms by bot id=8133839029
+2025-11-05 15:14:26,964 - aiogram.event - INFO - Update id=605933645 is handled. Duration 199 ms by bot id=8133839029
+2025-11-05 15:14:28,038 - aiogram.event - INFO - Update id=605933646 is handled. Duration 400 ms by bot id=8133839029
+2025-11-05 15:14:32,163 - aiogram.event - INFO - Update id=605933647 is handled. Duration 521 ms by bot id=8133839029
+2025-11-05 15:14:33,563 - aiogram.event - INFO - Update id=605933648 is handled. Duration 396 ms by bot id=8133839029
+2025-11-05 15:14:34,916 - aiogram.event - INFO - Update id=605933649 is handled. Duration 395 ms by bot id=8133839029
+2025-11-05 15:14:36,279 - aiogram.event - INFO - Update id=605933650 is handled. Duration 439 ms by bot id=8133839029
+2025-11-05 15:14:37,660 - aiogram.event - INFO - Update id=605933651 is handled. Duration 459 ms by bot id=8133839029
+2025-11-05 15:14:38,887 - aiogram.event - INFO - Update id=605933652 is handled. Duration 408 ms by bot id=8133839029
+2025-11-05 15:14:41,004 - aiogram.event - INFO - Update id=605933653 is handled. Duration 913 ms by bot id=8133839029
+2025-11-05 15:14:42,486 - aiogram.event - INFO - Update id=605933654 is handled. Duration 600 ms by bot id=8133839029
+2025-11-05 15:14:43,968 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:14:44,325 - aiogram.event - INFO - Update id=605933655 is handled. Duration 808 ms by bot id=8133839029
+2025-11-05 15:15:27,395 - aiogram.event - INFO - Update id=605933656 is handled. Duration 39235 ms by bot id=8133839029
+2025-11-05 15:18:57,434 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:18:57,437 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:18:57,437 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:18:57,699 - __main__ - INFO - Bot stopped
+2025-11-05 15:18:57,699 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:18:57,699 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:18:57,701 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:22:08,926 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:22:08,927 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:22:09,205 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:22:09,213 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:22:09,213 - __main__ - INFO - Starting bot...
+2025-11-05 15:22:09,811 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:22:10,021 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:22:20,590 - aiogram.event - INFO - Update id=605933661 is handled. Duration 489 ms by bot id=8133839029
+2025-11-05 15:22:35,832 - aiogram.event - INFO - Update id=605933660 is not handled. Duration 19769 ms by bot id=8133839029
+2025-11-05 15:22:35,833 - aiogram.event - ERROR - Cause exception while process update id=605933660 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 804, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 463, in finish_socket_func
+    return ov.getresult()
+           ~~~~~~~~~~~~^^
+OSError: [WinError 121] Превышен таймаут семафора
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [WinError 121] Превышен таймаут семафора
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\middleware\album_middleware.py", line 22, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\start_handlers.py", line 74, in new_product_command
+    await ProductService.show_main_categories(message, message.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 32, in show_main_categories
+    await message.answer(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+2025-11-05 15:22:41,176 - aiogram.event - INFO - Update id=605933662 is not handled. Duration 19196 ms by bot id=8133839029
+2025-11-05 15:22:41,176 - aiogram.event - ERROR - Cause exception while process update id=605933662 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 804, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 463, in finish_socket_func
+    return ov.getresult()
+           ~~~~~~~~~~~~^^
+OSError: [WinError 121] Превышен таймаут семафора
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [WinError 121] Превышен таймаут семафора
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+2025-11-05 15:22:45,354 - aiogram.event - INFO - Update id=605933663 is not handled. Duration 20937 ms by bot id=8133839029
+2025-11-05 15:22:45,354 - aiogram.event - ERROR - Cause exception while process update id=605933663 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 804, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 463, in finish_socket_func
+    return ov.getresult()
+           ~~~~~~~~~~~~^^
+OSError: [WinError 121] Превышен таймаут семафора
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [WinError 121] Превышен таймаут семафора
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+2025-11-05 15:22:47,750 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:22:47,751 - aiogram.event - INFO - Update id=605933664 is not handled. Duration 17691 ms by bot id=8133839029
+2025-11-05 15:22:47,752 - aiogram.event - ERROR - Cause exception while process update id=605933664 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:22:47,769 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:22:47,769 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:22:47,769 - aiogram.event - INFO - Update id=605933666 is not handled. Duration 5231 ms by bot id=8133839029
+2025-11-05 15:22:47,770 - aiogram.event - ERROR - Cause exception while process update id=605933666 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:22:47,785 - aiogram.event - INFO - Update id=605933665 is not handled. Duration 9638 ms by bot id=8133839029
+2025-11-05 15:22:47,785 - aiogram.event - ERROR - Cause exception while process update id=605933665 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:22:48,064 - __main__ - INFO - Bot stopped
+2025-11-05 15:22:48,064 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:22:48,065 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:22:48,066 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:22:52,023 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:22:52,023 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:22:52,303 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:22:52,312 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:22:52,312 - __main__ - INFO - Starting bot...
+2025-11-05 15:22:54,072 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:22:54,262 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:22:56,262 - aiogram.event - INFO - Update id=605933668 is handled. Duration 596 ms by bot id=8133839029
+2025-11-05 15:22:57,780 - aiogram.event - INFO - Update id=605933669 is handled. Duration 235 ms by bot id=8133839029
+2025-11-05 15:23:00,756 - aiogram.event - INFO - Update id=605933670 is handled. Duration 678 ms by bot id=8133839029
+2025-11-05 15:23:04,847 - aiogram.event - INFO - Update id=605933671 is handled. Duration 519 ms by bot id=8133839029
+2025-11-05 15:23:07,420 - aiogram.event - INFO - Update id=605933672 is handled. Duration 847 ms by bot id=8133839029
+2025-11-05 15:23:10,771 - aiogram.event - INFO - Update id=605933673 is handled. Duration 590 ms by bot id=8133839029
+2025-11-05 15:23:12,963 - aiogram.event - INFO - Update id=605933674 is handled. Duration 870 ms by bot id=8133839029
+2025-11-05 15:23:49,016 - aiogram.event - INFO - Update id=605933675 is handled. Duration 1 ms by bot id=8133839029
+2025-11-05 15:23:49,016 - aiogram.event - INFO - Update id=605933676 is handled. Duration 1 ms by bot id=8133839029
+2025-11-05 15:23:52,580 - aiogram.event - INFO - Update id=605933677 is handled. Duration 607 ms by bot id=8133839029
+2025-11-05 15:23:54,093 - aiogram.event - INFO - Update id=605933678 is handled. Duration 513 ms by bot id=8133839029
+2025-11-05 15:23:55,652 - aiogram.event - INFO - Update id=605933679 is handled. Duration 631 ms by bot id=8133839029
+2025-11-05 15:23:56,433 - aiogram.event - INFO - Update id=605933680 is handled. Duration 172 ms by bot id=8133839029
+2025-11-05 15:23:58,740 - aiogram.event - INFO - Update id=605933681 is handled. Duration 606 ms by bot id=8133839029
+2025-11-05 15:24:03,334 - aiogram.event - INFO - Update id=605933682 is handled. Duration 726 ms by bot id=8133839029
+2025-11-05 15:24:05,305 - aiogram.event - INFO - Update id=605933683 is handled. Duration 679 ms by bot id=8133839029
+2025-11-05 15:24:06,835 - aiogram.event - INFO - Update id=605933684 is handled. Duration 680 ms by bot id=8133839029
+2025-11-05 15:24:08,365 - aiogram.event - INFO - Update id=605933685 is handled. Duration 662 ms by bot id=8133839029
+2025-11-05 15:24:10,092 - aiogram.event - INFO - Update id=605933686 is handled. Duration 674 ms by bot id=8133839029
+2025-11-05 15:24:11,696 - aiogram.event - INFO - Update id=605933687 is handled. Duration 443 ms by bot id=8133839029
+2025-11-05 15:24:13,093 - aiogram.event - INFO - Update id=605933688 is handled. Duration 187 ms by bot id=8133839029
+2025-11-05 15:24:14,708 - aiogram.event - INFO - Update id=605933689 is handled. Duration 406 ms by bot id=8133839029
+2025-11-05 15:24:16,623 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:24:16,813 - aiogram.event - INFO - Update id=605933690 is handled. Duration 638 ms by bot id=8133839029
+2025-11-05 15:24:18,428 - aiogram.event - INFO - Update id=605933691 is handled. Duration 197 ms by bot id=8133839029
+2025-11-05 15:24:29,759 - aiogram.event - INFO - Update id=605933692 is handled. Duration 931 ms by bot id=8133839029
+2025-11-05 15:26:34,049 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:26:34,050 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:26:34,050 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:26:34,308 - __main__ - INFO - Bot stopped
+2025-11-05 15:26:34,309 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:26:34,309 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:26:34,310 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:26:40,774 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:26:40,775 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:26:41,122 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:26:41,135 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:26:41,135 - __main__ - INFO - Starting bot...
+2025-11-05 15:26:41,821 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:26:42,029 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:27:19,790 - aiogram.event - INFO - Update id=605933695 is handled. Duration 1241 ms by bot id=8133839029
+2025-11-05 15:27:43,645 - aiogram.event - INFO - Update id=605933696 is not handled. Duration 21090 ms by bot id=8133839029
+2025-11-05 15:27:43,646 - aiogram.event - ERROR - Cause exception while process update id=605933696 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+Traceback (most recent call last):
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\proactor_events.py", line 286, in _loop_reading
+    length = fut.result()
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 804, in _poll
+    value = callback(transferred, key, ov)
+  File "C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\asyncio\windows_events.py", line 463, in finish_socket_func
+    return ov.getresult()
+           ~~~~~~~~~~~~^^
+OSError: [WinError 121] Превышен таймаут семафора
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ClientOSError: [WinError 121] Превышен таймаут семафора
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientOSError: [WinError 121] Превышен таймаут семафора
+2025-11-05 15:27:54,511 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:27:54,514 - aiogram.event - INFO - Update id=605933697 is not handled. Duration 2855 ms by bot id=8133839029
+2025-11-05 15:27:54,514 - aiogram.event - ERROR - Cause exception while process update id=605933697 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\product_handlers.py", line 329, in process_main_category
+    await ProductService.show_subcategories(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 68, in show_subcategories
+    await message.answer(
+    ...<2 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:27:54,519 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:27:54,519 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:27:54,782 - __main__ - INFO - Bot stopped
+2025-11-05 15:27:54,782 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:27:55,029 - aiogram.event - INFO - Update id=605933693 is not handled. Duration 41297 ms by bot id=8133839029
+2025-11-05 15:27:55,029 - aiogram.event - ERROR - Cause exception while process update id=605933693 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ClientConnectionError: Connector is closed.
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 1378, in my_products_command
+    await message.answer(products_text, parse_mode="Markdown")
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 725, in _connect_and_send_request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        req, traces=traces, timeout=real_timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\connector.py", line 652, in connect
+    raise ClientConnectionError("Connector is closed.")
+aiohttp.client_exceptions.ClientConnectionError: Connector is closed.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\middleware\album_middleware.py", line 22, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\start_handlers.py", line 100, in my_products_command
+    await common_handler.my_products_command(message)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 1381, in my_products_command
+    await message.answer("❌ Ошибка при загрузке списка товаров")
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectionError: Connector is closed.
+2025-11-05 15:27:55,045 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:27:55,045 - aiogram.event - INFO - Update id=605933694 is not handled. Duration 41107 ms by bot id=8133839029
+2025-11-05 15:27:55,047 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:27:59,230 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:27:59,230 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:27:59,500 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:27:59,508 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:27:59,508 - __main__ - INFO - Starting bot...
+2025-11-05 15:28:09,981 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:28:10,270 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:29:30,367 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:29:30,368 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:29:30,369 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:29:30,369 - aiogram.event - INFO - Update id=605933699 is not handled. Duration 20189 ms by bot id=8133839029
+2025-11-05 15:29:30,369 - aiogram.event - ERROR - Cause exception while process update id=605933699 by bot id=8133839029
+TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 177, in make_request
+    async with session.post(
+               ~~~~~~~~~~~~^
+        url, data=form, timeout=self.timeout if timeout is None else timeout
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ) as resp:
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 1488, in __aenter__
+    self._resp: _RetType = await self._coro
+                           ^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 770, in _request
+    resp = await handler(req)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client.py", line 748, in _connect_and_send_request
+    await resp.start(conn)
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\client_reqrep.py", line 532, in start
+    message, payload = await protocol.read()  # type: ignore[union-attr]
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiohttp\streams.py", line 672, in read
+    await self._waiter
+aiohttp.client_exceptions.ServerDisconnectedError: Server disconnected
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\middleware\album_middleware.py", line 22, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\start_handlers.py", line 74, in new_product_command
+    await ProductService.show_main_categories(message, message.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 32, in show_main_categories
+    await message.answer(
+    ...<3 lines>...
+    )
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\methods\base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\client\session\aiohttp.py", line 184, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:29:30,631 - __main__ - INFO - Bot stopped
+2025-11-05 15:29:30,631 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:29:30,631 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:29:30,632 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:29:35,376 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:29:35,377 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:29:35,648 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:29:35,657 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:29:35,657 - __main__ - INFO - Starting bot...
+2025-11-05 15:29:36,344 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:29:36,546 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:29:53,862 - aiogram.event - INFO - Update id=605933700 is handled. Duration 839 ms by bot id=8133839029
+2025-11-05 15:29:55,388 - aiogram.event - INFO - Update id=605933701 is handled. Duration 339 ms by bot id=8133839029
+2025-11-05 15:29:57,624 - aiogram.event - INFO - Update id=605933702 is handled. Duration 354 ms by bot id=8133839029
+2025-11-05 15:29:59,863 - aiogram.event - INFO - Update id=605933703 is handled. Duration 305 ms by bot id=8133839029
+2025-11-05 15:30:03,064 - aiogram.event - INFO - Update id=605933704 is handled. Duration 194 ms by bot id=8133839029
+2025-11-05 15:30:04,627 - aiogram.event - INFO - Update id=605933705 is handled. Duration 469 ms by bot id=8133839029
+2025-11-05 15:30:07,878 - aiogram.event - INFO - Update id=605933706 is handled. Duration 531 ms by bot id=8133839029
+2025-11-05 15:30:09,754 - aiogram.event - INFO - Update id=605933707 is handled. Duration 324 ms by bot id=8133839029
+2025-11-05 15:30:17,905 - aiogram.event - INFO - Update id=605933708 is handled. Duration 239 ms by bot id=8133839029
+2025-11-05 15:30:20,235 - aiogram.event - INFO - Update id=605933709 is handled. Duration 649 ms by bot id=8133839029
+2025-11-05 15:30:21,749 - aiogram.event - INFO - Update id=605933710 is handled. Duration 602 ms by bot id=8133839029
+2025-11-05 15:30:23,104 - aiogram.event - INFO - Update id=605933711 is handled. Duration 498 ms by bot id=8133839029
+2025-11-05 15:30:23,952 - aiogram.event - INFO - Update id=605933712 is handled. Duration 280 ms by bot id=8133839029
+2025-11-05 15:30:25,435 - aiogram.event - INFO - Update id=605933713 is handled. Duration 528 ms by bot id=8133839029
+2025-11-05 15:30:29,786 - aiogram.event - INFO - Update id=605933714 is handled. Duration 639 ms by bot id=8133839029
+2025-11-05 15:30:31,347 - aiogram.event - INFO - Update id=605933715 is handled. Duration 519 ms by bot id=8133839029
+2025-11-05 15:30:32,584 - aiogram.event - INFO - Update id=605933716 is handled. Duration 398 ms by bot id=8133839029
+2025-11-05 15:30:33,756 - aiogram.event - INFO - Update id=605933717 is handled. Duration 412 ms by bot id=8133839029
+2025-11-05 15:30:34,981 - aiogram.event - INFO - Update id=605933718 is handled. Duration 415 ms by bot id=8133839029
+2025-11-05 15:30:36,642 - aiogram.event - INFO - Update id=605933719 is handled. Duration 738 ms by bot id=8133839029
+2025-11-05 15:30:38,155 - aiogram.event - INFO - Update id=605933720 is handled. Duration 281 ms by bot id=8133839029
+2025-11-05 15:30:39,903 - aiogram.event - INFO - Update id=605933721 is handled. Duration 536 ms by bot id=8133839029
+2025-11-05 15:30:41,472 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:30:41,713 - aiogram.event - INFO - Update id=605933722 is handled. Duration 719 ms by bot id=8133839029
+2025-11-05 15:30:44,994 - aiogram.event - INFO - Update id=605933723 is handled. Duration 781 ms by bot id=8133839029
+2025-11-05 15:33:39,501 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:33:39,503 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:33:39,503 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:33:39,762 - __main__ - INFO - Bot stopped
+2025-11-05 15:33:39,763 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:33:39,763 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:33:39,764 - __main__ - INFO - Bot stopped by user
+2025-11-05 15:33:42,991 - bot.database - INFO - Data loaded successfully from file
+2025-11-05 15:33:42,991 - __main__ - INFO - File database initialized successfully
+2025-11-05 15:33:43,270 - __main__ - INFO - AlbumMiddleware registered
+2025-11-05 15:33:43,278 - __main__ - INFO - Total routers registered: 6
+2025-11-05 15:33:43,278 - __main__ - INFO - Starting bot...
+2025-11-05 15:33:44,080 - aiogram.dispatcher - INFO - Start polling
+2025-11-05 15:33:44,316 - aiogram.dispatcher - INFO - Run polling for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:34:29,155 - aiogram.event - INFO - Update id=605933724 is handled. Duration 33716 ms by bot id=8133839029
+2025-11-05 15:36:05,270 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-05 15:36:05,272 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-05 15:36:05,272 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8133839029)
+2025-11-05 15:36:05,531 - __main__ - INFO - Bot stopped
+2025-11-05 15:36:05,531 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-05 15:36:05,532 - aiogram.dispatcher - INFO - Polling stopped for bot @AvitoXMLGenBot id=8133839029 - 'AvitoXMLbot'
+2025-11-05 15:36:05,533 - __main__ - INFO - Bot stopped by user

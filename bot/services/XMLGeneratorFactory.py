@@ -1,10 +1,5 @@
 # bot/services/XMLGeneratorFactory.py
-from bot.services.BagsXMLGenerator import BagsXMLGenerator
 from bot.services.BaseXMLGenerator import BaseXMLGenerator
-from bot.services.ClothingXMLGenerator import ClothingXMLGenerator
-from bot.services.MenShoesXMLGenerator import MenShoesXMLGenerator
-from bot.services.WomenShoesXMLGenerator import WomenShoesXMLGenerator
-from bot.services.AccessoriesXMLGenerator import AccessoriesXMLGenerator
 
 class XMLGeneratorFactory:
     """Фабрика для создания генераторов XML"""
@@ -13,39 +8,60 @@ class XMLGeneratorFactory:
     def get_generator(category_name: str) -> BaseXMLGenerator:
         """Получить генератор по названию категории"""
         if not category_name:
-            return BaseXMLGenerator()
+            print("⚠️ Категория не указана, используем DefaultXMLGenerator")
+            from bot.services.DefaultXMLGenerator import DefaultXMLGenerator
+            return DefaultXMLGenerator()
 
         category_lower = category_name.lower()
+        print(f"🔍 Определение генератора для категории: '{category_name}'")
+
+        # Аксессуары
+        if any(keyword in category_lower for keyword in ["аксессуар", "аксесуар"]):
+            print("✅ Используем AccessoriesXMLGenerator")
+            from bot.services.AccessoriesXMLGenerator import AccessoriesXMLGenerator
+            return AccessoriesXMLGenerator()
 
         # Сумки, рюкзаки, чемоданы
-        if any(keyword in category_lower for keyword in ["сумк", "рюкзак", "чемодан", "портфел", "борсетк"]):
+        elif any(keyword in category_lower for keyword in ["сумк", "рюкзак", "чемодан", "портфел", "борсетк"]):
+            print("✅ Используем BagsXMLGenerator")
+            from bot.services.BagsXMLGenerator import BagsXMLGenerator
             return BagsXMLGenerator()
-
-        # Одежда
-        elif any(keyword in category_lower for keyword in ["одежда", "мужская", "женская"]):
-            return ClothingXMLGenerator()
 
         # Мужская обувь
         elif "мужская обувь" in category_lower:
+            print("✅ Используем MenShoesXMLGenerator")
+            from bot.services.MenShoesXMLGenerator import MenShoesXMLGenerator
             return MenShoesXMLGenerator()
 
         # Женская обувь
         elif "женская обувь" in category_lower:
+            print("✅ Используем WomenShoesXMLGenerator")
+            from bot.services.WomenShoesXMLGenerator import WomenShoesXMLGenerator
             return WomenShoesXMLGenerator()
 
-        # Аксессуары
-        elif "аксессуар" in category_lower:
-            return AccessoriesXMLGenerator()
+        # Одежда
+        elif any(keyword in category_lower for keyword in ["одежда", "мужская одежда", "женская одежда"]):
+            print("✅ Используем ClothingXMLGenerator")
+            from bot.services.ClothingXMLGenerator import ClothingXMLGenerator
+            return ClothingXMLGenerator()
 
         # Обувь (общее)
         elif "обувь" in category_lower:
             # Определяем мужская или женская по контексту
             if "мужск" in category_lower:
+                print("✅ Используем MenShoesXMLGenerator (по контексту)")
+                from bot.services.MenShoesXMLGenerator import MenShoesXMLGenerator
                 return MenShoesXMLGenerator()
             elif "женск" in category_lower:
+                print("✅ Используем WomenShoesXMLGenerator (по контексту)")
+                from bot.services.WomenShoesXMLGenerator import WomenShoesXMLGenerator
                 return WomenShoesXMLGenerator()
             else:
-                return BaseXMLGenerator()
+                print("⚠️ Используем DefaultXMLGenerator для неопределенной обуви")
+                from bot.services.DefaultXMLGenerator import DefaultXMLGenerator
+                return DefaultXMLGenerator()
 
         else:
-            return BaseXMLGenerator()
+            print(f"⚠️ Используем DefaultXMLGenerator (категория '{category_name}' не распознана)")
+            from bot.services.DefaultXMLGenerator import DefaultXMLGenerator
+            return DefaultXMLGenerator()

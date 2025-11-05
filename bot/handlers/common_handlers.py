@@ -1014,16 +1014,16 @@ class CommonHandlers(BaseHandler):
 
         # Определяем тип категории
         is_shoe = self._is_shoe_category(category_name)
-        is_sport_shoe = self._is_sport_shoe_category(category_name)
         is_accessory = self._is_accessory_category(category_name)
         is_bag_category = self._is_bag_category(category_name)
         is_backpack_category = self._is_backpack_category(category_name)
-        is_clothing = self._is_clothing_category(category_name)  # Новая проверка
+        is_clothing = self._is_clothing_category(category_name)
 
         if is_shoe:
-            # Для обуви запрашиваем цвет, материал и цвет от производителя
-            await state.set_state(ProductStates.waiting_for_shoe_color)
-            await self._ask_shoe_color(message, user_name, is_sport_shoe=is_sport_shoe)
+            # Для обуви сначала запрашиваем РАЗМЕР, потом цвет, материал и цвет от производителя
+            await state.set_state(ProductStates.waiting_for_size)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_size(message, user_name)  # Используем существующий метод
         elif is_accessory:
             # Для аксессуаров - запрашиваем цвет и "Для кого"
             await state.set_state(ProductStates.waiting_for_accessory_color)
@@ -1422,14 +1422,10 @@ class CommonHandlers(BaseHandler):
             await progress_msg.edit_text(
                 f"📊 Найдено {len(full_products)} товаров с {total_images} изображениями\n\n🔄 Генерирую архив...")
 
-            # Генерируем ZIP архив (асинхронный вызов)
-            from bot.services.XMLGeneratorFactory import XMLGeneratorFactory
+            # Генерируем ZIP архив - используем DefaultXMLGenerator вместо BaseXMLGenerator
+            from bot.services.DefaultXMLGenerator import DefaultXMLGenerator
 
-            first_product = full_products[0] if full_products else {}
-            category_name = first_product.get('category_name', '')
-
-            # Создаем генератор с ImageService
-            generator = XMLGeneratorFactory.get_generator(category_name)
+            generator = DefaultXMLGenerator()
             if hasattr(self, 'image_service') and self.image_service:
                 generator.image_service = self.image_service
 
@@ -1817,7 +1813,7 @@ class CommonHandlers(BaseHandler):
         size_data = callback.data[5:]  # Убираем "size_"
 
         if size_data == "custom":
-            await callback.message.edit_text("Введите размер товара:")
+            await callback.message.edit_text("Введите размер обуви (например: 42, 42.5, 43):")
             await state.set_state(ProductStates.waiting_for_size)
             return
 
@@ -1829,11 +1825,20 @@ class CommonHandlers(BaseHandler):
         user_name = callback.from_user.first_name
         size_text = size_data if size_data != "skip" else "не указан"
 
-        await callback.message.edit_text(f"{user_name}, размер: {size_text}")
-        await state.set_state(ProductStates.waiting_for_condition)
+        await callback.message.edit_text(f"{user_name}, размер обуви: {size_text}")
 
-        from bot.services.product_service import ProductService
-        await ProductService.ask_condition(callback.message, user_name)
+        # После выбора размера для обуви переходим к цвету
+        data = await StateManager.get_data_safe(state)
+        category_name = data.get('category_name', '')
+
+        if self._is_shoe_category(category_name):
+            is_sport_shoe = self._is_sport_shoe_category(category_name)
+            await state.set_state(ProductStates.waiting_for_shoe_color)
+            await self._ask_shoe_color(callback.message, user_name, is_sport_shoe=is_sport_shoe)
+        else:
+            await state.set_state(ProductStates.waiting_for_condition)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_condition(callback.message, user_name)
 
     async def process_custom_size(self, message: Message, state: FSMContext):
         """Обработка ручного ввода размера"""
@@ -1841,11 +1846,20 @@ class CommonHandlers(BaseHandler):
         await StateManager.safe_update(state, size=size)
 
         user_name = message.from_user.first_name
-        await message.answer(f"{user_name}, размер: {size}")
-        await state.set_state(ProductStates.waiting_for_condition)
+        await message.answer(f"{user_name}, размер обуви: {size}")
 
-        from bot.services.product_service import ProductService
-        await ProductService.ask_condition(message, user_name)
+        # После ввода размера для обуви переходим к цвету
+        data = await StateManager.get_data_safe(state)
+        category_name = data.get('category_name', '')
+
+        if self._is_shoe_category(category_name):
+            is_sport_shoe = self._is_sport_shoe_category(category_name)
+            await state.set_state(ProductStates.waiting_for_shoe_color)
+            await self._ask_shoe_color(message, user_name, is_sport_shoe=is_sport_shoe)
+        else:
+            await state.set_state(ProductStates.waiting_for_condition)
+            from bot.services.product_service import ProductService
+            await ProductService.ask_condition(message, user_name)
 
     async def process_condition(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора состояния товара"""

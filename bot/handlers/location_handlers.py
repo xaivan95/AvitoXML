@@ -10,11 +10,11 @@ from bot.states import ProductStates
 from bot.handlers.base import BaseHandler, StateManager
 from bot.services.location_service import LocationService
 from bot.services.metro_service import MetroService
-from bot.keyboards.builders import KeyboardBuilder
 
 
 class LocationHandlers(BaseHandler):
     """Обработчики для работы с локациями"""
+
     def __init__(self, db: Database, bot: Bot = None):
         router = Router()
         super().__init__(router, db, bot)
@@ -46,10 +46,7 @@ class LocationHandlers(BaseHandler):
             self.handle_city_input,
             StateFilter(ProductStates.waiting_for_city_input)
         )
-        self.router.message.register(
-            self.process_single_city_input,
-            StateFilter(ProductStates.waiting_for_city_input)
-        )
+
         self.router.callback_query.register(
             self.confirm_city,
             F.data == "city_confirm",
@@ -179,17 +176,55 @@ class LocationHandlers(BaseHandler):
     async def handle_city_input(self, message: Message, state: FSMContext):
         """Общий обработчик ввода городов"""
         data = await StateManager.get_data_safe(state)
-        sale_type = data.get('sale_type')
         placement_method = data.get('placement_method')
+
         if message.text == "✅ Завершить ввод городов":
-            if placement_method in ["multiple_in_city", "exact_cities"]:
-                await self._finish_city_input(message, state)
+            await self._finish_city_input(message, state)
             return
 
         if placement_method == "multiple_in_city":
             await self._process_single_city_for_multiple(message, state)
         elif placement_method == "exact_cities":
-            await self._process_single_city_for_multiple(message, state)
+            await self._process_city_input(message, state)
+        else:
+            # Fallback для других методов
+            await self._process_city_input(message, state)
+
+    async def _process_city_input(self, message: Message, state: FSMContext):
+        """Обработка ввода города для метода exact_cities"""
+        city_name = message.text.strip()
+
+        if not city_name:
+            await message.answer("Введите название города:")
+            return
+
+        # Ищем город через Nominatim
+        from нф import validate_city_nominatim
+        result = await validate_city_nominatim(city_name)
+
+        if result['valid']:
+            city_data = result['data']
+            await StateManager.safe_update(state, temp_city=city_data)
+
+            builder = InlineKeyboardBuilder()
+            builder.button(text="✅ Да, верно", callback_data="city_confirm")
+            builder.button(text="❌ Нет, другой город", callback_data="city_reject")
+            builder.adjust(2)
+
+            await message.answer(
+                f"🔍 Найден город:\n"
+                f"🏙️ {city_data['name']}\n"
+                f"📍 {city_data['full_address']}\n\n"
+                "Это правильный город?",
+                reply_markup=builder.as_markup()
+            )
+
+            await state.set_state(ProductStates.waiting_for_city_confirmation)
+        else:
+            await message.answer(
+                f"❌ Город '{city_name}' не найден.\n"
+                "Попробуйте ввести другое название:"
+            )
 
     async def _process_single_city_for_multiple(self, message: Message, state: FSMContext):
         """Обработка одного города для мультиразмещения"""
@@ -234,48 +269,8 @@ class LocationHandlers(BaseHandler):
                 "Попробуйте ввести другое название:"
             )
 
-    async def _process_city_input(self, message: Message, state: FSMContext):
-        """Обработка ввода города"""
-        city_name = message.text.strip()
-
-        if not city_name:
-            await message.answer("Введите название города:")
-            return
-
-        # Ищем город через Nominatim
-        from нф import validate_city_nominatim
-        result = await validate_city_nominatim(city_name)
-
-        if result['valid']:
-            city_data = result['data']
-            await StateManager.safe_update(state, temp_city=city_data)
-
-            builder = InlineKeyboardBuilder()
-            builder.button(text="✅ Да, верно", callback_data="city_confirm")
-            builder.button(text="❌ Нет, другой город", callback_data="city_reject")
-            builder.adjust(2)
-
-            await message.answer(
-                f"🔍 Найден город:\n"
-                f"🏙️ {city_data['name']}\n"
-                f"📍 {city_data['full_address']}\n\n"
-                "Это правильный город?",
-                reply_markup=builder.as_markup()
-            )
-
-            await state.set_state(ProductStates.waiting_for_city_confirmation)
-        else:
-            await message.answer(
-                f"❌ Город '{city_name}' не найден.\n"
-                "Попробуйте ввести другое название:"
-            )
-
-    async def process_single_city_input(self, message: Message, state: FSMContext):
-        """Обработка ввода одного города (упрощенная версия)"""
-        await self._process_city_input(message, state)
-
     async def confirm_city(self, callback: CallbackQuery, state: FSMContext):
-        """Подтверждение города"""
+        """Подтверждение города для метода exact_cities"""
         data = await StateManager.get_data_safe(state)
         city_data = data.get('temp_city')
         selected_cities = data.get('selected_cities', [])
@@ -318,7 +313,16 @@ class LocationHandlers(BaseHandler):
     async def restart_city_input(self, callback: CallbackQuery, state: FSMContext):
         """Перезапуск ввода городов"""
         await StateManager.safe_update(state, selected_cities=[])
+        await state.set_state(ProductStates.waiting_for_city_input)
+
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="✅ Завершить ввод городов")]],
+            resize_keyboard=True,
+            one_time_keyboard=True
+        )
+
         await callback.message.edit_text("Введите название первого города:")
+        await callback.message.answer("Можете вводить города:", reply_markup=keyboard)
         await callback.answer()
 
     async def skip_city_input(self, callback: CallbackQuery, state: FSMContext):
@@ -333,7 +337,7 @@ class LocationHandlers(BaseHandler):
         await ProductService.ask_start_date(callback.message, user_name)
 
     async def _finish_city_input(self, message: Message, state: FSMContext):
-        """Завершение ввода городов"""
+        """Завершение ввода городов для метода exact_cities"""
         data = await StateManager.get_data_safe(state)
         selected_cities = data.get('selected_cities', [])
 

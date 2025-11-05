@@ -1,3 +1,4 @@
+# bot/states.py
 from aiogram.fsm.state import State, StatesGroup
 
 class ProductStates(StatesGroup):
@@ -16,6 +17,7 @@ class ProductStates(StatesGroup):
     waiting_for_avito_delivery = State()
     waiting_for_delivery_services = State()
     waiting_for_delivery_discount = State()
+    waiting_for_delivery_discount_percent = State()  # НОВОЕ: для ввода процента скидки
     waiting_for_multioffer = State()
     waiting_for_brand = State()
     waiting_for_size = State()
