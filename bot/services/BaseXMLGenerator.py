@@ -12,6 +12,8 @@ import random
 
 import requests
 
+from bot.services.category_service import CategoryService
+
 
 class BaseXMLGenerator(ABC):
     """Базовый класс для генерации XML"""
@@ -22,12 +24,12 @@ class BaseXMLGenerator(ABC):
         self.image_service = image_service
 
     @abstractmethod
-    def generate_ad(self, product: dict, city: str, ad_number: int = 1, metro_station: str = None) -> ET.Element:
-        """Генерация элемента объявления"""
+    def generate_ad(self, product: dict, city: str, ad_number: int = 1, metro_station: str = None, images_map: dict = None) -> ET.Element:
+        """Генерация элемента объявления с поддержкой images_map"""
         pass
 
-    def generate_xml_content(self, products: list) -> str:
-        """Генерация XML контента (без архива)"""
+    def generate_xml_content(self, products: list, images_map: dict = None) -> str:
+        """Генерация XML контента с правильными изображениями для каждого объявления"""
         root = ET.Element("Ads",
                           formatVersion=self.format_version,
                           target=self.target)
@@ -44,7 +46,7 @@ class BaseXMLGenerator(ABC):
             if placement_method == 'multiple_in_city' and cities:
                 # Мультиразмещение в одном городе
                 for i in range(quantity):
-                    ad = self.generate_ad(product, cities[0], i + 1)
+                    ad = self.generate_ad(product, cities[0], i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 
@@ -52,7 +54,7 @@ class BaseXMLGenerator(ABC):
                 # Размещение по количеству в разных городах
                 for i in range(min(quantity, len(cities))):
                     city = cities[i] if i < len(cities) else cities[0]
-                    ad = self.generate_ad(product, city, i + 1)
+                    ad = self.generate_ad(product, city, i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 
@@ -62,14 +64,14 @@ class BaseXMLGenerator(ABC):
                 metro_city = product.get('metro_city', 'Москва')
 
                 for i, station in enumerate(metro_stations[:quantity]):
-                    ad = self.generate_ad(product, metro_city, i + 1, station)
+                    ad = self.generate_ad(product, metro_city, i + 1, station, images_map)
                     root.append(ad)
                     ad_count += 1
 
             else:
                 # Обычное размещение по городам
                 for i, city in enumerate(cities[:quantity]):
-                    ad = self.generate_ad(product, city, i + 1)
+                    ad = self.generate_ad(product, city, i + 1, None, images_map)
                     root.append(ad)
                     ad_count += 1
 
@@ -82,62 +84,49 @@ class BaseXMLGenerator(ABC):
         return reparsed.toprettyxml(indent="  ")
 
     async def generate_zip_archive(self, products: list) -> BytesIO:
-        """Генерация ZIP архива с XML и изображениями (асинхронная версия)"""
+        """Генерация ZIP архива с XML и изображениями"""
         temp_dir = tempfile.mkdtemp()
 
         try:
             zip_buffer = BytesIO()
 
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                # Генерируем XML
-                xml_content = self.generate_xml_content(products)
-                zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
+                # Сначала собираем все уникальные изображения для архива
+                all_images_map = {}  # {image_url: filename}
+                image_counter = 1
 
-                # Собираем все уникальные изображения из всех товаров
-                all_image_refs = []
-                image_product_map = {}
-
+                # Проходим по всем товарам и собираем изображения
                 for product in products:
-                    images = product.get('all_images', [])
-                    shuffle = product.get('shuffle_images', False)
+                    images = self._get_product_images_for_archive(product)
+                    for img_url in images:
+                        if img_url and img_url not in all_images_map:
+                            filename = f"{image_counter}.jpg"
+                            all_images_map[img_url] = filename
+                            image_counter += 1
 
-                    if shuffle:
-                        random.shuffle(images)
+                print(f"📸 Всего уникальных изображений для архива: {len(all_images_map)}")
 
-                    for img_ref in images:
-                        if img_ref and img_ref not in image_product_map:
-                            all_image_refs.append(img_ref)
-                            image_product_map[img_ref] = product.get('product_id', 'unknown')
-
-                print(f"📸 Найдено {len(all_image_refs)} уникальных изображений для архива")
-
-                # Обрабатываем и добавляем изображения в архив
+                # Скачиваем и добавляем изображения в архив
                 successful_downloads = 0
-                for i, image_ref in enumerate(all_image_refs[:50], 1):
+                for img_url, filename in all_images_map.items():
                     try:
-                        filename = f"{i}.jpg"
                         image_path = os.path.join(temp_dir, filename)
 
-                        print(f"⬇️ Обрабатываем изображение {i}: {image_ref[:50]}...")
+                        print(f"⬇️ Скачиваем изображение {filename}: {img_url[:50]}...")
 
                         if self.image_service:
-                            # Используем ImageService для скачивания (асинхронно)
-                            image_content = await self.image_service.process_image_for_export(image_ref)
-
+                            image_content = await self.image_service.process_image_for_export(img_url)
                             if image_content:
-                                # Сохраняем изображение
                                 with open(image_path, 'wb') as f:
                                     f.write(image_content)
 
                                 zip_file.write(image_path, filename)
                                 successful_downloads += 1
-                                print(f"✅ Изображение {filename} успешно добавлено")
-                            else:
-                                print(f"❌ Не удалось скачать изображение {image_ref}")
+
                         else:
-                            # Старая логика для URL (синхронная)
-                            if self._is_url(image_ref):
-                                response = requests.get(image_ref, timeout=30, stream=True)
+                            # Логика для URL без image_service
+                            if self._is_url(img_url):
+                                response = requests.get(img_url, timeout=30, stream=True)
                                 if response.status_code == 200:
                                     with open(image_path, 'wb') as f:
                                         for chunk in response.iter_content(chunk_size=8192):
@@ -145,19 +134,21 @@ class BaseXMLGenerator(ABC):
 
                                     zip_file.write(image_path, filename)
                                     successful_downloads += 1
-                                    print(f"✅ Изображение {filename} успешно добавлено")
+
                                 else:
-                                    print(f"❌ Ошибка скачивания {image_ref}: статус {response.status_code}")
-                            else:
-                                print(f"❌ Пропускаем не-URL изображение: {image_ref}")
+                                    print(f"❌ Ошибка скачивания {filename}: статус {response.status_code}")
 
                     except Exception as e:
-                        print(f"❌ Ошибка при обработке изображения {image_ref}: {e}")
+                        print(f"❌ Ошибка при обработке изображения {filename}: {e}")
                         continue
 
                 print(f"✅ В архив добавлено {successful_downloads} изображений")
 
-                # Добавляем README файл
+                # Теперь генерируем XML с правильными ссылками на изображения
+                xml_content = self.generate_xml_content(products, all_images_map)
+                zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
+
+                # README - исправленный вызов
                 readme_content = self._generate_readme(products, successful_downloads)
                 zip_file.writestr('README.txt', readme_content.encode('utf-8'))
 
@@ -166,17 +157,15 @@ class BaseXMLGenerator(ABC):
 
         except Exception as e:
             print(f"❌ Критическая ошибка при создании архива: {e}")
+            import traceback
+            traceback.print_exc()
             return await self._create_fallback_zip(products)
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 
-    def _is_url(self, file_reference: str) -> bool:
-            """Проверяет, является ли строка URL"""
-            return file_reference.startswith(('http://', 'https://'))
-
     def _generate_readme(self, products: list, image_count: int) -> str:
-            """Генерирует README файл"""
-            return f"""Avito Export Archive
+        """Генерирует README файл"""
+        return f"""Avito Export Archive
     Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     Total products: {len(products)}
     Total images: {image_count}
@@ -192,20 +181,29 @@ class BaseXMLGenerator(ABC):
 
     Убедитесь, что все изображения имеют правильные форматы (JPEG, PNG)."""
 
+
+    def _is_url(self, file_reference: str) -> bool:
+            """Проверяет, является ли строка URL"""
+            return file_reference.startswith(('http://', 'https://'))
+
     async def _create_fallback_zip(self, products: list) -> BytesIO:
-        """Создает архив только с XML (асинхронная версия)"""
+        """Создает архив только с XML (резервный вариант)"""
         zip_buffer = BytesIO()
 
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            # Генерируем XML без images_map
             xml_content = self.generate_xml_content(products)
             zip_file.writestr('avito.xml', xml_content.encode('utf-8'))
 
-            error_info = f"""ВНИМАНИЕ: Изображения не были добавлены в архив.
+            error_info = f"""ВНИМАНИЕ: Изображения не были добавлены в архив из-за ошибки.
 
     Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-    Total products: {len(products)}"""
+    Total products: {len(products)}
 
-            zip_file.writestr('INFO.txt', error_info.encode('utf-8'))
+    Причина: Ошибка при обработке изображений
+    Рекомендация: Проверьте доступность URL изображений"""
+
+            zip_file.writestr('ERROR_INFO.txt', error_info.encode('utf-8'))
 
         zip_buffer.seek(0)
         return zip_buffer
@@ -216,7 +214,8 @@ class BaseXMLGenerator(ABC):
         # Id
         product_id = product.get('product_id', 'unknown')
         ET.SubElement(ad, "Id").text = f"{product_id}_{ad_number}" if ad_number > 1 else product_id
-
+        # Размер (добавляем в общие элементы)
+        self._add_size_to_common(ad, product)
         # DateBegin (если указана)
         start_date = product.get('start_date')
         if start_date:
@@ -259,9 +258,6 @@ class BaseXMLGenerator(ABC):
         if price > 0:
             ET.SubElement(ad, "Price").text = str(price)
 
-        # Images
-        self._add_images(ad, product)
-
         # ContactMethod
         contact_method = product.get('contact_method', 'both')
         contact_methods = {
@@ -302,25 +298,14 @@ class BaseXMLGenerator(ABC):
             ET.SubElement(ad, "AdType").text = sale_type_names.get(sale_type, "Товар приобретен на продажу")
 
     def _add_images(self, ad: ET.Element, product: dict):
-        """Добавление изображений с локальными именами"""
+        """Старый метод - теперь используем _add_images_to_ad"""
+        print("⚠️ Используется старый метод _add_images, рекомендуется обновить логику")
         all_images = product.get('all_images', [])
-        shuffle = product.get('shuffle_images', False)
-
         if all_images:
             images_elem = ET.SubElement(ad, "Images")
-
-            # Перемешиваем если нужно
-            image_list = all_images.copy()
-            if shuffle:
-                random.shuffle(image_list)
-
-            # Добавляем до 10 изображений с локальными именами
-            for i, img_url in enumerate(image_list[:10], 1):
-                # Используем локальные имена файлов (1.jpg, 2.jpg и т.д.)
-                # Avito будет искать эти файлы в том же архиве
-                ET.SubElement(images_elem, "Image", name=f"{i}.jpg")
-
-            print(f"📷 Добавлено {min(len(image_list), 10)} изображений в XML")
+            # Просто добавляем первые 10 изображений как 1.jpg, 2.jpg и т.д.
+            for i in range(min(10, len(all_images))):
+                ET.SubElement(images_elem, "Image", name=f"{i + 1}.jpg")
 
     def _get_product_price(self, product: dict) -> int:
         """Получение цены товара"""
@@ -351,4 +336,101 @@ class BaseXMLGenerator(ABC):
         else:
             return f"{city}, {street}, д. {building}"
 
+    def _extract_category_levels(self, product: dict) -> tuple:
+        """
+        Извлекает уровни категории из продукта
+        Возвращает: (first_level, second_level, third_level)
+        """
+        category_id = product.get('category')
+        category_name = product.get('category_name', '')
+
+        print(f"📦 Извлечение уровней категории:")
+        print(f"   ID: {category_id}")
+        print(f"   Название: {category_name}")
+
+        # Пробуем сначала по ID
+        if category_id:
+            first_level, second_level, third_level = CategoryService.get_category_levels(category_id)
+            if first_level:  # Если нашли по ID
+                print(f"✅ Используем уровни из ID")
+                return first_level, second_level, third_level
+
+        # Если не нашли по ID или ID пустой, используем название
+        if category_name:
+            print(f"✅ Используем уровни из названия")
+            return CategoryService.get_category_levels_from_name(category_name)
+
+        print(f"❌ Не удалось извлечь уровни категории")
+        return "", "", ""
+
+    def _get_apparel_value(self, second_level: str) -> str:
+        """Возвращает точное название для Apparel"""
+        return second_level if second_level else "Другое"
+
+    def _get_dresstype_value(self, third_level: str) -> str:
+        """Возвращает точное название для DressType"""
+        return third_level
+
+    def _add_size_to_common(self, ad: ET.Element, product: dict):
+        """Добавляет тег <Size> с размером"""
+        # Пробуем разные поля с размером
+        size_fields = ['clothing_size', 'size', 'shoe_size']
+
+        for field in size_fields:
+            size_value = product.get(field, '')
+            if size_value:
+                print(f"✅ Добавляем размер в тег <Size> из поля '{field}': {size_value}")
+                ET.SubElement(ad, "Size").text = size_value
+                return
+
+        print("❌ Размер не найден для тега <Size>")
+
+    def _get_product_images_for_archive(self, product: dict) -> list:
+        """Получает все изображения товара для добавления в архив"""
+        all_images = product.get('all_images', [])
+        return all_images
+
+    def _get_images_for_ad(self, product: dict, ad_number: int, images_map: dict) -> list:
+        """
+        Получает список изображений для конкретного объявления
+        """
+        all_images = product.get('all_images', [])
+        shuffle_images = product.get('shuffle_images', False)
+
+        if not all_images:
+            return []
+
+        # Создаем копию списка изображений
+        images_list = all_images.copy()
+
+        # Перемешиваем если нужно
+        if shuffle_images:
+            import random
+            random.shuffle(images_list)
+            print(f"   🔀 Изображения перемешаны для объявления {ad_number}")
+
+        # Ограничиваем количество изображений (максимум 10)
+        images_list = images_list[:10]
+
+        print(f"   📋 Для объявления {ad_number}: {len(images_list)} изображений")
+
+        return images_list
+
+    def _add_images_to_ad(self, ad: ET.Element, product: dict, ad_number: int, images_map: dict):
+        """Добавляет изображения в объявление с правильными именами файлов"""
+        images_for_ad = self._get_images_for_ad(product, ad_number, images_map)
+
+        if not images_for_ad:
+            print(f"   ⚠️ Нет изображений для объявления {ad_number}")
+            return
+
+        images_elem = ET.SubElement(ad, "Images")
+
+        for i, img_url in enumerate(images_for_ad, 1):
+            if img_url in images_map:
+                filename = images_map[img_url]
+                ET.SubElement(images_elem, "Image", name=filename)
+                print(f"   ✅ Добавлено изображение {i}: {filename}")
+            else:
+                print(f"   ❌ Изображение не найдено в архиве: {img_url[:50]}...")
 

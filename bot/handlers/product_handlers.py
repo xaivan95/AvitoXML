@@ -94,10 +94,11 @@ class ProductHandlers(BaseHandler):
         builder = InlineKeyboardBuilder()
 
         clothing_sizes = [
-            "40 (XXS)", "42 (XS)", "44 (XS/S)", "46 (S)", "48 (M)", "50 (L)",
-            "52 (L/XL)", "54 (XL)", "56 (XXL)", "58 (XXL)", "60 (3XL)", "62 (4XL)",
-            "64 (5XL)", "66 (6XL)", "68 (7XL)", "70 (7XL)", "72 (8XL)", "74 (8XL)",
-            "76 (9XL)", "78 (10XL)", "80 (10XL)", "82+ (10XL+)", "One size", "Без размера"
+            "38 (XXS)", "40 (XS)", "42 (S)", "44 (S/M)", "46 (M)",
+            "48 (L)", "50 (L/XL)", "52 (XL)", "54 (XXL)", "56 (3XL)",
+            "58 (4XL)", "60 (5XL)", "62 (5XL)", "64 (6XL)", "66 (6XL)",
+            "68 (7XL)", "70 (7XL)", "72 (8XL)", "74 (8XL)", "76 (8XL)",
+            "78+ (8XL+)", "One size", "Без размера"
         ]
 
         for size in clothing_sizes:

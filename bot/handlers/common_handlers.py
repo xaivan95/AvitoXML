@@ -1422,7 +1422,7 @@ class CommonHandlers(BaseHandler):
             await progress_msg.edit_text(
                 f"📊 Найдено {len(full_products)} товаров с {total_images} изображениями\n\n🔄 Генерирую архив...")
 
-            # Генерируем ZIP архив (асинхронно)
+            # Генерируем ZIP архив (асинхронный вызов)
             from bot.services.XMLGeneratorFactory import XMLGeneratorFactory
 
             first_product = full_products[0] if full_products else {}
@@ -1430,7 +1430,8 @@ class CommonHandlers(BaseHandler):
 
             # Создаем генератор с ImageService
             generator = XMLGeneratorFactory.get_generator(category_name)
-            generator.image_service = self.image_service
+            if hasattr(self, 'image_service') and self.image_service:
+                generator.image_service = self.image_service
 
             # Асинхронный вызов
             zip_buffer = await generator.generate_zip_archive(full_products)
@@ -1457,6 +1458,8 @@ class CommonHandlers(BaseHandler):
 
         except Exception as e:
             print(f"Error generating XML archive: {e}")
+            import traceback
+            traceback.print_exc()
             try:
                 await progress_msg.edit_text(
                     f"❌ Ошибка при генерации архива: {str(e)}\n\n"
@@ -1886,21 +1889,11 @@ class CommonHandlers(BaseHandler):
 
         # Получаем значение multioffer из состояния
         data = await StateManager.get_data_safe(state)
-        is_multioffer = data.get('multioffer', False)
 
-        if is_multioffer:
-            # Мультиобъявление - показываем варианты размещения
-            await state.set_state(ProductStates.waiting_for_placement_type)
-            from bot.services.product_service import ProductService
-            await ProductService.ask_placement_type(callback.message, user_name)
-        else:
-            # Не мультиобъявление (личная продажа) - сразу запрашиваем один город
-            await state.set_state(ProductStates.waiting_for_city_input)
-            await StateManager.safe_update(state, selected_cities=[])
+        await state.set_state(ProductStates.waiting_for_placement_type)
+        from bot.services.product_service import ProductService
+        await ProductService.ask_placement_type(callback.message, user_name)
 
-            await callback.message.answer(
-                f"{user_name}, введите название города для размещения объявления:"
-            )
 
     async def process_placement_type(self, callback: CallbackQuery, state: FSMContext):
         """Обработка выбора типа размещения для мультиобъявлений"""
