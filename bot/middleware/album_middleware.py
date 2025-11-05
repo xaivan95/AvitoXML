@@ -1,13 +1,12 @@
-import asyncio
-from typing import Any, Dict, Callable, Awaitable
+# bot/middlewares/album_middleware.py
 from aiogram import BaseMiddleware
 from aiogram.types import Message
+from typing import Dict, Any, Callable, Awaitable
+import asyncio
 
 
 class AlbumMiddleware(BaseMiddleware):
-    """Middleware for handling media groups"""
-
-    def __init__(self, latency: float = 0.5):
+    def __init__(self, latency: float = 1.0):
         self.latency = latency
         self.albums: Dict[str, Dict[str, Any]] = {}
 
@@ -18,39 +17,64 @@ class AlbumMiddleware(BaseMiddleware):
             data: Dict[str, Any]
     ) -> Any:
 
-        # Если это не медиа-группа, передаем как есть
-        if not event.media_group_id:
-            data['album'] = [event]
+        # Если сообщение не содержит фото, передаем как есть
+        if not event.photo:
             return await handler(event, data)
 
-        # Обработка медиа-группы
+        # Если нет media_group_id, это одиночное фото
+        if not event.media_group_id:
+            return await handler(event, data)
+
         media_group_id = event.media_group_id
 
+        # Если это новый альбом
         if media_group_id not in self.albums:
             self.albums[media_group_id] = {
-                'messages': [],
-                'is_processing': False
+                'messages': [event],
+                'handler_called': False
             }
 
-        album_data = self.albums[media_group_id]
-        album_data['messages'].append(event)
+            # Создаем задачу для обработки альбома через latency секунд
+            asyncio.create_task(
+                self._process_album(media_group_id, handler, data)
+            )
+        else:
+            # Добавляем сообщение в существующий альбом
+            self.albums[media_group_id]['messages'].append(event)
 
-        # Если альбом уже обрабатывается, пропускаем
-        if album_data['is_processing']:
-            return
+        # Никогда не вызываем хендлер сразу для отдельных сообщений альбома
+        return None
 
-        # Помечаем как обрабатываемый
-        album_data['is_processing'] = True
+    async def _process_album(self, media_group_id: str, handler: Callable, data: Dict[str, Any]):
+        """Обработка альбома после задержки"""
+        try:
+            # Ждем указанное время для сбора всех сообщений альбома
+            await asyncio.sleep(self.latency)
 
-        # Ждем другие сообщения из группы
-        await asyncio.sleep(self.latency)
+            if media_group_id not in self.albums:
+                return
 
-        # Передаем все сообщения группы в хендлер
-        data['album'] = album_data['messages']
-        result = await handler(event, data)
+            album_data = self.albums[media_group_id]
+            messages = album_data['messages']
 
-        # Удаляем обработанную группу
-        if media_group_id in self.albums:
-            del self.albums[media_group_id]
+            if not messages or album_data['handler_called']:
+                return
 
-        return result
+            # Помечаем как обработанный
+            album_data['handler_called'] = True
+
+            # Берем первое сообщение альбома для обработки
+            first_message = messages[0]
+
+            # Передаем альбом через data, а не через атрибут сообщения
+            data['album'] = messages
+
+            # Передаем в хендлер
+            await handler(first_message, data)
+
+        except Exception as e:
+            print(f"Error processing album: {e}")
+        finally:
+            # Удаляем альбом из кэша
+            if media_group_id in self.albums:
+                del self.albums[media_group_id]

@@ -1,0 +1,103 @@
+{
+  "user_states": {},
+  "products": [
+    {
+      "user_id": 1409857437,
+      "product_id": "05dbebc4-f73f-4c6a-99fb-59b22653deb0",
+      "title": "чимоданы и сумки",
+      "description": "Ivan, введите заголовок объявления (максимум 100 символов):\nчимоданы и сумки\nIvan, введите текст объявления, не менее 100 и не более 7500 символов:Ivan, введите заголовок объявления (максимум 100 символов):\nчимоданы и сумки\nIvan, введите текст объявления, не менее 100 и не более 7500 символов:",
+      "price": null,
+      "price_type": "range",
+      "price_min": 1200,
+      "price_max": 1500,
+      "category": "100366_3",
+      "category_name": "Сумки, рюкзаки и чемоданы - Чемоданы и дорожные сумки",
+      "contact_phone": "+79613271725",
+      "display_phone": "79613271725",
+      "contact_method": "both",
+      "main_images": [
+        "AgACAgIAAxkBAAIQ3WkLEhW6JZ-ozN1DgM3TG7mLjF0jAAIYC2sb9FBgSISl0lXtMDvQAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRK2kLF4NSeOU3Yn-EJd-P_YBDRgwaAAJHC2sb9FBgSGGR1JOGLuKkAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRLWkLF4sF9o3FooOp3Idg5dQ2rKY2AAJIC2sb9FBgSAxn4khhY-X6AQADAgADeAADNgQ"
+      ],
+      "additional_images": [
+        "AgACAgIAAxkBAAIRMmkLF5TjxLPNq2CO4JoEKJ2b43uFAAJJC2sb9FBgSNkZfsaqF0CwAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRNGkLF5sEvGMsopt1_gmRTJ1vPg3LAAJKC2sb9FBgSG4Bm7hKpTjQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRNmkLF6IYjYjvJn4uHk-bpVlfXPk0AAJLC2sb9FBgSImQnAv-vrGfAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPGkLF7dDNwllgNxpHuGje_zVUVVkAAJSC2sb9FBgSIUqkf2g5NalAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRQGkLF8lM1kVbkuSBoKSETHeZgng-AAJYC2sb9FBgSLLrydPlOAdsAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRQmkLF858DtBcjTF2DkFhR6CUEOd9AAJZC2sb9FBgSPFs0FxX4O-JAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIROmkLF7chkUQoRvmhYOAYhtzAOGDPAAJPC2sb9FBgSGD8YAmsNtuNAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIROWkLF7fpRhcvJs0yieFzZzi95q45AAJRC2sb9FBgSMpdBTWjUOTQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPWkLF7eAS5N78hXKi6badKV5q1CzAAJTC2sb9FBgSDoeqlq4-lJqAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRSmkLF9-6KQABZOcKDiPRFYlvY-VwcQACXAtrG_RQYEhXTT8ZxPpZmgEAAwIAA20AAzYE",
+        "AgACAgIAAxkBAAIRTGkLF-Sxf5OFYG_jfmJDwKDycUjhAAJdC2sb9FBgSEVavBEScnkUAQADAgADeQADNgQ"
+      ],
+      "all_images": [
+        "AgACAgIAAxkBAAIQ3WkLEhW6JZ-ozN1DgM3TG7mLjF0jAAIYC2sb9FBgSISl0lXtMDvQAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRK2kLF4NSeOU3Yn-EJd-P_YBDRgwaAAJHC2sb9FBgSGGR1JOGLuKkAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRLWkLF4sF9o3FooOp3Idg5dQ2rKY2AAJIC2sb9FBgSAxn4khhY-X6AQADAgADeAADNgQ",
+        "AgACAgIAAxkBAAIRMmkLF5TjxLPNq2CO4JoEKJ2b43uFAAJJC2sb9FBgSNkZfsaqF0CwAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRNGkLF5sEvGMsopt1_gmRTJ1vPg3LAAJKC2sb9FBgSG4Bm7hKpTjQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRNmkLF6IYjYjvJn4uHk-bpVlfXPk0AAJLC2sb9FBgSImQnAv-vrGfAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPGkLF7dDNwllgNxpHuGje_zVUVVkAAJSC2sb9FBgSIUqkf2g5NalAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRQGkLF8lM1kVbkuSBoKSETHeZgng-AAJYC2sb9FBgSLLrydPlOAdsAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRQmkLF858DtBcjTF2DkFhR6CUEOd9AAJZC2sb9FBgSPFs0FxX4O-JAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIROmkLF7chkUQoRvmhYOAYhtzAOGDPAAJPC2sb9FBgSGD8YAmsNtuNAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIROWkLF7fpRhcvJs0yieFzZzi95q45AAJRC2sb9FBgSMpdBTWjUOTQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPWkLF7eAS5N78hXKi6badKV5q1CzAAJTC2sb9FBgSDoeqlq4-lJqAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRSmkLF9-6KQABZOcKDiPRFYlvY-VwcQACXAtrG_RQYEhXTT8ZxPpZmgEAAwIAA20AAzYE",
+        "AgACAgIAAxkBAAIRTGkLF-Sxf5OFYG_jfmJDwKDycUjhAAJdC2sb9FBgSEVavBEScnkUAQADAgADeQADNgQ"
+      ],
+      "total_images": 14,
+      "shuffle_images": true,
+      "avito_delivery": true,
+      "delivery_services": [
+        "sdek_courier",
+        "pek",
+        "business_lines"
+      ],
+      "delivery_discount": "free",
+      "multioffer": true,
+      "brand": "Zanone",
+      "size": "",
+      "condition": "good",
+      "sale_type": "manufacturer",
+      "placement_type": "cities",
+      "placement_method": "by_quantity",
+      "cities": [
+        "Москва",
+        "Санкт-Петербург",
+        "Новосибирск",
+        "Екатеринбург",
+        "Казань"
+      ],
+      "selected_cities": [],
+      "quantity": 5,
+      "metro_city": null,
+      "metro_stations": [],
+      "selected_metro_stations": [],
+      "start_date": "2025-11-05T00:00:00",
+      "start_time": "16:00",
+      "start_datetime": "2025-11-05T16:00:00",
+      "images": [
+        "AgACAgIAAxkBAAIQ3WkLEhW6JZ-ozN1DgM3TG7mLjF0jAAIYC2sb9FBgSISl0lXtMDvQAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRK2kLF4NSeOU3Yn-EJd-P_YBDRgwaAAJHC2sb9FBgSGGR1JOGLuKkAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRLWkLF4sF9o3FooOp3Idg5dQ2rKY2AAJIC2sb9FBgSAxn4khhY-X6AQADAgADeAADNgQ",
+        "AgACAgIAAxkBAAIRMmkLF5TjxLPNq2CO4JoEKJ2b43uFAAJJC2sb9FBgSNkZfsaqF0CwAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRNGkLF5sEvGMsopt1_gmRTJ1vPg3LAAJKC2sb9FBgSG4Bm7hKpTjQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRNmkLF6IYjYjvJn4uHk-bpVlfXPk0AAJLC2sb9FBgSImQnAv-vrGfAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPGkLF7dDNwllgNxpHuGje_zVUVVkAAJSC2sb9FBgSIUqkf2g5NalAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRQGkLF8lM1kVbkuSBoKSETHeZgng-AAJYC2sb9FBgSLLrydPlOAdsAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIRQmkLF858DtBcjTF2DkFhR6CUEOd9AAJZC2sb9FBgSPFs0FxX4O-JAQADAgADdwADNgQ",
+        "AgACAgIAAxkBAAIROmkLF7chkUQoRvmhYOAYhtzAOGDPAAJPC2sb9FBgSGD8YAmsNtuNAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIROWkLF7fpRhcvJs0yieFzZzi95q45AAJRC2sb9FBgSMpdBTWjUOTQAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRPWkLF7eAS5N78hXKi6badKV5q1CzAAJTC2sb9FBgSDoeqlq4-lJqAQADAgADeQADNgQ",
+        "AgACAgIAAxkBAAIRSmkLF9-6KQABZOcKDiPRFYlvY-VwcQACXAtrG_RQYEhXTT8ZxPpZmgEAAwIAA20AAzYE",
+        "AgACAgIAAxkBAAIRTGkLF-Sxf5OFYG_jfmJDwKDycUjhAAJdC2sb9FBgSEVavBEScnkUAQADAgADeQADNgQ"
+      ],
+      "image_count": 14,
+      "created_at": "2025-11-05T12:25:32.576071"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from bot.database import db  # ✅ Импортируем глобальный экземпляр
+from bot.middleware import AlbumMiddleware  # ✅ Импортируем middleware
 import config
 from bot.handlers import initialize_handlers
 
@@ -38,6 +39,10 @@ async def main():
 
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
+
+    # ✅ РЕГИСТРИРУЕМ MIDDLEWARE ДО регистрации роутеров
+    dp.message.middleware(AlbumMiddleware(latency=1.0))
+    logger.info("AlbumMiddleware registered")
 
     routers = initialize_handlers(db, bot)
     for router in routers:

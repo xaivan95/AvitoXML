@@ -10,62 +10,24 @@ from bot.states import ProductStates
 from bot.handlers.base import BaseHandler, StateManager
 
 
-async def _ask_shuffle_images(message: Message, state: FSMContext, user_name: str = ""):
-    """Запрос о перемешивании фото"""
-    from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-    builder = InlineKeyboardBuilder()
-    builder.button(text="✅ Да, перемешать", callback_data="shuffle_yes")
-    builder.button(text="❌ Нет, оставить как есть", callback_data="shuffle_no")
-    builder.adjust(1)
-
-    greeting = f"{user_name}, " if user_name else ""
-
-    data = await StateManager.get_data_safe(state)
-    main_count = len(data.get('main_images', []))
-    additional_count = len(data.get('additional_images', []))
-    total_count = main_count + additional_count
-
-    await message.answer(
-        f"{greeting}нужно ли перемешать фото?\n\n"
-        f"📊 Статистика фото:\n"
-        f"• Основные: {main_count}\n"
-        f"• Дополнительные: {additional_count}\n"
-        f"• Всего: {total_count}\n\n"
-        "При перемешивании все фото будут расположены в случайном порядке.",
-        reply_markup=builder.as_markup()
-    )
-
-
 class ImageHandlers(BaseHandler):
     """Обработчики для работы с изображениями"""
 
     def __init__(self, bot: Bot = None):
         router = Router()
-        # ImageHandlers может не требовать db
         super().__init__(router, None, bot)
 
     def _register_handlers(self):
-        # Основные изображения
+        # Основные изображения - с поддержкой альбомов
         self.router.message.register(
-            self.handle_main_images_album,
-            StateFilter(ProductStates.waiting_for_main_images),
-            F.media_group_id
-        )
-        self.router.message.register(
-            self.process_main_single_image,
+            self.handle_main_images,
             StateFilter(ProductStates.waiting_for_main_images),
             F.photo
         )
 
-        # Дополнительные изображения
+        # Дополнительные изображения - с поддержкой альбомов
         self.router.message.register(
-            self.handle_additional_images_album,
-            StateFilter(ProductStates.waiting_for_additional_images),
-            F.media_group_id
-        )
-        self.router.message.register(
-            self.process_additional_single_image,
+            self.handle_additional_images,
             StateFilter(ProductStates.waiting_for_additional_images),
             F.photo
         )
@@ -73,11 +35,13 @@ class ImageHandlers(BaseHandler):
         # Команды завершения
         self.router.message.register(
             self.finish_main_images_command,
-            Command("finish_main_images")
+            Command("finish_main_images"),
+            StateFilter(ProductStates.waiting_for_main_images)
         )
         self.router.message.register(
             self.finish_additional_images_command,
-            Command("finish_additional_images")
+            Command("finish_additional_images"),
+            StateFilter(ProductStates.waiting_for_additional_images)
         )
 
         # Перемешивание изображений
@@ -86,10 +50,11 @@ class ImageHandlers(BaseHandler):
             F.data.startswith("shuffle_")
         )
 
-    async def handle_main_images_album(self, message: Message, album: List[Message], state: FSMContext):
-        """Обработка альбома основных изображений"""
-        if not album:
-            return
+    async def handle_main_images(self, message: Message, state: FSMContext, album: List[Message] = None):
+        """Универсальная обработка основных изображений (одиночных и альбомов)"""
+        # Получаем альбом из data, если он есть
+        if album is None:
+            album = [message]
 
         photo_files = []
         for msg in album:
@@ -97,42 +62,35 @@ class ImageHandlers(BaseHandler):
                 largest_photo = msg.photo[-1]
                 photo_files.append(largest_photo.file_id)
 
-        if photo_files:
-            data = await StateManager.get_data_safe(state)
-            main_images = data.get('main_images', [])
-            main_images.extend(photo_files)
+        if not photo_files:
+            return
 
-            await StateManager.safe_update(state, main_images=main_images)
+        data = await StateManager.get_data_safe(state)
+        main_images = data.get('main_images', [])
+        main_images.extend(photo_files)
 
+        await StateManager.safe_update(state, main_images=main_images)
+
+        # Определяем тип отправки
+        if len(album) > 1:
+            # Альбом
             await message.answer(
                 f"✅ Добавлен альбом с {len(photo_files)} основными фото! "
                 f"Всего основных фото: {len(main_images)}\n\n"
                 "Продолжайте отправлять фото или нажмите /finish_main_images чтобы завершить."
             )
+        else:
+            # Одиночное фото
+            await message.answer(
+                f"✅ Получено 1 основное изображение! Всего основных фото: {len(main_images)}\n\n"
+                "Продолжайте отправлять фото или нажмите /finish_main_images чтобы завершить."
+            )
 
-    async def process_main_single_image(self, message: Message, state: FSMContext):
-        """Обработка одиночного основного изображения"""
-        if message.media_group_id:
-            return  # Обрабатывается в handle_main_images_album
-
-        largest_photo = message.photo[-1]
-        photo_file_id = largest_photo.file_id
-
-        data = await StateManager.get_data_safe(state)
-        main_images = data.get('main_images', [])
-        main_images.append(photo_file_id)
-
-        await StateManager.safe_update(state, main_images=main_images)
-
-        await message.answer(
-            f"✅ Получено 1 основное изображение! Всего основных фото: {len(main_images)}\n\n"
-            "Продолжайте отправлять фото или нажмите /finish_main_images чтобы завершить."
-        )
-
-    async def handle_additional_images_album(self, message: Message, album: List[Message], state: FSMContext):
-        """Обработка альбома дополнительных изображений"""
-        if not album:
-            return
+    async def handle_additional_images(self, message: Message, state: FSMContext, album: List[Message] = None):
+        """Универсальная обработка дополнительных изображений (одиночных и альбомов)"""
+        # Получаем альбом из data, если он есть
+        if album is None:
+            album = [message]
 
         photo_files = []
         for msg in album:
@@ -140,38 +98,32 @@ class ImageHandlers(BaseHandler):
                 largest_photo = msg.photo[-1]
                 photo_files.append(largest_photo.file_id)
 
-        if photo_files:
-            data = await StateManager.get_data_safe(state)
-            additional_images = data.get('additional_images', [])
-            additional_images.extend(photo_files)
+        if not photo_files:
+            return
 
-            await StateManager.safe_update(state, additional_images=additional_images)
+        data = await StateManager.get_data_safe(state)
+        additional_images = data.get('additional_images', [])
+        additional_images.extend(photo_files)
 
-            total_count = len(additional_images)
+        await StateManager.safe_update(state, additional_images=additional_images)
+
+        total_count = len(additional_images)
+
+        # Определяем тип отправки
+        if len(album) > 1:
+            # Альбом
             await message.answer(
                 f"✅ Добавлен альбом с {len(photo_files)} дополнительными фото! "
                 f"Всего дополнительных фото: {total_count}\n\n"
                 "Продолжайте отправлять фото или нажмите /finish_additional_images чтобы завершить."
             )
-
-    async def process_additional_single_image(self, message: Message, state: FSMContext):
-        """Обработка одиночного дополнительного изображения"""
-        if message.media_group_id:
-            return  # Обрабатывается в handle_additional_images_album
-
-        data = await StateManager.get_data_safe(state)
-        additional_images = data.get('additional_images', [])
-
-        largest_photo = message.photo[-1]
-        additional_images.append(largest_photo.file_id)
-
-        await StateManager.safe_update(state, additional_images=additional_images)
-
-        await message.answer(
-            f"✅ Дополнительное изображение добавлено! "
-            f"Всего дополнительных фото: {len(additional_images)}\n\n"
-            "Продолжайте отправлять фото или нажмите /finish_additional_images чтобы завершить."
-        )
+        else:
+            # Одиночное фото
+            await message.answer(
+                f"✅ Дополнительное изображение добавлено! "
+                f"Всего дополнительных фото: {total_count}\n\n"
+                "Продолжайте отправлять фото или нажмите /finish_additional_images чтобы завершить."
+            )
 
     async def finish_main_images_command(self, message: Message, state: FSMContext):
         """Завершение добавления основных изображений"""
@@ -181,6 +133,7 @@ class ImageHandlers(BaseHandler):
         await state.set_state(ProductStates.waiting_for_additional_images)
 
         user_name = message.from_user.first_name
+
         if main_images:
             await message.answer(
                 f"{user_name}, ✅ завершено добавление основных изображений! "
@@ -219,26 +172,7 @@ class ImageHandlers(BaseHandler):
             "Теперь нужно решить, перемешивать ли фото."
         )
 
-        await _ask_shuffle_images(message, state, user_name)
-
-    async def process_shuffle_choice(self, callback: CallbackQuery, state: FSMContext):
-        """Обработка выбора перемешивания фото"""
-        shuffle_choice = callback.data[8:]  # Убираем "shuffle_"
-
-        shuffle_images = (shuffle_choice == "yes")
-        await StateManager.safe_update(state, shuffle_images=shuffle_images)
-        await state.set_state(ProductStates.waiting_for_avito_delivery)
-
-        user_name = callback.from_user.first_name
-        choice_text = "перемешаны" if shuffle_images else "оставлены в исходном порядке"
-
-        await callback.message.edit_text(
-            f"{user_name}, фото будут {choice_text}.\n\n"
-            "Теперь уточним настройки доставки."
-        )
-
-        from bot.services.delivery_service import DeliveryService
-        await DeliveryService.ask_avito_delivery(callback.message, user_name)
+        await self._ask_shuffle_images(message, state, user_name)
 
     async def _ask_additional_images(self, message: Message, state: FSMContext, user_name: str = ""):
         """Запрос дополнительных изображений"""
@@ -258,3 +192,47 @@ class ImageHandlers(BaseHandler):
             "💡 Если дополнительных фото нет, просто нажмите /finish_additional_images"
         )
 
+    async def _ask_shuffle_images(self, message: Message, state: FSMContext, user_name: str = ""):
+        """Запрос о перемешивании фото"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✅ Да, перемешать", callback_data="shuffle_yes")
+        builder.button(text="❌ Нет, оставить как есть", callback_data="shuffle_no")
+        builder.adjust(1)
+
+        greeting = f"{user_name}, " if user_name else ""
+
+        data = await StateManager.get_data_safe(state)
+        main_count = len(data.get('main_images', []))
+        additional_count = len(data.get('additional_images', []))
+        total_count = main_count + additional_count
+
+        await message.answer(
+            f"{greeting}нужно ли перемешать фото?\n\n"
+            f"📊 Статистика фото:\n"
+            f"• Основные: {main_count}\n"
+            f"• Дополнительные: {additional_count}\n"
+            f"• Всего: {total_count}\n\n"
+            "При перемешивании все фото будут расположены в случайном порядке.",
+            reply_markup=builder.as_markup()
+        )
+
+    async def process_shuffle_choice(self, callback: CallbackQuery, state: FSMContext):
+        """Обработка выбора перемешивания фото"""
+        shuffle_choice = callback.data[8:]  # Убираем "shuffle_"
+
+        shuffle_images = (shuffle_choice == "yes")
+        await StateManager.safe_update(state, shuffle_images=shuffle_images)
+        await state.set_state(ProductStates.waiting_for_avito_delivery)
+
+        user_name = callback.from_user.first_name
+        choice_text = "перемешаны" if shuffle_images else "оставлены в исходном порядке"
+
+        await callback.message.edit_text(
+            f"{user_name}, фото будут {choice_text}.\n\n"
+            "Теперь уточним настройки доставки."
+        )
+
+        from bot.services.delivery_service import DeliveryService
+        await DeliveryService.ask_avito_delivery(callback.message, user_name)
