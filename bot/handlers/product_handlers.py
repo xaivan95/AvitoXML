@@ -1,4 +1,3 @@
-# bot/handlers/product_handlers.py
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command, StateFilter
@@ -74,12 +73,9 @@ class ProductHandlers(BaseHandler):
         )
 
     def _needs_full_clothing_properties(self, category_name: str) -> bool:
-        """Проверяет, нужны ли полные свойства одежды (материал + размер + цвет)"""
         if not category_name:
             return False
-
         category_lower = category_name.lower()
-
         # Категории, для которых НЕ нужны полные свойства
         excluded_categories = [
             "нижнее бельё", "нижнее белье", "дублёнки", "дубленки", "шубы", "другое"
