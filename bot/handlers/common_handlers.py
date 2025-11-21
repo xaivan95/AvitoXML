@@ -223,6 +223,23 @@ class CommonHandlers(BaseHandler):
             Command("create_test")
         )
 
+        # Добавьте этот обработчик в _register_handlers
+        self.router.callback_query.register(
+            self.back_to_quick_dates,
+            CalendarCallback.filter(F.action == "back_to_quick"),
+            StateFilter(ProductStates.waiting_for_start_date)
+        )
+
+    async def back_to_quick_dates(self, callback: CallbackQuery, state: FSMContext):
+        """Возврат к быстрому выбору дат"""
+        user_name = callback.from_user.first_name
+        calendar = ProductCalendar()
+
+        await callback.message.edit_text(
+            f"{user_name}, выберите дату начала продажи:",
+            reply_markup=await calendar.start_calendar()
+        )
+
     async def create_test_product_command(self, message: Message):
         """Создание тестового товара по команде"""
         try:
@@ -1066,9 +1083,9 @@ class CommonHandlers(BaseHandler):
     async def _handle_clothing_properties(self, message: Message, state: FSMContext, user_name: str,
                                           category_name: str):
         """Обработка свойств одежды"""
-        # Начинаем с запроса размера одежды
         await state.set_state(ProductStates.waiting_for_clothing_size)
-        await self._ask_clothing_size(message, user_name)
+        from bot.services.product_service import ProductService
+        await ProductService.ask_clothing_size(message, user_name)
 
     async def _ask_clothing_size(self, message: Message, user_name: str):
         """Запрос размера одежды"""
@@ -1596,12 +1613,11 @@ class CommonHandlers(BaseHandler):
         else:
             return 0
 
-
     async def handle_calendar_callback(
-        self,
-        callback: CallbackQuery,
-        callback_data: CalendarCallback,  # Только один параметр callback_data
-        state: FSMContext
+            self,
+            callback: CallbackQuery,
+            callback_data: CalendarCallback,
+            state: FSMContext
     ):
         """Обработчик всех callback'ов календаря"""
         current_state = await state.get_state()
@@ -1620,13 +1636,16 @@ class CommonHandlers(BaseHandler):
             if date is None:
                 # Пользователь выбрал "Пропустить"
                 await state.update_data(start_date=None, start_time=None, start_datetime=None)
-                await callback.message.answer(f"{user_name}, продажа начнется сразу после публикации.")
+                await callback.message.edit_text(
+                    f"{user_name}, продажа начнется сразу после публикации."
+                )
                 await ProductService.complete_product_creation(callback.message, state, user_name)
             else:
                 # Сохраняем дату и переходим к выбору времени
                 await state.update_data(start_date=date)
                 await state.set_state(ProductStates.waiting_for_start_time)
 
+                # Показываем выбранную дату и запрашиваем время
                 builder = InlineKeyboardBuilder()
                 popular_times = [
                     "09:00", "10:00", "11:00", "12:00",
@@ -1640,11 +1659,14 @@ class CommonHandlers(BaseHandler):
                 builder.button(text="✏️ Ввести вручную", callback_data="time_custom")
                 builder.adjust(3)
 
-                await callback.message.answer(
+                await callback.message.edit_text(
                     f"{user_name}, дата начала продажи: {date.strftime('%d.%m.%Y')}\n\n"
                     "⏰ Теперь выберите время начала продажи:",
                     reply_markup=builder.as_markup()
                 )
+        else:
+            # Если не выбрана дата (переход к ручному выбору), не редактируем сообщение
+            await callback.answer()
 
     async def process_contact_phone(self, message: Message, state: FSMContext):
         """Обработка номера телефона из контакта"""

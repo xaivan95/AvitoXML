@@ -23,6 +23,48 @@ class BaseXMLGenerator(ABC):
         self.target = "Avito.ru"
         self.image_service = image_service
 
+    def _add_delivery_to_ad(self, ad: ET.Element, product: dict):
+        """Добавление информации о доставке в объявление"""
+        delivery_services = product.get('delivery_services', [])
+
+        if not delivery_services or "disabled" in delivery_services:
+            return
+
+        delivery_elem = ET.SubElement(ad, "Delivery")
+
+        # Маппинг кодов доставки на значения Avito
+        delivery_mapping = {
+            "pickup": "ПВЗ",
+            "courier": "Курьер",
+            "postamat": "Постамат",
+            "own_courier": "Свой курьер",
+            "sdek": "Свой партнер СДЭК",
+            "business_lines": "Свой партнер Деловые Линии",
+            "dpd": "Свой партнер DPD",
+            "pek": "Свой партнер ПЭК",
+            "russian_post": "Свой партнер Почта России",
+            "sdek_courier": "Свой партнер СДЭК курьер",
+            "self_pickup_online": "Самовывоз с онлайн-оплатой"
+        }
+
+        for service_code in delivery_services:
+            if service_code in delivery_mapping and service_code != "disabled":
+                ET.SubElement(delivery_elem, "Option").text = delivery_mapping[service_code]
+
+        # Добавляем скидку на доставку если есть
+        delivery_discount = product.get('delivery_discount', '')
+        delivery_discount_percent = product.get('delivery_discount_percent')
+
+        if delivery_discount == "free":
+            # Бесплатная доставка
+            discount_elem = ET.SubElement(delivery_elem, "Discount")
+            ET.SubElement(discount_elem, "Type").text = "free"
+        elif delivery_discount == "discount" and delivery_discount_percent:
+            # Скидка с процентом
+            discount_elem = ET.SubElement(delivery_elem, "Discount")
+            ET.SubElement(discount_elem, "Type").text = "percent"
+            ET.SubElement(discount_elem, "Value").text = str(delivery_discount_percent)
+
     @abstractmethod
     def generate_ad(self, product: dict, city: str, ad_number: int = 1, metro_station: str = None, images_map: dict = None) -> ET.Element:
         """Генерация элемента объявления с поддержкой images_map"""
@@ -218,14 +260,14 @@ class BaseXMLGenerator(ABC):
         zip_buffer.seek(0)
         return zip_buffer
 
+    # bot/services/BaseXMLGenerator.py
     def _add_common_elements(self, ad: ET.Element, product: dict, city: str, ad_number: int = 1,
                              metro_station: str = None):
         """Добавление общих элементов"""
         # Id
         product_id = product.get('product_id', 'unknown')
         ET.SubElement(ad, "Id").text = f"{product_id}_{ad_number}" if ad_number > 1 else product_id
-        # Размер (добавляем в общие элементы)
-        self._add_size_to_common(ad, product)
+
         # DateBegin (если указана)
         start_date = product.get('start_date')
         if start_date:
@@ -280,11 +322,10 @@ class BaseXMLGenerator(ABC):
         # InternetCalls (по умолчанию Нет)
         ET.SubElement(ad, "InternetCalls").text = "Нет"
 
-        # Delivery
-        if product.get('avito_delivery', False):
-            delivery_elem = ET.SubElement(ad, "Delivery")
-            ET.SubElement(delivery_elem, "Option").text = "ПВЗ"
-            ET.SubElement(delivery_elem, "Option").text = "Курьер"
+        # Delivery - ВЫЗЫВАЕМ МЕТОД КОРРЕКТНО
+        avito_delivery = product.get('avito_delivery', False)
+        if avito_delivery:
+            self._add_delivery_to_ad(ad, product)
 
         # Condition
         condition = product.get('condition', '')
@@ -306,6 +347,7 @@ class BaseXMLGenerator(ABC):
                 "personal": "Частное лицо"
             }
             ET.SubElement(ad, "AdType").text = sale_type_names.get(sale_type, "Товар приобретен на продажу")
+
 
     def _add_images(self, ad: ET.Element, product: dict):
         """Старый метод - теперь используем _add_images_to_ad"""

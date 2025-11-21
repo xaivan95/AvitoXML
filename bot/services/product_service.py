@@ -348,6 +348,34 @@ class ProductService:
         )
 
     @staticmethod
+    async def ask_clothing_size(message: Message, user_name: str = ""):
+        """Запрос размера одежды"""
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+        builder = InlineKeyboardBuilder()
+
+        # Размеры одежды согласно требованиям Avito
+        clothing_sizes = [
+            "40 (XXS)", "42 (XS)", "44 (XS/S)", "46 (S)", "48 (M)",
+            "50 (L)", "52 (L/XL)", "54 (XL)", "56 (XXL)", "58 (XXL)",
+            "60 (3XL)", "62 (4XL)", "64 (5XL)", "66 (6XL)", "68 (7XL)",
+            "70 (7XL)", "72 (8XL)", "74 (8XL)", "76 (9XL)", "78 (10XL)",
+            "80 (10XL)", "82+ (10XL+)", "One size", "Без размера"
+        ]
+
+        for size in clothing_sizes:
+            builder.button(text=size, callback_data=f"clothing_size_{size}")
+
+        builder.adjust(2)  # 2 кнопки в ряду
+
+        greeting = f"{user_name}, " if user_name else ""
+
+        await message.answer(
+            f"{greeting}выберите размер одежды:",
+            reply_markup=builder.as_markup()
+        )
+
+    @staticmethod
     async def ask_sale_type(message: Message, user_name: str = ""):
         """Запрос типа продажи"""
         builder = InlineKeyboardBuilder()
@@ -392,16 +420,30 @@ class ProductService:
 
     @staticmethod
     async def ask_start_date(message: Message, user_name: str = ""):
-        """Запрос даты старта продажи"""
+        """Запрос даты старта продажи с быстрыми кнопками"""
         greeting = f"{user_name}, " if user_name else ""
+
+        # Получаем даты для отображения в тексте
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+        in_3_days = today + timedelta(days=3)
+        in_week = today + timedelta(days=7)
+        in_2_weeks = today + timedelta(days=14)
+
         calendar = ProductCalendar()
 
         await message.answer(
             f"{greeting}выберите дату начала продажи:\n\n"
-            "📅 Вы можете выбрать конкретную дату или пропустить этот шаг "
-            "(в этом случае продажа начнется сразу после публикации).",
+            f"📅 Быстрый выбор:\n"
+            f"• Завтра - {tomorrow.strftime('%d.%m.%Y')}\n"
+            f"• Через 3 дня - {in_3_days.strftime('%d.%m.%Y')}\n"
+            f"• Через неделю - {in_week.strftime('%d.%m.%Y')}\n"
+            f"• Через 2 недели - {in_2_weeks.strftime('%d.%m.%Y')}\n\n"
+            "💡 Вы можете выбрать быструю дату или указать конкретную дату вручную.\n"
+            "⏩ Или пропустите - продажа начнется сразу после публикации.",
             reply_markup=await calendar.start_calendar()
         )
+
     #TODO сохраняет с ID бота
     @staticmethod
     async def complete_product_creation(message: Message, state, user_name: str = ""):

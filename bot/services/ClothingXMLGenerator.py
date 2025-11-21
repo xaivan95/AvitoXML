@@ -1,10 +1,5 @@
+# bot/services/ClothingXMLGenerator.py
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from abc import ABC, abstractmethod
-from datetime import datetime
-import random
-
-from bot.services.BagsXMLGenerator import BagsXMLGenerator
 from bot.services.BaseXMLGenerator import BaseXMLGenerator
 
 
@@ -22,7 +17,6 @@ class ClothingXMLGenerator(BaseXMLGenerator):
         if images_map is not None:
             self._add_images_to_ad(ad, product, ad_number, images_map)
         else:
-            # Резервный вариант без images_map
             self._add_images(ad, product)
 
         # Извлекаем уровни категории
@@ -41,24 +35,31 @@ class ClothingXMLGenerator(BaseXMLGenerator):
         apparel_value = self._get_apparel_value(second_level)
         ET.SubElement(ad, "Apparel").text = apparel_value
 
-        # DressType (третий уровень) - если есть
-        dress_type = self._get_dresstype_value(third_level)
-        if dress_type:
-            ET.SubElement(ad, "DressType").text = dress_type
+        # Определяем, нужно ли использовать ApparelType или DressType
+        if self._should_use_apparel_type(first_level, second_level):
+            # Для верхней одежды используем ApparelType
+            apparel_type = self._get_apparel_type_value(third_level)
+            if apparel_type:
+                ET.SubElement(ad, "ApparelType").text = apparel_type
+        else:
+            # Для остальной одежды используем DressType
+            dress_type = self._get_dresstype_value(third_level)
+            if dress_type:
+                ET.SubElement(ad, "DressType").text = dress_type
 
         # Brand
         brand = product.get('brand', '')
         if brand and brand != 'Не указан':
             ET.SubElement(ad, "Brand").text = brand
 
-        # Size
+        # Size - ОБЯЗАТЕЛЬНОЕ ПОЛЕ для одежды
         clothing_size = product.get('clothing_size', '')
         if clothing_size:
-            param = ET.SubElement(ad, "Param")
-            ET.SubElement(param, "Name").text = "Размер"
-            ET.SubElement(param, "Value").text = clothing_size
-
-
+            # Добавляем размер в тег Size
+            ET.SubElement(ad, "Size").text = clothing_size
+        else:
+            # Если размер не указан, используем "Без размера"
+            ET.SubElement(ad, "Size").text = "Без размера"
 
         # Color
         clothing_color = product.get('clothing_color', '')
@@ -101,3 +102,18 @@ class ClothingXMLGenerator(BaseXMLGenerator):
     def _get_dresstype_value(self, third_level: str) -> str:
         """Возвращает точное название для DressType"""
         return third_level
+
+    def _get_apparel_type_value(self, third_level: str) -> str:
+        """Возвращает точное название для ApparelType"""
+        return third_level
+
+    def _should_use_apparel_type(self, first_level: str, second_level: str) -> bool:
+        """Определяет, нужно ли использовать ApparelType вместо DressType"""
+        # ApparelType используется только для верхней одежды
+        upper_clothing_keywords = ["верхняя одежда", "куртки", "пуховики", "пальто", "плащи"]
+
+        first_lower = first_level.lower() if first_level else ""
+        second_lower = second_level.lower() if second_level else ""
+
+        return any(keyword in first_lower for keyword in upper_clothing_keywords) or \
+            any(keyword in second_lower for keyword in upper_clothing_keywords)

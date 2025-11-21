@@ -1,315 +1,167 @@
-import calendar
+# bot/calendar.py
 from datetime import datetime, timedelta
-from typing import Tuple, Optional
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.filters.callback_data import CallbackData
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from typing import Optional
 
 
 class CalendarCallback(CallbackData, prefix="calendar"):
     action: str
-    year: int
-    month: int
-    day: int
+    year: Optional[int] = None
+    month: Optional[int] = None
+    day: Optional[int] = None
 
 
 class ProductCalendar:
-    months = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"]
-
     def __init__(self):
-        self.now = datetime.now()
         self.today = datetime.now().date()
 
     async def start_calendar(self) -> InlineKeyboardMarkup:
-        """Начальный экран календаря - выбор года (начинаем с текущего)"""
-        current_year = self.now.year
+        """Начало календаря с быстрыми кнопками"""
+        builder = InlineKeyboardBuilder()
 
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[])
-
-        # Строка с годами (начинаем с текущего)
-        years_row = []
-        for value in range(current_year, current_year + 5):
-            years_row.append(InlineKeyboardButton(
-                text=str(value),
-                callback_data=CalendarCallback(
-                    action="SET_YEAR",
-                    year=value,
-                    month=0,
-                    day=0
-                ).pack()
-            ))
-        inline_kb.inline_keyboard.append(years_row)
-
-        # Навигация по годам
-        nav_row = [
-            InlineKeyboardButton(
-                text='<<',
-                callback_data=CalendarCallback(
-                    action="PREV_YEARS",
-                    year=current_year,
-                    month=0,
-                    day=0
-                ).pack()
-            ),
-            InlineKeyboardButton(
-                text='>>',
-                callback_data=CalendarCallback(
-                    action="NEXT_YEARS",
-                    year=current_year,
-                    month=0,
-                    day=0
-                ).pack()
-            )
+        # Быстрые кнопки
+        quick_dates = [
+            ("📅 Завтра", "tomorrow"),
+            ("📅 Через 3 дня", "3_days"),
+            ("📅 Через неделю", "7_days"),
+            ("📅 Через 2 недели", "14_days")
         ]
-        inline_kb.inline_keyboard.append(nav_row)
 
-        # Кнопка пропуска
-        skip_button = InlineKeyboardButton(
-            text="⏩ Пропустить (начать сразу)",
-            callback_data=CalendarCallback(
-                action="SKIP",
-                year=0,
-                month=0,
-                day=0
-            ).pack()
-        )
-        inline_kb.inline_keyboard.append([skip_button])
+        for text, action in quick_dates:
+            builder.button(text=text, callback_data=CalendarCallback(action=action))
 
-        return inline_kb
+        builder.button(text="📅 Выбрать дату вручную", callback_data=CalendarCallback(action="manual"))
+        builder.button(text="⏩ Пропустить", callback_data=CalendarCallback(action="skip"))
 
-    async def _get_month_kb(self, year: int) -> InlineKeyboardMarkup:
-        """Клавиатура выбора месяца с проверкой на будущие года"""
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[])
+        builder.adjust(2, 2, 1, 1)  # 2 кнопки в первых двух рядах, затем по 1
 
-        # Заголовок с годом
-        header_row = [
-            InlineKeyboardButton(
-                text=str(year),
-                callback_data=CalendarCallback(
-                    action="START",
-                    year=year,
-                    month=0,
-                    day=0
-                ).pack()
-            )
-        ]
-        inline_kb.inline_keyboard.append(header_row)
+        return builder.as_markup()
 
-        # Определяем доступные месяцы
-        current_year = self.now.year
-        current_month = self.now.month
+    async def process_selection(self, callback_query, callback_data: CalendarCallback) -> tuple:
+        """Обработка выбора даты"""
+        return_data = (False, None)
 
-        # Первые 6 месяцев
-        months_row1 = []
-        for i, month in enumerate(self.months[0:6], 1):
-            # Проверяем, не в прошлом ли месяц
-            if year > current_year or (year == current_year and i >= current_month):
-                months_row1.append(InlineKeyboardButton(
-                    text=month,
-                    callback_data=CalendarCallback(
-                        action="SET_MONTH",
-                        year=year,
-                        month=i,
-                        day=0
-                    ).pack()
-                ))
-            else:
-                months_row1.append(InlineKeyboardButton(
-                    text="❌",
-                    callback_data=CalendarCallback(
-                        action="IGNORE",
-                        year=0,
-                        month=0,
-                        day=0
-                    ).pack()
-                ))
-        inline_kb.inline_keyboard.append(months_row1)
+        if callback_data.action == "skip":
+            return True, None
 
-        # Последние 6 месяцев
-        months_row2 = []
-        for i, month in enumerate(self.months[6:12], 7):
-            # Проверяем, не в прошлом ли месяц
-            if year > current_year or (year == current_year and i >= current_month):
-                months_row2.append(InlineKeyboardButton(
-                    text=month,
-                    callback_data=CalendarCallback(
-                        action="SET_MONTH",
-                        year=year,
-                        month=i,
-                        day=0
-                    ).pack()
-                ))
-            else:
-                months_row2.append(InlineKeyboardButton(
-                    text="❌",
-                    callback_data=CalendarCallback(
-                        action="IGNORE",
-                        year=0,
-                        month=0,
-                        day=0
-                    ).pack()
-                ))
-        inline_kb.inline_keyboard.append(months_row2)
+        elif callback_data.action == "manual":
+            # Переход к ручному выбору даты
+            await self._show_month_selection(callback_query)
+            return False, None
 
-        # Кнопки навигации
-        nav_row = [
-            InlineKeyboardButton(
-                text='🔙 Назад',
-                callback_data=CalendarCallback(
-                    action="BACK",
-                    year=year,
-                    month=0,
-                    day=0
-                ).pack()
-            )
-        ]
-        inline_kb.inline_keyboard.append(nav_row)
+        elif callback_data.action in ["tomorrow", "3_days", "7_days", "14_days"]:
+            # Обработка быстрых кнопок
+            selected_date = self._get_quick_date(callback_data.action)
+            return True, selected_date
 
-        return inline_kb
+        elif callback_data.action == "day":
+            # Выбор конкретного дня (из старой логики)
+            return_data = await self._process_day_selection(callback_data)
 
-    async def _get_days_kb(self, year: int, month: int) -> InlineKeyboardMarkup:
-        """Клавиатура выбора дня с проверкой на прошлые даты"""
-        inline_kb = InlineKeyboardMarkup(inline_keyboard=[])
+        elif callback_data.action == "prev-month":
+            # Навигация по месяцам
+            await self._show_month_selection(callback_query, year=callback_data.year, month=callback_data.month)
 
-        # Заголовок с годом и месяцем
-        header_row = [
-            InlineKeyboardButton(
-                text=f"{self.months[month - 1]} {year}",
-                callback_data=CalendarCallback(
-                    action="SET_YEAR",
-                    year=year,
-                    month=0,
-                    day=0
-                ).pack()
-            )
-        ]
-        inline_kb.inline_keyboard.append(header_row)
+        elif callback_data.action == "next-month":
+            # Навигация по месяцам
+            await self._show_month_selection(callback_query, year=callback_data.year, month=callback_data.month)
 
-        # Дни недели
-        week_days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
-        week_days_row = []
-        for day in week_days:
-            week_days_row.append(InlineKeyboardButton(
-                text=day,
-                callback_data=CalendarCallback(
-                    action="IGNORE",
-                    year=0,
-                    month=0,
-                    day=0
-                ).pack()
-            ))
-        inline_kb.inline_keyboard.append(week_days_row)
+        elif callback_data.action == "ignore":
+            # Игнорируем
+            await callback_query.answer(cache_time=60)
 
-        # Дни месяца с проверкой на доступность
-        month_calendar = calendar.monthcalendar(year, month)
+        return return_data
+
+    def _get_quick_date(self, action: str) -> datetime:
+        """Получить дату для быстрой кнопки"""
         today = self.today
 
-        for week in month_calendar:
-            week_row = []
-            for day in week:
-                if day == 0:
-                    week_row.append(InlineKeyboardButton(
-                        text=" ",
-                        callback_data=CalendarCallback(
-                            action="IGNORE",
-                            year=0,
-                            month=0,
-                            day=0
-                        ).pack()
-                    ))
-                else:
-                    current_date = datetime(year, month, day).date()
-                    if current_date >= today:
-                        # Доступная дата
-                        week_row.append(InlineKeyboardButton(
-                            text=str(day),
-                            callback_data=CalendarCallback(
-                                action="SET_DAY",
-                                year=year,
-                                month=month,
-                                day=day
-                            ).pack()
-                        ))
-                    else:
-                        # Прошедшая дата
-                        week_row.append(InlineKeyboardButton(
-                            text="❌",
-                            callback_data=CalendarCallback(
-                                action="IGNORE",
-                                year=0,
-                                month=0,
-                                day=0
-                            ).pack()
-                        ))
-            inline_kb.inline_keyboard.append(week_row)
+        if action == "tomorrow":
+            return today + timedelta(days=1)
+        elif action == "3_days":
+            return today + timedelta(days=3)
+        elif action == "7_days":
+            return today + timedelta(days=7)
+        elif action == "14_days":
+            return today + timedelta(days=14)
+
+        return today
+
+    async def _show_month_selection(self, callback_query, year: int = None, month: int = None):
+        """Показать выбор месяца (старая логика)"""
+        now = datetime.now()
+        if year is None:
+            year = now.year
+        if month is None:
+            month = now.month
+
+        # Создаем клавиатуру для выбора месяца
+        builder = InlineKeyboardBuilder()
 
         # Кнопки навигации
-        nav_row = [
-            InlineKeyboardButton(
-                text='🔙 Назад',
-                callback_data=CalendarCallback(
-                    action="BACK",
-                    year=year,
-                    month=month,
-                    day=0
-                ).pack()
+        prev_month = month - 1 if month > 1 else 12
+        prev_year = year if month > 1 else year - 1
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+
+        builder.button(
+            text="◀️",
+            callback_data=CalendarCallback(action="prev-month", year=prev_year, month=prev_month)
+        )
+        builder.button(
+            text=f"{self._get_month_name(month)} {year}",
+            callback_data=CalendarCallback(action="ignore")
+        )
+        builder.button(
+            text="▶️",
+            callback_data=CalendarCallback(action="next-month", year=next_year, month=next_month)
+        )
+
+        # Дни месяца
+        days = self._get_month_days(year, month)
+        for day in days:
+            builder.button(
+                text=f"{day}",
+                callback_data=CalendarCallback(action="day", year=year, month=month, day=day)
             )
+
+        # Кнопка возврата
+        builder.button(
+            text="🔙 Назад к быстрому выбору",
+            callback_data=CalendarCallback(action="back_to_quick")
+        )
+
+        builder.adjust(3, *[7 for _ in range((len(days) + 6) // 7)], 1)
+
+        await callback_query.message.edit_reply_markup(reply_markup=builder.as_markup())
+
+    def _get_month_name(self, month: int) -> str:
+        """Получить название месяца"""
+        months = [
+            "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+            "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         ]
-        inline_kb.inline_keyboard.append(nav_row)
+        return months[month - 1]
 
-        return inline_kb
+    def _get_month_days(self, year: int, month: int) -> list:
+        """Получить список дней месяца"""
+        import calendar
+        cal = calendar.monthcalendar(year, month)
+        days = []
+        for week in cal:
+            for day in week:
+                if day != 0:
+                    days.append(day)
+        return days
 
-    async def process_selection(self, callback: CallbackQuery, data: CalendarCallback) -> Tuple[
-        bool, Optional[datetime]]:
-        """Обработка выбора в календаре"""
-        try:
-            if data.action == "IGNORE":
-                await callback.answer("Эта дата недоступна", show_alert=True)
-                return False, None
+    async def _process_day_selection(self, callback_data: CalendarCallback) -> tuple:
+        """Обработка выбора дня"""
+        selected_date = datetime(
+            year=callback_data.year,
+            month=callback_data.month,
+            day=callback_data.day
+        ).date()
 
-            if data.action == "SKIP":
-                await callback.message.delete()
-                return True, None
-
-            if data.action == "SET_YEAR":
-                markup = await self._get_month_kb(data.year)
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-            if data.action == "PREV_YEARS":
-                new_year = max(self.now.year, data.year - 5)  # Не уходим в прошлое
-                markup = await self.start_calendar()
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-            if data.action == "NEXT_YEARS":
-                new_year = data.year + 5
-                markup = await self.start_calendar()
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-            if data.action == "START":
-                markup = await self.start_calendar()
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-            if data.action == "SET_MONTH":
-                markup = await self._get_days_kb(data.year, data.month)
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-            if data.action == "SET_DAY":
-                selected_date = datetime(data.year, data.month, data.day)
-                await callback.message.delete()
-                return True, selected_date
-
-            if data.action == "BACK":
-                # Всегда возвращаем к начальному экрану
-                markup = await self.start_calendar()
-                await callback.message.edit_reply_markup(reply_markup=markup)
-                return False, None
-
-        except Exception as e:
-            print(f"Calendar processing error: {e}")
-            await callback.answer("Произошла ошибка", show_alert=True)
-
-        return False, None
+        return True, selected_date
