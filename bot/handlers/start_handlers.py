@@ -32,6 +32,13 @@ class StartHandlers(BaseHandler):
         self.router.callback_query.register(self.help_callback, F.data == "help")
         self.router.callback_query.register(self.back_to_main_callback, F.data == "back_to_main")
 
+        # Новые обработчики для удаления товаров
+        self.router.callback_query.register(self.show_delete_product_menu, F.data == "delete_product")
+        self.router.callback_query.register(self.select_product_to_delete, F.data.startswith("delete_select_"))
+        self.router.callback_query.register(self.confirm_delete_product, F.data.startswith("confirm_delete_"))
+        self.router.callback_query.register(self.cancel_delete_product, F.data == "cancel_delete")
+        self.router.callback_query.register(self.back_to_products_list, F.data == "back_to_products_list")
+
     async def start_command(self, message: Message):
         """Обработчик команды /start"""
         user_name = message.from_user.first_name
@@ -120,7 +127,7 @@ class StartHandlers(BaseHandler):
                 )
                 return
 
-            # Формируем список товаров
+            # Формируем список товаров с нумерацией
             products_text = "📦 <b>Ваши товары:</b>\n\n"
             for i, product in enumerate(products, 1):
                 created_at = product.get('created_at', '')
@@ -130,7 +137,7 @@ class StartHandlers(BaseHandler):
                     created_date = 'неизвестно'
 
                 products_text += (
-                    f"{i}. <b>{product.get('title', 'Без названия')[:30]}...</b>\n"
+                    f"<b>{i}. {product.get('title', 'Без названия')[:30]}...</b>\n"
                     f"   🆔 ID: <code>{product.get('product_id', 'N/A')}</code>\n"
                     f"   📁 Категория: {product.get('category_name', 'Не указана')}\n"
                     f"   💰 Цена: {self._format_price(product)}\n"
@@ -141,13 +148,14 @@ class StartHandlers(BaseHandler):
                 )
 
             builder = InlineKeyboardBuilder()
-            builder.button(text="📦 Сгенерировать XML", callback_data="generate_xml")
+            builder.button(text="🗑️ Удалить товар", callback_data="delete_product")
+            #builder.button(text="📦 Сгенерировать XML", callback_data="generate_xml")
             builder.button(text="🆕 Новый товар", callback_data="new_product")
             builder.button(text="🔙 Назад", callback_data="back_to_main")
             builder.adjust(1)
 
             await callback.message.edit_text(
-                products_text + "\n💡 Используйте /generate_xml для создания XML выгрузки",
+                products_text + "\n💡 Выберите действие:",
                 reply_markup=builder.as_markup(),
                 parse_mode="HTML"
             )
@@ -158,6 +166,185 @@ class StartHandlers(BaseHandler):
                 "❌ Ошибка при загрузке списка товаров\n\n"
                 "Попробуйте позже или обратитесь к администратору."
             )
+
+    async def show_delete_product_menu(self, callback: CallbackQuery):
+        """Показать меню выбора товара для удаления"""
+        try:
+            user_id = callback.from_user.id
+            products = await self.db.get_user_products(user_id)
+
+            if not products:
+                await callback.answer("❌ У вас нет товаров для удаления")
+                return
+
+            builder = InlineKeyboardBuilder()
+
+            # Добавляем кнопки для каждого товара
+            for i, product in enumerate(products, 1):
+                product_title = product.get('title', 'Без названия')[:25]
+                product_id = product.get('product_id')
+                builder.button(
+                    text=f"{i}. {product_title}...",
+                    callback_data=f"delete_select_{product_id}"
+                )
+
+            # Кнопки навигации
+            builder.button(text="🔙 Назад к списку", callback_data="back_to_products_list")
+            builder.button(text="🏠 В главное меню", callback_data="back_to_main")
+            builder.adjust(1)
+
+            await callback.message.edit_text(
+                "🗑️ <b>Удаление товара</b>\n\n"
+                "Выберите товар для удаления:\n\n"
+                "⚠️ <i>Внимание: удаление нельзя отменить!</i>",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML"
+            )
+
+        except Exception as e:
+            print(f"Error in show_delete_product_menu: {e}")
+            await callback.answer("❌ Ошибка при загрузке списка товаров")
+
+    async def select_product_to_delete(self, callback: CallbackQuery):
+        """Обработка выбора товара для удаления"""
+        try:
+            product_id = callback.data[14:]  # Убираем "delete_select_"
+
+            # Получаем информацию о товаре
+            product = await self.db.get_product_by_id(product_id)
+
+            if not product:
+                await callback.answer("❌ Товар не найден")
+                return
+
+            builder = InlineKeyboardBuilder()
+            builder.button(
+                text="✅ Да, удалить",
+                callback_data=f"confirm_delete_{product_id}"
+            )
+            builder.button(
+                text="❌ Отмена",
+                callback_data="cancel_delete"
+            )
+            builder.adjust(2)
+
+            product_title = product.get('title', 'Без названия')
+            product_category = product.get('category_name', 'Не указана')
+            product_price = self._format_price(product)
+
+            await callback.message.edit_text(
+                f"🗑️ <b>Подтверждение удаления</b>\n\n"
+                f"<b>Товар:</b> {product_title}\n"
+                f"<b>Категория:</b> {product_category}\n"
+                f"<b>Цена:</b> {product_price}\n"
+                f"<b>Фото:</b> {len(product.get('all_images', []))} шт.\n\n"
+                f"⚠️ <b>Вы уверены, что хотите удалить этот товар?</b>\n"
+                f"<i>Это действие нельзя отменить!</i>",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML"
+            )
+
+        except Exception as e:
+            print(f"Error in select_product_to_delete: {e}")
+            await callback.answer("❌ Ошибка при выборе товара")
+
+    async def confirm_delete_product(self, callback: CallbackQuery):
+        """Подтверждение и удаление товара"""
+        try:
+            product_id = callback.data[15:]  # Убираем "confirm_delete_"
+            user_id = callback.from_user.id
+
+            # Находим индекс товара для удаления
+            products = await self.db.get_user_products(user_id)
+            product_index = None
+
+            for i, product in enumerate(products):
+                if product.get('product_id') == product_id:
+                    product_index = i
+                    break
+
+            if product_index is None:
+                await callback.answer("❌ Товар не найден")
+                return
+
+            # Удаляем товар
+            success = await self.db.delete_product(user_id, product_index)
+
+            if success:
+                # Показываем обновленный список товаров
+                products = await self.db.get_user_products(user_id)
+
+                if not products:
+                    # Если товаров не осталось
+                    builder = InlineKeyboardBuilder()
+                    builder.button(text="🆕 Создать товар", callback_data="new_product")
+                    builder.button(text="🏠 В главное меню", callback_data="back_to_main")
+                    builder.adjust(1)
+
+                    await callback.message.edit_text(
+                        "✅ <b>Товар успешно удален!</b>\n\n"
+                        "📭 У вас больше нет товаров.\n\n"
+                        "Создайте новый товар, чтобы продолжить работу!",
+                        reply_markup=builder.as_markup(),
+                        parse_mode="HTML"
+                    )
+                else:
+                    # Показываем обновленный список
+                    builder = InlineKeyboardBuilder()
+                    builder.button(text="🗑️ Удалить еще товар", callback_data="delete_product")
+                    #builder.button(text="📦 Сгенерировать XML", callback_data="/generate_xml")
+                    builder.button(text="🆕 Новый товар", callback_data="new_product")
+                    builder.button(text="🏠 В главное меню", callback_data="back_to_main")
+                    builder.adjust(1)
+
+                    products_text = "✅ <b>Товар успешно удален!</b>\n\n📦 <b>Ваши товары:</b>\n\n"
+                    for i, product in enumerate(products, 1):
+                        created_at = product.get('created_at', '')
+                        if created_at and isinstance(created_at, str):
+                            created_date = created_at[:10]
+                        else:
+                            created_date = 'неизвестно'
+
+                        products_text += (
+                            f"<b>{i}. {product.get('title', 'Без названия')[:30]}...</b>\n"
+                            f"   📁 {product.get('category_name', 'Не указана')}\n"
+                            f"   💰 {self._format_price(product)}\n"
+                            f"   ────────────────────\n"
+                        )
+
+                    await callback.message.edit_text(
+                        products_text,
+                        reply_markup=builder.as_markup(),
+                        parse_mode="HTML"
+                    )
+            else:
+                await callback.message.edit_text(
+                    "❌ <b>Ошибка при удалении товара</b>\n\n"
+                    "Попробуйте еще раз или обратитесь к администратору.",
+                    parse_mode="HTML"
+                )
+
+        except Exception as e:
+            print(f"Error in confirm_delete_product: {e}")
+            await callback.message.edit_text(
+                "❌ <b>Ошибка при удалении товара</b>\n\n"
+                "Попробуйте еще раз или обратитесь к администратору.",
+                parse_mode="HTML"
+            )
+
+    async def cancel_delete_product(self, callback: CallbackQuery):
+        """Отмена удаления товара"""
+        await callback.message.edit_text(
+            "❌ <b>Удаление отменено</b>\n\n"
+            "Товар не был удален.",
+            parse_mode="HTML"
+        )
+        # Возвращаемся к списку товаров
+        await self.my_products_callback(callback)
+
+    async def back_to_products_list(self, callback: CallbackQuery):
+        """Возврат к списку товаров"""
+        await self.my_products_callback(callback)
 
     def _format_price(self, product: dict) -> str:
         """Форматирование цены для отображения"""

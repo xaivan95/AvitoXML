@@ -225,8 +225,8 @@ class CommonHandlers(BaseHandler):
 
         # Добавьте этот обработчик в _register_handlers
         self.router.callback_query.register(
-            self.back_to_quick_dates,
-            CalendarCallback.filter(F.action == "back_to_quick"),
+            self.handle_calendar_callback,
+            F.data.startswith("back_to_quick"),  # ПРАВИЛЬНЫЙ ФИЛЬТР
             StateFilter(ProductStates.waiting_for_start_date)
         )
 
@@ -1360,7 +1360,7 @@ class CommonHandlers(BaseHandler):
             await callback.answer("❌ Ошибка при выборе назначения")
 
     async def my_products_command(self, message: Message):
-        """Показать все товары пользователя"""
+        """Показать все товары пользователя с возможностью удаления"""
         try:
             user_id = message.from_user.id
             products = await self.db.get_user_products(user_id)
@@ -1373,17 +1373,16 @@ class CommonHandlers(BaseHandler):
                 return
 
             # Формируем список товаров
-            products_text = "📦 Ваши товары:\n\n"
+            products_text = "📦 <b>Ваши товары:</b>\n\n"
             for i, product in enumerate(products, 1):
                 created_at = product.get('created_at', '')
                 if created_at and isinstance(created_at, str):
-                    created_date = created_at[:10]  # Берем только дату
+                    created_date = created_at[:10]
                 else:
                     created_date = 'неизвестно'
 
                 products_text += (
-                    f"{i}. **{product.get('title', 'Без названия')[:30]}...**\n"
-                    f"   🆔 ID: `{product.get('product_id', 'N/A')}`\n"
+                    f"<b>{i}. {product.get('title', 'Без названия')[:30]}...</b>\n"
                     f"   📁 Категория: {product.get('category_name', 'Не указана')}\n"
                     f"   💰 Цена: {self._format_price(product)}\n"
                     f"   🏙️ Города: {len(product.get('cities', []))}\n"
@@ -1392,7 +1391,20 @@ class CommonHandlers(BaseHandler):
                     f"   ────────────────────\n"
                 )
 
-            await message.answer(products_text, parse_mode="Markdown")
+            # Создаем клавиатуру с возможностью удаления
+            from aiogram.utils.keyboard import InlineKeyboardBuilder
+            builder = InlineKeyboardBuilder()
+
+            builder.button(text="🗑️ Удалить товар", callback_data="delete_product")
+            #builder.button(text="📦 Сгенерировать XML", callback_data="generate_xml")
+            builder.button(text="🆕 Новый товар", callback_data="new_product")
+            builder.adjust(1)
+
+            await message.answer(
+                products_text + "\n💡 Используйте кнопки ниже для управления товарами:",
+                reply_markup=builder.as_markup(),
+                parse_mode="HTML"
+            )
 
         except Exception as e:
             await message.answer("❌ Ошибка при загрузке списка товаров")
@@ -2051,21 +2063,40 @@ class CommonHandlers(BaseHandler):
         hour = int(time_parts[0])
         minute = int(time_parts[1])
 
-        full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        try:
+            # Универсальный способ создания datetime
+            from datetime import datetime, time as dt_time
 
-        await StateManager.safe_update(
-            state,
-            start_time=time_str,
-            start_datetime=full_datetime
-        )
+            if isinstance(start_date, datetime):
+                # Если start_date уже datetime
+                full_datetime = datetime(
+                    start_date.year, start_date.month, start_date.day,
+                    hour, minute, 0
+                )
+            else:
+                # Если start_date это date
+                full_datetime = datetime(
+                    start_date.year, start_date.month, start_date.day,
+                    hour, minute, 0
+                )
 
-        await message.answer(
-            f"✅ Время установлено: {time_str}\n"
-            f"📅 Полная дата начала: {full_datetime.strftime('%d.%m.%Y %H:%M')}"
-        )
+            await StateManager.safe_update(
+                state,
+                start_time=time_str,
+                start_datetime=full_datetime
+            )
 
-        from bot.services.product_service import ProductService
-        await ProductService.complete_product_creation(message, state, user_name)
+            await message.answer(
+                f"✅ Время установлено: {time_str}\n"
+                f"📅 Полная дата начала: {full_datetime.strftime('%d.%m.%Y %H:%M')}"
+            )
+
+            from bot.services.product_service import ProductService
+            await ProductService.complete_product_creation(message, state, user_name)
+
+        except Exception as e:
+            print(f"Error processing time: {e}")
+            await message.answer("❌ Ошибка при установке времени. Попробуйте еще раз.")
 
     def _is_valid_time_format(self, time_str: str) -> bool:
         """Проверка корректности формата времени"""

@@ -1,5 +1,5 @@
 # bot/calendar.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.filters.callback_data import CallbackData
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -35,7 +35,7 @@ class ProductCalendar:
         builder.button(text="📅 Выбрать дату вручную", callback_data=CalendarCallback(action="manual"))
         builder.button(text="⏩ Пропустить", callback_data=CalendarCallback(action="skip"))
 
-        builder.adjust(2, 2, 1, 1)  # 2 кнопки в первых двух рядах, затем по 1
+        builder.adjust(2, 2, 1, 1)
 
         return builder.as_markup()
 
@@ -51,13 +51,20 @@ class ProductCalendar:
             await self._show_month_selection(callback_query)
             return False, None
 
+        elif callback_data.action == "back_to_quick":
+            # Возврат к быстрому выбору
+            await callback_query.message.edit_reply_markup(
+                reply_markup=await self.start_calendar()
+            )
+            return False, None
+
         elif callback_data.action in ["tomorrow", "3_days", "7_days", "14_days"]:
             # Обработка быстрых кнопок
             selected_date = self._get_quick_date(callback_data.action)
             return True, selected_date
 
         elif callback_data.action == "day":
-            # Выбор конкретного дня (из старой логики)
+            # Выбор конкретного дня
             return_data = await self._process_day_selection(callback_data)
 
         elif callback_data.action == "prev-month":
@@ -74,7 +81,7 @@ class ProductCalendar:
 
         return return_data
 
-    def _get_quick_date(self, action: str) -> datetime:
+    def _get_quick_date(self, action: str) -> date:
         """Получить дату для быстрой кнопки"""
         today = self.today
 
@@ -90,7 +97,7 @@ class ProductCalendar:
         return today
 
     async def _show_month_selection(self, callback_query, year: int = None, month: int = None):
-        """Показать выбор месяца (старая логика)"""
+        """Показать выбор месяца с ограничениями"""
         now = datetime.now()
         if year is None:
             year = now.year
@@ -100,32 +107,53 @@ class ProductCalendar:
         # Создаем клавиатуру для выбора месяца
         builder = InlineKeyboardBuilder()
 
+        # Определяем, можно ли переходить к предыдущему месяцу
+        can_go_prev = not (year == now.year and month == now.month)
+
         # Кнопки навигации
         prev_month = month - 1 if month > 1 else 12
         prev_year = year if month > 1 else year - 1
         next_month = month + 1 if month < 12 else 1
         next_year = year if month < 12 else year + 1
 
-        builder.button(
-            text="◀️",
-            callback_data=CalendarCallback(action="prev-month", year=prev_year, month=prev_month)
-        )
+        # Кнопка предыдущего месяца (только если не текущий месяц)
+        if can_go_prev:
+            builder.button(
+                text="◀️",
+                callback_data=CalendarCallback(action="prev-month", year=prev_year, month=prev_month)
+            )
+        else:
+            builder.button(text="❌", callback_data=CalendarCallback(action="ignore"))
+
         builder.button(
             text=f"{self._get_month_name(month)} {year}",
             callback_data=CalendarCallback(action="ignore")
         )
+
+        # Кнопка следующего месяца (всегда активна)
         builder.button(
             text="▶️",
             callback_data=CalendarCallback(action="next-month", year=next_year, month=next_month)
         )
 
-        # Дни месяца
+        # Дни месяца (только будущие даты активны)
         days = self._get_month_days(year, month)
+        today = self.today
+
         for day in days:
-            builder.button(
-                text=f"{day}",
-                callback_data=CalendarCallback(action="day", year=year, month=month, day=day)
-            )
+            current_date = date(year, month, day)
+            if current_date >= today:
+                # Будущая дата - активная кнопка
+                builder.button(
+                    text=f"{day}",
+                    callback_data=CalendarCallback(action="day", year=year, month=month, day=day)
+                )
+            else:
+                # Прошедшая дата - неактивная кнопка
+                builder.button(
+                    text=f"❌",
+                    callback_data=CalendarCallback(action="ignore")
+                )
 
         # Кнопка возврата
         builder.button(
@@ -133,6 +161,7 @@ class ProductCalendar:
             callback_data=CalendarCallback(action="back_to_quick")
         )
 
+        # Рассчитываем layout: 3 кнопки навигации, затем дни по 7 в ряд, затем 1 кнопка возврата
         builder.adjust(3, *[7 for _ in range((len(days) + 6) // 7)], 1)
 
         await callback_query.message.edit_reply_markup(reply_markup=builder.as_markup())
@@ -158,10 +187,14 @@ class ProductCalendar:
 
     async def _process_day_selection(self, callback_data: CalendarCallback) -> tuple:
         """Обработка выбора дня"""
-        selected_date = datetime(
+        selected_date = date(
             year=callback_data.year,
             month=callback_data.month,
             day=callback_data.day
-        ).date()
+        )
+
+        # Проверяем, что выбранная дата не в прошлом
+        if selected_date < self.today:
+            return False, None
 
         return True, selected_date

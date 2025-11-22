@@ -540,16 +540,21 @@ class Database:
             return None
 
     async def delete_product(self, user_id: int, product_index: int):
-        user_products = await self.get_user_products(user_id)
-        if 0 <= product_index < len(user_products):
-            product_to_delete = user_products[product_index]
-            # Находим и удаляем объект Product
-            for i, product in enumerate(self.products):
-                if product.product_id == product_to_delete['product_id']:
-                    del self.products[i]
-                    await self.save_data()
-                    return True
-        return False
+        """Удаление товара по индексу"""
+        try:
+            user_products = await self.get_user_products(user_id)
+            if 0 <= product_index < len(user_products):
+                product_to_delete = user_products[product_index]
+                # Находим и удаляем объект Product
+                for i, product in enumerate(self.products):
+                    if product.product_id == product_to_delete['product_id']:
+                        del self.products[i]
+                        await self.save_data()
+                        return True
+            return False
+        except Exception as e:
+            logger.error(f"Error deleting product: {e}")
+            return False
 
 # Глобальный экземпляр базы данных
 db = Database()

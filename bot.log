@@ -7900,3 +7900,985 @@ aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedEr
 2025-11-21 00:01:36,247 - aiogram.event - INFO - Update id=890011940 is handled. Duration 297 ms by bot id=7820063803
 2025-11-21 00:01:39,438 - aiogram.event - INFO - Update id=890011941 is handled. Duration 193 ms by bot id=7820063803
 2025-11-21 00:01:40,684 - aiogram.event - INFO - Update id=890011942 is handled. Duration 94 ms by bot id=7820063803
+2025-11-21 11:35:05,776 - bot.database - INFO - Data loaded successfully from file
+2025-11-21 11:35:05,777 - __main__ - INFO - File database initialized successfully
+2025-11-21 11:35:06,138 - __main__ - INFO - AlbumMiddleware registered
+2025-11-21 11:35:06,147 - __main__ - INFO - Total routers registered: 6
+2025-11-21 11:35:06,147 - __main__ - INFO - Starting bot...
+2025-11-21 11:35:06,333 - aiogram.dispatcher - INFO - Start polling
+2025-11-21 11:35:06,388 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-21 11:35:08,322 - aiogram.event - INFO - Update id=890011944 is handled. Duration 215 ms by bot id=7820063803
+2025-11-21 11:35:09,850 - aiogram.event - INFO - Update id=890011945 is handled. Duration 104 ms by bot id=7820063803
+2025-11-21 11:35:11,095 - aiogram.event - INFO - Update id=890011946 is handled. Duration 75 ms by bot id=7820063803
+2025-11-21 11:35:13,361 - aiogram.event - INFO - Update id=890011947 is handled. Duration 83 ms by bot id=7820063803
+2025-11-21 11:35:18,116 - aiogram.event - INFO - Update id=890011948 is handled. Duration 78 ms by bot id=7820063803
+2025-11-21 11:35:19,625 - aiogram.event - INFO - Update id=890011949 is handled. Duration 77 ms by bot id=7820063803
+2025-11-21 11:35:21,357 - aiogram.event - INFO - Update id=890011950 is handled. Duration 218 ms by bot id=7820063803
+2025-11-21 11:35:24,414 - aiogram.event - INFO - Update id=890011951 is handled. Duration 161 ms by bot id=7820063803
+2025-11-21 11:35:25,871 - aiogram.event - INFO - Update id=890011952 is handled. Duration 133 ms by bot id=7820063803
+2025-11-21 11:37:23,332 - aiogram.event - INFO - Update id=890011953 is handled. Duration 1 ms by bot id=7820063803
+2025-11-21 11:37:23,332 - aiogram.event - INFO - Update id=890011954 is handled. Duration 0 ms by bot id=7820063803
+2025-11-21 11:37:44,000 - aiogram.event - INFO - Update id=890011955 is handled. Duration 151 ms by bot id=7820063803
+2025-11-21 11:37:45,656 - aiogram.event - INFO - Update id=890011956 is handled. Duration 145 ms by bot id=7820063803
+2025-11-21 11:37:52,157 - aiogram.event - INFO - Update id=890011957 is handled. Duration 150 ms by bot id=7820063803
+2025-11-21 11:37:53,379 - aiogram.event - INFO - Update id=890011958 is handled. Duration 94 ms by bot id=7820063803
+2025-11-21 11:37:54,433 - aiogram.event - INFO - Update id=890011959 is handled. Duration 192 ms by bot id=7820063803
+2025-11-21 11:37:58,682 - aiogram.event - INFO - Update id=890011960 is handled. Duration 393 ms by bot id=7820063803
+2025-11-21 11:38:00,186 - aiogram.event - INFO - Update id=890011961 is handled. Duration 177 ms by bot id=7820063803
+2025-11-21 11:38:01,245 - aiogram.event - INFO - Update id=890011962 is handled. Duration 231 ms by bot id=7820063803
+2025-11-21 11:38:02,183 - aiogram.event - INFO - Update id=890011963 is handled. Duration 157 ms by bot id=7820063803
+2025-11-21 11:38:04,188 - aiogram.event - INFO - Update id=890011964 is handled. Duration 185 ms by bot id=7820063803
+2025-11-21 11:38:05,969 - aiogram.event - INFO - Update id=890011965 is handled. Duration 296 ms by bot id=7820063803
+2025-11-21 11:38:07,672 - aiogram.event - INFO - Update id=890011966 is handled. Duration 148 ms by bot id=7820063803
+2025-11-21 11:38:09,484 - aiogram.event - INFO - Update id=890011967 is handled. Duration 165 ms by bot id=7820063803
+2025-11-21 11:38:10,318 - aiogram.event - INFO - Update id=890011968 is handled. Duration 73 ms by bot id=7820063803
+2025-11-21 11:38:11,486 - aiogram.event - INFO - Update id=890011969 is not handled. Duration 80 ms by bot id=7820063803
+2025-11-21 11:38:11,486 - aiogram.event - ERROR - Cause exception while process update id=890011969 by bot id=7820063803
+NameError: name 'datetime' is not defined
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\middleware\album_middleware.py", line 22, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\location_handlers.py", line 155, in process_metro_quantity
+    await ProductService.ask_start_date(message, user_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\services\product_service.py", line 427, in ask_start_date
+    today = datetime.now().date()
+            ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'?
+2025-11-21 11:39:14,437 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-21 11:39:14,442 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-21 11:39:14,442 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-21 11:39:19,683 - bot.database - INFO - Data loaded successfully from file
+2025-11-21 11:39:19,683 - __main__ - INFO - File database initialized successfully
+2025-11-21 11:39:20,034 - __main__ - INFO - AlbumMiddleware registered
+2025-11-21 11:39:20,044 - __main__ - INFO - Total routers registered: 6
+2025-11-21 11:39:20,044 - __main__ - INFO - Starting bot...
+2025-11-21 11:39:20,240 - aiogram.dispatcher - INFO - Start polling
+2025-11-21 11:39:20,303 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-21 11:39:34,720 - aiogram.event - INFO - Update id=890011970 is not handled. Duration 0 ms by bot id=7820063803
+2025-11-21 11:39:45,456 - aiogram.event - INFO - Update id=890011971 is handled. Duration 232 ms by bot id=7820063803
+2025-11-21 11:39:47,481 - aiogram.event - INFO - Update id=890011972 is handled. Duration 102 ms by bot id=7820063803
+2025-11-21 11:39:48,724 - aiogram.event - INFO - Update id=890011973 is handled. Duration 82 ms by bot id=7820063803
+2025-11-21 11:39:49,823 - aiogram.event - INFO - Update id=890011974 is handled. Duration 81 ms by bot id=7820063803
+2025-11-21 11:39:51,574 - aiogram.event - INFO - Update id=890011975 is handled. Duration 81 ms by bot id=7820063803
+2025-11-21 11:39:55,933 - aiogram.event - INFO - Update id=890011976 is handled. Duration 92 ms by bot id=7820063803
+2025-11-21 11:39:57,557 - aiogram.event - INFO - Update id=890011977 is handled. Duration 260 ms by bot id=7820063803
+2025-11-21 11:40:01,707 - aiogram.event - INFO - Update id=890011978 is handled. Duration 185 ms by bot id=7820063803
+2025-11-21 11:40:03,035 - aiogram.event - INFO - Update id=890011979 is handled. Duration 83 ms by bot id=7820063803
+2025-11-21 11:40:27,433 - aiogram.event - INFO - Update id=890011980 is handled. Duration 122 ms by bot id=7820063803
+2025-11-21 11:40:48,270 - aiogram.event - INFO - Update id=890011981 is handled. Duration 176 ms by bot id=7820063803
+2025-11-21 11:40:50,434 - aiogram.event - INFO - Update id=890011982 is handled. Duration 192 ms by bot id=7820063803
+2025-11-21 11:40:51,812 - aiogram.event - INFO - Update id=890011983 is handled. Duration 165 ms by bot id=7820063803
+2025-11-21 11:40:52,588 - aiogram.event - INFO - Update id=890011984 is handled. Duration 93 ms by bot id=7820063803
+2025-11-21 11:40:53,501 - aiogram.event - INFO - Update id=890011985 is handled. Duration 179 ms by bot id=7820063803
+2025-11-21 11:40:57,071 - aiogram.event - INFO - Update id=890011986 is handled. Duration 191 ms by bot id=7820063803
+2025-11-21 11:40:58,581 - aiogram.event - INFO - Update id=890011987 is handled. Duration 188 ms by bot id=7820063803
+2025-11-21 11:40:59,637 - aiogram.event - INFO - Update id=890011988 is handled. Duration 247 ms by bot id=7820063803
+2025-11-21 11:41:00,783 - aiogram.event - INFO - Update id=890011989 is handled. Duration 186 ms by bot id=7820063803
+2025-11-21 11:41:02,528 - aiogram.event - INFO - Update id=890011990 is handled. Duration 170 ms by bot id=7820063803
+2025-11-21 11:41:03,942 - aiogram.event - INFO - Update id=890011991 is handled. Duration 164 ms by bot id=7820063803
+2025-11-21 11:41:04,983 - aiogram.event - INFO - Update id=890011992 is handled. Duration 269 ms by bot id=7820063803
+2025-11-21 11:41:06,079 - aiogram.event - INFO - Update id=890011993 is handled. Duration 204 ms by bot id=7820063803
+2025-11-21 11:41:06,885 - aiogram.event - INFO - Update id=890011994 is handled. Duration 86 ms by bot id=7820063803
+2025-11-21 11:41:08,041 - aiogram.event - INFO - Update id=890011995 is handled. Duration 175 ms by bot id=7820063803
+2025-11-21 11:41:13,615 - aiogram.event - INFO - Update id=890011996 is handled. Duration 97 ms by bot id=7820063803
+2025-11-21 11:41:15,181 - aiogram.event - INFO - Update id=890011997 is not handled. Duration 8 ms by bot id=7820063803
+2025-11-21 11:41:15,181 - aiogram.event - ERROR - Cause exception while process update id=890011997 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:18,093 - aiogram.event - INFO - Update id=890011998 is not handled. Duration 7 ms by bot id=7820063803
+2025-11-21 11:41:18,093 - aiogram.event - ERROR - Cause exception while process update id=890011998 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:19,152 - aiogram.event - INFO - Update id=890011999 is not handled. Duration 6 ms by bot id=7820063803
+2025-11-21 11:41:19,153 - aiogram.event - ERROR - Cause exception while process update id=890011999 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:19,989 - aiogram.event - INFO - Update id=890012000 is not handled. Duration 8 ms by bot id=7820063803
+2025-11-21 11:41:19,989 - aiogram.event - ERROR - Cause exception while process update id=890012000 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:20,157 - aiogram.event - INFO - Update id=890012001 is not handled. Duration 6 ms by bot id=7820063803
+2025-11-21 11:41:20,157 - aiogram.event - ERROR - Cause exception while process update id=890012001 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:20,345 - aiogram.event - INFO - Update id=890012002 is not handled. Duration 6 ms by bot id=7820063803
+2025-11-21 11:41:20,345 - aiogram.event - ERROR - Cause exception while process update id=890012002 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:22,176 - aiogram.event - INFO - Update id=890012003 is not handled. Duration 6 ms by bot id=7820063803
+2025-11-21 11:41:22,176 - aiogram.event - ERROR - Cause exception while process update id=890012003 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2026, in process_time_selection
+    await self._process_time_input(callback.message, time_data, state, callback.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:41:37,711 - aiogram.event - INFO - Update id=890012004 is handled. Duration 110 ms by bot id=7820063803
+2025-11-21 11:41:41,795 - aiogram.event - INFO - Update id=890012005 is not handled. Duration 0 ms by bot id=7820063803
+2025-11-21 11:41:41,795 - aiogram.event - ERROR - Cause exception while process update id=890012005 by bot id=7820063803
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+Traceback (most recent call last):
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 309, in _process_update
+    response = await self.feed_update(bot, update, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 158, in feed_update
+    response = await self.update.wrap_outer_middleware(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\middlewares\user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\fsm\middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        observer=observer, update_type=update_type, event=telegram_event, **data
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\middleware\album_middleware.py", line 22, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\.venv\Lib\site-packages\aiogram\dispatcher\event\handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2039, in process_time_input_message
+    await self._process_time_input(message, time_input, state, message.from_user.first_name)
+  File "C:\Users\User\PycharmProjects\AvitoXML\bot\handlers\common_handlers.py", line 2054, in _process_time_input
+    full_datetime = start_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+TypeError: replace() takes at most 3 keyword arguments (4 given)
+2025-11-21 11:45:59,243 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-21 11:45:59,256 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-21 11:45:59,256 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-21 11:46:04,618 - bot.database - INFO - Data loaded successfully from file
+2025-11-21 11:46:04,618 - __main__ - INFO - File database initialized successfully
+2025-11-21 11:46:04,984 - __main__ - INFO - AlbumMiddleware registered
+2025-11-21 11:46:04,994 - __main__ - INFO - Total routers registered: 6
+2025-11-21 11:46:04,994 - __main__ - INFO - Starting bot...
+2025-11-21 11:46:05,170 - aiogram.dispatcher - INFO - Start polling
+2025-11-21 11:46:05,229 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-21 11:46:14,399 - aiogram.event - INFO - Update id=890012006 is handled. Duration 293 ms by bot id=7820063803
+2025-11-21 11:46:16,547 - aiogram.event - INFO - Update id=890012007 is handled. Duration 101 ms by bot id=7820063803
+2025-11-21 11:46:18,367 - aiogram.event - INFO - Update id=890012008 is handled. Duration 81 ms by bot id=7820063803
+2025-11-21 11:46:19,522 - aiogram.event - INFO - Update id=890012009 is handled. Duration 84 ms by bot id=7820063803
+2025-11-21 11:46:21,250 - aiogram.event - INFO - Update id=890012010 is handled. Duration 144 ms by bot id=7820063803
+2025-11-21 11:46:23,832 - aiogram.event - INFO - Update id=890012011 is handled. Duration 162 ms by bot id=7820063803
+2025-11-21 11:46:25,126 - aiogram.event - INFO - Update id=890012012 is handled. Duration 198 ms by bot id=7820063803
+2025-11-21 11:46:28,098 - aiogram.event - INFO - Update id=890012013 is handled. Duration 326 ms by bot id=7820063803
+2025-11-21 11:46:29,733 - aiogram.event - INFO - Update id=890012014 is handled. Duration 73 ms by bot id=7820063803
+2025-11-21 11:48:08,288 - aiogram.event - INFO - Update id=890012015 is handled. Duration 80 ms by bot id=7820063803
+2025-11-21 11:48:13,300 - aiogram.event - INFO - Update id=890012016 is handled. Duration 149 ms by bot id=7820063803
+2025-11-21 11:48:14,504 - aiogram.event - INFO - Update id=890012017 is handled. Duration 154 ms by bot id=7820063803
+2025-11-21 11:48:15,736 - aiogram.event - INFO - Update id=890012018 is handled. Duration 174 ms by bot id=7820063803
+2025-11-21 11:48:16,684 - aiogram.event - INFO - Update id=890012019 is handled. Duration 82 ms by bot id=7820063803
+2025-11-21 11:48:17,622 - aiogram.event - INFO - Update id=890012020 is handled. Duration 171 ms by bot id=7820063803
+2025-11-21 11:48:21,310 - aiogram.event - INFO - Update id=890012021 is handled. Duration 174 ms by bot id=7820063803
+2025-11-21 11:48:22,796 - aiogram.event - INFO - Update id=890012022 is handled. Duration 184 ms by bot id=7820063803
+2025-11-21 11:48:24,060 - aiogram.event - INFO - Update id=890012023 is handled. Duration 217 ms by bot id=7820063803
+2025-11-21 11:48:25,178 - aiogram.event - INFO - Update id=890012024 is handled. Duration 179 ms by bot id=7820063803
+2025-11-21 11:48:27,121 - aiogram.event - INFO - Update id=890012025 is handled. Duration 158 ms by bot id=7820063803
+2025-11-21 11:48:28,604 - aiogram.event - INFO - Update id=890012026 is handled. Duration 357 ms by bot id=7820063803
+2025-11-21 11:48:29,537 - aiogram.event - INFO - Update id=890012027 is handled. Duration 178 ms by bot id=7820063803
+2025-11-21 11:48:30,708 - aiogram.event - INFO - Update id=890012028 is handled. Duration 168 ms by bot id=7820063803
+2025-11-21 11:48:31,741 - aiogram.event - INFO - Update id=890012029 is handled. Duration 79 ms by bot id=7820063803
+2025-11-21 11:48:32,681 - aiogram.event - INFO - Update id=890012030 is handled. Duration 160 ms by bot id=7820063803
+2025-11-21 11:48:35,499 - aiogram.event - INFO - Update id=890012031 is handled. Duration 120 ms by bot id=7820063803
+2025-11-21 11:48:36,619 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-21 11:48:36,707 - aiogram.event - INFO - Update id=890012032 is handled. Duration 216 ms by bot id=7820063803
+2025-11-21 11:48:43,252 - aiogram.event - INFO - Update id=890012033 is not handled. Duration 8 ms by bot id=7820063803
+2025-11-21 11:48:47,725 - aiogram.event - INFO - Update id=890012034 is handled. Duration 97 ms by bot id=7820063803
+2025-11-21 11:48:51,518 - aiogram.event - INFO - Update id=890012035 is handled. Duration 122 ms by bot id=7820063803
+2025-11-21 11:48:53,707 - aiogram.event - INFO - Update id=890012036 is handled. Duration 112 ms by bot id=7820063803
+2025-11-21 11:48:55,344 - aiogram.event - INFO - Update id=890012037 is handled. Duration 85 ms by bot id=7820063803
+2025-11-21 11:48:58,288 - aiogram.event - INFO - Update id=890012038 is handled. Duration 79 ms by bot id=7820063803
+2025-11-21 11:48:59,745 - aiogram.event - INFO - Update id=890012039 is handled. Duration 161 ms by bot id=7820063803
+2025-11-21 11:49:03,446 - aiogram.event - INFO - Update id=890012040 is handled. Duration 259 ms by bot id=7820063803
+2025-11-21 11:49:04,553 - aiogram.event - INFO - Update id=890012041 is handled. Duration 74 ms by bot id=7820063803
+2025-11-21 11:49:10,160 - aiogram.event - INFO - Update id=890012042 is handled. Duration 163 ms by bot id=7820063803
+2025-11-21 11:49:12,256 - aiogram.event - INFO - Update id=890012043 is handled. Duration 156 ms by bot id=7820063803
+2025-11-21 11:49:13,324 - aiogram.event - INFO - Update id=890012044 is handled. Duration 155 ms by bot id=7820063803
+2025-11-21 11:49:14,201 - aiogram.event - INFO - Update id=890012045 is handled. Duration 86 ms by bot id=7820063803
+2025-11-21 11:49:15,125 - aiogram.event - INFO - Update id=890012046 is handled. Duration 168 ms by bot id=7820063803
+2025-11-21 11:49:18,448 - aiogram.event - INFO - Update id=890012047 is handled. Duration 178 ms by bot id=7820063803
+2025-11-21 11:49:19,784 - aiogram.event - INFO - Update id=890012048 is handled. Duration 203 ms by bot id=7820063803
+2025-11-21 11:49:20,776 - aiogram.event - INFO - Update id=890012049 is handled. Duration 152 ms by bot id=7820063803
+2025-11-21 11:49:22,066 - aiogram.event - INFO - Update id=890012050 is handled. Duration 151 ms by bot id=7820063803
+2025-11-21 11:49:23,351 - aiogram.event - INFO - Update id=890012051 is handled. Duration 156 ms by bot id=7820063803
+2025-11-21 11:49:24,129 - aiogram.event - INFO - Update id=890012052 is handled. Duration 166 ms by bot id=7820063803
+2025-11-21 11:49:25,338 - aiogram.event - INFO - Update id=890012053 is handled. Duration 193 ms by bot id=7820063803
+2025-11-21 11:49:26,572 - aiogram.event - INFO - Update id=890012054 is handled. Duration 206 ms by bot id=7820063803
+2025-11-21 11:49:27,811 - aiogram.event - INFO - Update id=890012055 is handled. Duration 175 ms by bot id=7820063803
+2025-11-21 11:49:30,104 - aiogram.event - INFO - Update id=890012056 is handled. Duration 174 ms by bot id=7820063803
+2025-11-21 11:49:32,756 - aiogram.event - INFO - Update id=890012057 is handled. Duration 266 ms by bot id=7820063803
+2025-11-21 11:49:34,636 - aiogram.event - INFO - Update id=890012058 is handled. Duration 155 ms by bot id=7820063803
+2025-11-21 11:49:36,307 - aiogram.event - INFO - Update id=890012059 is handled. Duration 271 ms by bot id=7820063803
+2025-11-21 11:49:37,051 - aiogram.event - INFO - Update id=890012060 is handled. Duration 294 ms by bot id=7820063803
+2025-11-21 11:49:37,664 - aiogram.event - INFO - Update id=890012061 is handled. Duration 148 ms by bot id=7820063803
+2025-11-21 11:49:38,832 - aiogram.event - INFO - Update id=890012062 is handled. Duration 194 ms by bot id=7820063803
+2025-11-21 11:49:40,642 - aiogram.event - INFO - Update id=890012063 is handled. Duration 463 ms by bot id=7820063803
+2025-11-21 11:49:42,274 - aiogram.event - INFO - Update id=890012064 is handled. Duration 155 ms by bot id=7820063803
+2025-11-21 11:49:43,718 - aiogram.event - INFO - Update id=890012065 is handled. Duration 112 ms by bot id=7820063803
+2025-11-21 11:49:46,004 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-21 11:49:46,097 - aiogram.event - INFO - Update id=890012066 is handled. Duration 184 ms by bot id=7820063803
+2025-11-21 11:50:21,870 - aiogram.event - INFO - Update id=890012067 is not handled. Duration 9 ms by bot id=7820063803
+2025-11-21 11:50:23,411 - aiogram.event - INFO - Update id=890012068 is not handled. Duration 11 ms by bot id=7820063803
+2025-11-21 11:50:23,698 - aiogram.event - INFO - Update id=890012069 is not handled. Duration 10 ms by bot id=7820063803
+2025-11-21 11:50:24,601 - aiogram.event - INFO - Update id=890012070 is not handled. Duration 10 ms by bot id=7820063803
+2025-11-21 11:50:28,976 - aiogram.event - INFO - Update id=890012071 is handled. Duration 96 ms by bot id=7820063803
+2025-11-21 11:50:30,642 - aiogram.event - INFO - Update id=890012072 is not handled. Duration 10 ms by bot id=7820063803
+2025-11-21 11:50:36,260 - aiogram.event - INFO - Update id=890012073 is handled. Duration 137 ms by bot id=7820063803
+2025-11-21 11:50:36,979 - aiogram.event - INFO - Update id=890012074 is handled. Duration 80 ms by bot id=7820063803
+2025-11-21 11:50:39,313 - aiogram.event - INFO - Update id=890012075 is handled. Duration 207 ms by bot id=7820063803
+2025-11-21 11:50:42,249 - aiogram.event - INFO - Update id=890012076 is handled. Duration 78 ms by bot id=7820063803
+2025-11-21 11:50:44,693 - aiogram.event - INFO - Update id=890012077 is handled. Duration 162 ms by bot id=7820063803
+2025-11-21 11:50:47,405 - aiogram.event - INFO - Update id=890012078 is handled. Duration 163 ms by bot id=7820063803
+2025-11-21 11:50:48,652 - aiogram.event - INFO - Update id=890012079 is handled. Duration 89 ms by bot id=7820063803
+2025-11-21 11:50:55,782 - aiogram.event - INFO - Update id=890012080 is handled. Duration 157 ms by bot id=7820063803
+2025-11-21 11:50:57,328 - aiogram.event - INFO - Update id=890012081 is handled. Duration 176 ms by bot id=7820063803
+2025-11-21 11:50:58,714 - aiogram.event - INFO - Update id=890012082 is handled. Duration 154 ms by bot id=7820063803
+2025-11-21 11:51:00,661 - aiogram.event - INFO - Update id=890012083 is handled. Duration 107 ms by bot id=7820063803
+2025-11-21 11:51:01,164 - aiogram.event - INFO - Update id=890012084 is handled. Duration 202 ms by bot id=7820063803
+2025-11-21 11:51:01,855 - aiogram.event - INFO - Update id=890012085 is handled. Duration 185 ms by bot id=7820063803
+2025-11-21 11:51:04,998 - aiogram.event - INFO - Update id=890012086 is handled. Duration 293 ms by bot id=7820063803
+2025-11-21 11:51:06,252 - aiogram.event - INFO - Update id=890012087 is handled. Duration 183 ms by bot id=7820063803
+2025-11-21 11:51:07,363 - aiogram.event - INFO - Update id=890012088 is handled. Duration 163 ms by bot id=7820063803
+2025-11-21 11:51:08,126 - aiogram.event - INFO - Update id=890012089 is handled. Duration 219 ms by bot id=7820063803
+2025-11-21 11:51:09,107 - aiogram.event - INFO - Update id=890012090 is handled. Duration 327 ms by bot id=7820063803
+2025-11-21 11:51:10,029 - aiogram.event - INFO - Update id=890012091 is handled. Duration 308 ms by bot id=7820063803
+2025-11-21 11:51:12,956 - aiogram.event - INFO - Update id=890012092 is handled. Duration 167 ms by bot id=7820063803
+2025-11-21 11:51:13,788 - aiogram.event - INFO - Update id=890012093 is handled. Duration 228 ms by bot id=7820063803
+2025-11-21 11:51:20,370 - aiogram.event - INFO - Update id=890012094 is handled. Duration 169 ms by bot id=7820063803
+2025-11-21 11:51:22,886 - aiogram.event - INFO - Update id=890012095 is handled. Duration 105 ms by bot id=7820063803
+2025-11-21 11:51:24,867 - aiogram.event - INFO - Update id=890012096 is handled. Duration 74 ms by bot id=7820063803
+2025-11-21 11:51:28,426 - aiogram.event - INFO - Update id=890012097 is handled. Duration 172 ms by bot id=7820063803
+2025-11-21 11:51:29,320 - aiogram.event - INFO - Update id=890012098 is handled. Duration 158 ms by bot id=7820063803
+2025-11-21 17:18:39,489 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-21 17:18:39,503 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-21 17:18:50,733 - aiogram.dispatcher - INFO - Connection established (tryings = 1, bot id = 7820063803)
+2025-11-21 23:45:13,461 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-21 23:45:13,487 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-21 23:45:13,488 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-21 23:45:25,194 - bot.database - INFO - Data loaded successfully from file
+2025-11-21 23:45:25,194 - __main__ - INFO - File database initialized successfully
+2025-11-21 23:45:25,621 - __main__ - INFO - AlbumMiddleware registered
+2025-11-21 23:45:25,630 - __main__ - INFO - Total routers registered: 6
+2025-11-21 23:45:25,630 - __main__ - INFO - Starting bot...
+2025-11-21 23:45:25,814 - aiogram.dispatcher - INFO - Start polling
+2025-11-21 23:45:25,869 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-21 23:45:46,388 - aiogram.event - INFO - Update id=890012099 is handled. Duration 208 ms by bot id=7820063803
+2025-11-21 23:45:49,765 - aiogram.event - INFO - Update id=890012100 is handled. Duration 76 ms by bot id=7820063803
+2025-11-21 23:45:50,865 - aiogram.event - INFO - Update id=890012101 is handled. Duration 85 ms by bot id=7820063803
+2025-11-21 23:45:51,249 - aiogram.event - INFO - Update id=890012102 is handled. Duration 75 ms by bot id=7820063803
+2025-11-21 23:45:52,947 - aiogram.event - INFO - Update id=890012103 is handled. Duration 85 ms by bot id=7820063803
+2025-11-21 23:45:57,547 - aiogram.event - INFO - Update id=890012104 is handled. Duration 72 ms by bot id=7820063803
+2025-11-21 23:45:58,946 - aiogram.event - INFO - Update id=890012105 is handled. Duration 83 ms by bot id=7820063803
+2025-11-21 23:46:01,621 - aiogram.event - INFO - Update id=890012106 is handled. Duration 152 ms by bot id=7820063803
+2025-11-21 23:46:03,247 - aiogram.event - INFO - Update id=890012107 is handled. Duration 191 ms by bot id=7820063803
+2025-11-21 23:46:04,068 - aiogram.event - INFO - Update id=890012108 is handled. Duration 69 ms by bot id=7820063803
+2025-11-21 23:46:11,817 - aiogram.event - INFO - Update id=890012109 is handled. Duration 181 ms by bot id=7820063803
+2025-11-21 23:46:13,190 - aiogram.event - INFO - Update id=890012110 is handled. Duration 176 ms by bot id=7820063803
+2025-11-21 23:46:14,197 - aiogram.event - INFO - Update id=890012111 is handled. Duration 221 ms by bot id=7820063803
+2025-11-21 23:46:14,665 - aiogram.event - INFO - Update id=890012112 is handled. Duration 77 ms by bot id=7820063803
+2025-11-21 23:46:15,441 - aiogram.event - INFO - Update id=890012113 is handled. Duration 235 ms by bot id=7820063803
+2025-11-21 23:46:21,373 - aiogram.event - INFO - Update id=890012114 is handled. Duration 185 ms by bot id=7820063803
+2025-11-21 23:46:22,672 - aiogram.event - INFO - Update id=890012115 is handled. Duration 216 ms by bot id=7820063803
+2025-11-21 23:46:23,288 - aiogram.event - INFO - Update id=890012116 is handled. Duration 155 ms by bot id=7820063803
+2025-11-21 23:46:25,101 - aiogram.event - INFO - Update id=890012117 is handled. Duration 190 ms by bot id=7820063803
+2025-11-21 23:46:28,049 - aiogram.event - INFO - Update id=890012118 is handled. Duration 238 ms by bot id=7820063803
+2025-11-21 23:46:29,828 - aiogram.event - INFO - Update id=890012119 is handled. Duration 158 ms by bot id=7820063803
+2025-11-21 23:46:30,711 - aiogram.event - INFO - Update id=890012120 is handled. Duration 164 ms by bot id=7820063803
+2025-11-22 09:52:49,482 - aiogram.event - INFO - Update id=890012121 is handled. Duration 250 ms by bot id=7820063803
+2025-11-22 09:52:51,124 - aiogram.event - INFO - Update id=890012122 is handled. Duration 120 ms by bot id=7820063803
+2025-11-22 09:52:52,471 - aiogram.event - INFO - Update id=890012123 is handled. Duration 82 ms by bot id=7820063803
+2025-11-22 09:52:53,796 - aiogram.event - INFO - Update id=890012124 is handled. Duration 83 ms by bot id=7820063803
+2025-11-22 09:52:55,802 - aiogram.event - INFO - Update id=890012125 is handled. Duration 121 ms by bot id=7820063803
+2025-11-22 09:52:58,524 - aiogram.event - INFO - Update id=890012126 is handled. Duration 81 ms by bot id=7820063803
+2025-11-22 09:52:59,737 - aiogram.event - INFO - Update id=890012127 is handled. Duration 77 ms by bot id=7820063803
+2025-11-22 09:53:00,997 - aiogram.event - INFO - Update id=890012128 is handled. Duration 155 ms by bot id=7820063803
+2025-11-22 09:53:04,309 - aiogram.event - INFO - Update id=890012129 is handled. Duration 211 ms by bot id=7820063803
+2025-11-22 09:53:05,697 - aiogram.event - INFO - Update id=890012130 is handled. Duration 89 ms by bot id=7820063803
+2025-11-22 09:53:12,273 - aiogram.event - INFO - Update id=890012131 is handled. Duration 201 ms by bot id=7820063803
+2025-11-22 09:53:14,577 - aiogram.event - INFO - Update id=890012132 is handled. Duration 445 ms by bot id=7820063803
+2025-11-22 09:53:15,540 - aiogram.event - INFO - Update id=890012133 is handled. Duration 172 ms by bot id=7820063803
+2025-11-22 09:53:16,291 - aiogram.event - INFO - Update id=890012134 is handled. Duration 81 ms by bot id=7820063803
+2025-11-22 09:53:17,420 - aiogram.event - INFO - Update id=890012135 is handled. Duration 242 ms by bot id=7820063803
+2025-11-22 09:53:21,058 - aiogram.event - INFO - Update id=890012136 is handled. Duration 255 ms by bot id=7820063803
+2025-11-22 09:53:22,241 - aiogram.event - INFO - Update id=890012137 is handled. Duration 184 ms by bot id=7820063803
+2025-11-22 09:53:23,179 - aiogram.event - INFO - Update id=890012138 is handled. Duration 154 ms by bot id=7820063803
+2025-11-22 09:53:24,170 - aiogram.event - INFO - Update id=890012139 is handled. Duration 142 ms by bot id=7820063803
+2025-11-22 09:53:25,613 - aiogram.event - INFO - Update id=890012140 is handled. Duration 154 ms by bot id=7820063803
+2025-11-22 09:53:26,745 - aiogram.event - INFO - Update id=890012141 is handled. Duration 238 ms by bot id=7820063803
+2025-11-22 09:53:28,008 - aiogram.event - INFO - Update id=890012142 is handled. Duration 249 ms by bot id=7820063803
+2025-11-22 09:53:29,404 - aiogram.event - INFO - Update id=890012143 is handled. Duration 168 ms by bot id=7820063803
+2025-11-22 09:53:30,606 - aiogram.event - INFO - Update id=890012144 is handled. Duration 182 ms by bot id=7820063803
+2025-11-22 09:53:31,493 - aiogram.event - INFO - Update id=890012145 is handled. Duration 219 ms by bot id=7820063803
+2025-11-22 09:53:32,845 - aiogram.event - INFO - Update id=890012146 is handled. Duration 180 ms by bot id=7820063803
+2025-11-22 09:53:34,349 - aiogram.event - INFO - Update id=890012147 is handled. Duration 134 ms by bot id=7820063803
+2025-11-22 09:53:36,570 - aiogram.event - INFO - Update id=890012148 is handled. Duration 86 ms by bot id=7820063803
+2025-11-22 09:53:37,866 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-22 09:53:37,941 - aiogram.event - INFO - Update id=890012149 is handled. Duration 161 ms by bot id=7820063803
+2025-11-22 09:53:40,756 - aiogram.event - INFO - Update id=890012150 is handled. Duration 83 ms by bot id=7820063803
+2025-11-22 09:53:42,106 - aiogram.event - INFO - Update id=890012151 is handled. Duration 84 ms by bot id=7820063803
+2025-11-22 09:53:43,307 - aiogram.event - INFO - Update id=890012152 is handled. Duration 86 ms by bot id=7820063803
+2025-11-22 09:53:43,881 - aiogram.event - INFO - Update id=890012153 is handled. Duration 76 ms by bot id=7820063803
+2025-11-22 09:53:45,311 - aiogram.event - INFO - Update id=890012154 is handled. Duration 90 ms by bot id=7820063803
+2025-11-22 09:53:49,797 - aiogram.event - INFO - Update id=890012155 is handled. Duration 73 ms by bot id=7820063803
+2025-11-22 09:53:51,054 - aiogram.event - INFO - Update id=890012156 is handled. Duration 80 ms by bot id=7820063803
+2025-11-22 09:53:54,660 - aiogram.event - INFO - Update id=890012157 is handled. Duration 145 ms by bot id=7820063803
+2025-11-22 09:53:58,191 - aiogram.event - INFO - Update id=890012158 is handled. Duration 155 ms by bot id=7820063803
+2025-11-22 09:53:59,097 - aiogram.event - INFO - Update id=890012159 is handled. Duration 70 ms by bot id=7820063803
+2025-11-22 09:54:04,460 - aiogram.event - INFO - Update id=890012160 is handled. Duration 200 ms by bot id=7820063803
+2025-11-22 09:54:06,073 - aiogram.event - INFO - Update id=890012161 is handled. Duration 324 ms by bot id=7820063803
+2025-11-22 09:54:07,250 - aiogram.event - INFO - Update id=890012162 is handled. Duration 189 ms by bot id=7820063803
+2025-11-22 09:54:08,273 - aiogram.event - INFO - Update id=890012163 is handled. Duration 146 ms by bot id=7820063803
+2025-11-22 09:54:09,897 - aiogram.event - INFO - Update id=890012164 is handled. Duration 568 ms by bot id=7820063803
+2025-11-22 09:54:15,680 - aiogram.event - INFO - Update id=890012165 is handled. Duration 166 ms by bot id=7820063803
+2025-11-22 09:54:16,911 - aiogram.event - INFO - Update id=890012166 is handled. Duration 175 ms by bot id=7820063803
+2025-11-22 09:54:18,402 - aiogram.event - INFO - Update id=890012167 is handled. Duration 158 ms by bot id=7820063803
+2025-11-22 09:54:19,184 - aiogram.event - INFO - Update id=890012168 is handled. Duration 186 ms by bot id=7820063803
+2025-11-22 09:54:20,918 - aiogram.event - INFO - Update id=890012169 is handled. Duration 150 ms by bot id=7820063803
+2025-11-22 09:54:22,154 - aiogram.event - INFO - Update id=890012170 is handled. Duration 152 ms by bot id=7820063803
+2025-11-22 09:54:22,985 - aiogram.event - INFO - Update id=890012171 is handled. Duration 159 ms by bot id=7820063803
+2025-11-22 09:54:23,845 - aiogram.event - INFO - Update id=890012172 is handled. Duration 168 ms by bot id=7820063803
+2025-11-22 09:54:24,881 - aiogram.event - INFO - Update id=890012173 is handled. Duration 175 ms by bot id=7820063803
+2025-11-22 09:54:25,807 - aiogram.event - INFO - Update id=890012174 is handled. Duration 166 ms by bot id=7820063803
+2025-11-22 09:54:28,187 - aiogram.event - INFO - Update id=890012175 is handled. Duration 83 ms by bot id=7820063803
+2025-11-22 09:54:29,200 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-22 09:54:29,281 - aiogram.event - INFO - Update id=890012176 is handled. Duration 159 ms by bot id=7820063803
+2025-11-22 09:54:34,589 - aiogram.event - INFO - Update id=890012177 is handled. Duration 2389 ms by bot id=7820063803
+2025-11-22 09:54:37,722 - aiogram.event - INFO - Update id=890012178 is handled. Duration 87 ms by bot id=7820063803
+2025-11-22 14:41:36,379 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-22 14:41:36,415 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-22 14:41:36,416 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-22 14:41:36,698 - __main__ - INFO - Bot stopped
+2025-11-22 14:41:36,705 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-22 14:41:36,731 - aiogram.dispatcher - INFO - Polling stopped for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 14:41:36,750 - __main__ - INFO - Bot stopped by user
+2025-11-22 14:54:08,808 - bot.database - INFO - Data loaded successfully from file
+2025-11-22 14:54:08,809 - __main__ - INFO - File database initialized successfully
+2025-11-22 14:54:09,192 - __main__ - INFO - AlbumMiddleware registered
+2025-11-22 14:54:09,203 - __main__ - INFO - Total routers registered: 6
+2025-11-22 14:54:09,203 - __main__ - INFO - Starting bot...
+2025-11-22 14:54:09,393 - aiogram.dispatcher - INFO - Start polling
+2025-11-22 14:54:09,445 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 14:54:28,377 - aiogram.event - INFO - Update id=890012179 is handled. Duration 248 ms by bot id=7820063803
+2025-11-22 14:54:31,875 - aiogram.event - INFO - Update id=890012180 is handled. Duration 71 ms by bot id=7820063803
+2025-11-22 14:54:34,437 - aiogram.event - INFO - Update id=890012181 is handled. Duration 106 ms by bot id=7820063803
+2025-11-22 14:54:36,088 - bot.database - INFO - Data saved successfully
+2025-11-22 14:54:36,291 - aiogram.event - INFO - Update id=890012182 is handled. Duration 211 ms by bot id=7820063803
+2025-11-22 14:54:38,594 - aiogram.event - INFO - Update id=890012183 is handled. Duration 185 ms by bot id=7820063803
+2025-11-22 14:54:40,276 - aiogram.event - INFO - Update id=890012184 is handled. Duration 82 ms by bot id=7820063803
+2025-11-22 14:54:41,670 - aiogram.event - INFO - Update id=890012185 is handled. Duration 90 ms by bot id=7820063803
+2025-11-22 14:54:42,413 - aiogram.event - INFO - Update id=890012186 is handled. Duration 77 ms by bot id=7820063803
+2025-11-22 14:54:44,217 - aiogram.event - INFO - Update id=890012187 is handled. Duration 84 ms by bot id=7820063803
+2025-11-22 14:54:47,279 - aiogram.event - INFO - Update id=890012188 is handled. Duration 89 ms by bot id=7820063803
+2025-11-22 14:54:50,656 - aiogram.event - INFO - Update id=890012189 is handled. Duration 91 ms by bot id=7820063803
+2025-11-22 14:54:51,676 - aiogram.event - INFO - Update id=890012190 is handled. Duration 174 ms by bot id=7820063803
+2025-11-22 14:54:53,618 - aiogram.event - INFO - Update id=890012191 is handled. Duration 193 ms by bot id=7820063803
+2025-11-22 14:54:54,541 - aiogram.event - INFO - Update id=890012192 is handled. Duration 82 ms by bot id=7820063803
+2025-11-22 14:55:03,851 - aiogram.event - INFO - Update id=890012193 is handled. Duration 99 ms by bot id=7820063803
+2025-11-22 14:55:05,317 - aiogram.event - INFO - Update id=890012194 is handled. Duration 163 ms by bot id=7820063803
+2025-11-22 14:55:06,595 - aiogram.event - INFO - Update id=890012195 is handled. Duration 372 ms by bot id=7820063803
+2025-11-22 14:55:07,800 - aiogram.event - INFO - Update id=890012196 is handled. Duration 174 ms by bot id=7820063803
+2025-11-22 14:55:08,453 - aiogram.event - INFO - Update id=890012197 is handled. Duration 127 ms by bot id=7820063803
+2025-11-22 14:55:09,314 - aiogram.event - INFO - Update id=890012198 is handled. Duration 189 ms by bot id=7820063803
+2025-11-22 14:55:12,461 - aiogram.event - INFO - Update id=890012199 is handled. Duration 265 ms by bot id=7820063803
+2025-11-22 14:55:14,011 - aiogram.event - INFO - Update id=890012200 is handled. Duration 329 ms by bot id=7820063803
+2025-11-22 14:55:14,871 - aiogram.event - INFO - Update id=890012201 is handled. Duration 235 ms by bot id=7820063803
+2025-11-22 14:55:15,903 - aiogram.event - INFO - Update id=890012202 is handled. Duration 155 ms by bot id=7820063803
+2025-11-22 14:55:17,839 - aiogram.event - INFO - Update id=890012203 is handled. Duration 186 ms by bot id=7820063803
+2025-11-22 14:55:18,867 - aiogram.event - INFO - Update id=890012204 is handled. Duration 247 ms by bot id=7820063803
+2025-11-22 14:55:19,622 - aiogram.event - INFO - Update id=890012205 is handled. Duration 173 ms by bot id=7820063803
+2025-11-22 14:55:20,356 - aiogram.event - INFO - Update id=890012206 is handled. Duration 152 ms by bot id=7820063803
+2025-11-22 14:55:21,135 - aiogram.event - INFO - Update id=890012207 is handled. Duration 207 ms by bot id=7820063803
+2025-11-22 14:55:22,129 - aiogram.event - INFO - Update id=890012208 is handled. Duration 184 ms by bot id=7820063803
+2025-11-22 14:55:23,853 - aiogram.event - INFO - Update id=890012209 is handled. Duration 130 ms by bot id=7820063803
+2025-11-22 14:55:25,140 - bot.database - INFO - Data saved successfully
+2025-11-22 14:55:25,223 - aiogram.event - INFO - Update id=890012210 is handled. Duration 192 ms by bot id=7820063803
+2025-11-22 14:55:26,900 - aiogram.event - INFO - Update id=890012211 is handled. Duration 96 ms by bot id=7820063803
+2025-11-22 14:55:28,583 - aiogram.event - INFO - Update id=890012212 is not handled. Duration 29 ms by bot id=7820063803
+2025-11-22 14:55:41,933 - aiogram.event - INFO - Update id=890012213 is handled. Duration 153 ms by bot id=7820063803
+2025-11-22 14:55:44,048 - aiogram.event - INFO - Update id=890012214 is handled. Duration 93 ms by bot id=7820063803
+2025-11-22 14:55:45,395 - aiogram.event - INFO - Update id=890012215 is not handled. Duration 12 ms by bot id=7820063803
+2025-11-22 14:59:53,553 - bot.database - INFO - Data loaded successfully from file
+2025-11-22 14:59:53,553 - __main__ - INFO - File database initialized successfully
+2025-11-22 14:59:53,935 - __main__ - INFO - AlbumMiddleware registered
+2025-11-22 14:59:53,946 - __main__ - INFO - Total routers registered: 6
+2025-11-22 14:59:53,947 - __main__ - INFO - Starting bot...
+2025-11-22 14:59:54,128 - aiogram.dispatcher - INFO - Start polling
+2025-11-22 14:59:54,184 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 15:00:21,874 - aiogram.event - INFO - Update id=890012216 is handled. Duration 330 ms by bot id=7820063803
+2025-11-22 15:00:22,806 - aiogram.event - INFO - Update id=890012217 is not handled. Duration 11 ms by bot id=7820063803
+2025-11-22 15:00:28,536 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-22 15:00:28,541 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-22 15:00:28,541 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-22 15:00:28,793 - __main__ - INFO - Bot stopped
+2025-11-22 15:00:28,793 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-22 15:00:28,797 - aiogram.dispatcher - INFO - Polling stopped for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 15:00:28,799 - __main__ - INFO - Bot stopped by user
+2025-11-22 15:01:03,344 - bot.database - INFO - Data loaded successfully from file
+2025-11-22 15:01:03,345 - __main__ - INFO - File database initialized successfully
+2025-11-22 15:01:03,743 - __main__ - INFO - AlbumMiddleware registered
+2025-11-22 15:01:03,754 - __main__ - INFO - Total routers registered: 6
+2025-11-22 15:01:03,754 - __main__ - INFO - Starting bot...
+2025-11-22 15:01:03,932 - aiogram.dispatcher - INFO - Start polling
+2025-11-22 15:01:03,984 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 15:01:04,369 - aiogram.event - INFO - Update id=890012218 is handled. Duration 276 ms by bot id=7820063803
+2025-11-22 15:01:05,906 - aiogram.event - INFO - Update id=890012219 is not handled. Duration 228 ms by bot id=7820063803
+2025-11-22 15:01:54,562 - aiogram.dispatcher - INFO - Polling stopped
+2025-11-22 15:01:54,563 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
+2025-11-22 15:01:54,564 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7820063803)
+2025-11-22 15:01:54,826 - __main__ - INFO - Bot stopped
+2025-11-22 15:01:54,826 - bot.database - ERROR - Error saving data: 'str' object has no attribute 'isoformat'
+2025-11-22 15:01:54,826 - aiogram.dispatcher - INFO - Polling stopped for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 15:01:54,829 - __main__ - INFO - Bot stopped by user
+2025-11-22 15:02:00,111 - bot.database - INFO - Data loaded successfully from file
+2025-11-22 15:02:00,111 - __main__ - INFO - File database initialized successfully
+2025-11-22 15:02:00,467 - __main__ - INFO - AlbumMiddleware registered
+2025-11-22 15:02:00,476 - __main__ - INFO - Total routers registered: 6
+2025-11-22 15:02:00,476 - __main__ - INFO - Starting bot...
+2025-11-22 15:02:00,685 - aiogram.dispatcher - INFO - Start polling
+2025-11-22 15:02:00,753 - aiogram.dispatcher - INFO - Run polling for bot @my123testnewbot id=7820063803 - 'mytestnewbot'
+2025-11-22 15:02:04,322 - aiogram.event - INFO - Update id=890012220 is handled. Duration 258 ms by bot id=7820063803

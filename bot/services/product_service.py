@@ -1,5 +1,7 @@
 # bot/services/product_service.py
 import uuid
+from datetime import datetime, timedelta
+
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
